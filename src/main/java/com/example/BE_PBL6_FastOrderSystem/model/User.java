@@ -15,6 +15,7 @@ public class User {
     private String phoneNumber;
     private String password;
     private String fullName;
+    private String avatar;
     private String email;
     private String address;
     private LocalDate createdAt;
@@ -56,6 +57,12 @@ public class User {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+    public String getAvatar() {
+        return avatar;
+    }
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getEmail() {

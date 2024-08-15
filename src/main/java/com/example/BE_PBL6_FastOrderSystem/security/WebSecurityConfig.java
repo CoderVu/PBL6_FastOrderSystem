@@ -26,6 +26,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
     private final FoodUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
+    private static final String[] AUTH = {
+            "/api/v1/auth/**"
+    };
+    private static final String[] ADMIN = {
+            "/api/v1/admin/**"
+    };
+    private static final String[] USER = {
+            "/api/v1/user/products/**"
+    };
+    private static final String[] PUBLIC = {
+            "/api/v1/public/**"
+    };
 
     @Bean
     public AuthTokenFilter authenticationTokenFilter(){
@@ -56,7 +68,9 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Allow access to auth endpoints
+                        .requestMatchers(AUTH).permitAll() // Allow access to auth endpoints
+                        .requestMatchers(PUBLIC).permitAll() // Allow access to auth endpoints
+                        .requestMatchers(USER).hasAnyRole("USER") // Allow access to user endpoints
                         .anyRequest().authenticated()
                 );
 

@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.security.user;
 
 import com.example.BE_PBL6_FastOrderSystem.model.User;
-import com.example.BE_PBL6_FastOrderSystem.respo.respository.UserRepository;
+import com.example.BE_PBL6_FastOrderSystem.repo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,4 +19,6 @@ public class FoodUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return FoodUserDetails.buildUserDetails(user);
     }
+
+
 }
