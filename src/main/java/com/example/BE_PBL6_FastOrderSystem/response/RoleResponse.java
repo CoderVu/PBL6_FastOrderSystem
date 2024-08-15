@@ -1,4 +1,4 @@
-package com.example.BE_PBL6_FastOrderSystem.dto;
+package com.example.BE_PBL6_FastOrderSystem.response;
 
 public class RoleResponse {
     private Long id;

@@ -1,4 +1,4 @@
-package com.example.BE_PBL6_FastOrderSystem.dto;
+package com.example.BE_PBL6_FastOrderSystem.response;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -6,8 +6,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
 public class JwtResponse {
     private Long id;
     private String email;

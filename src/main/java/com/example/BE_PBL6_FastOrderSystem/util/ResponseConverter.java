@@ -1,8 +1,8 @@
 package com.example.BE_PBL6_FastOrderSystem.util;
 
-import com.example.BE_PBL6_FastOrderSystem.dto.CategoryResponse;
-import com.example.BE_PBL6_FastOrderSystem.dto.ProductResponse;
-import com.example.BE_PBL6_FastOrderSystem.dto.StoreResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.StoreResponse;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 
 public class ResponseConverter {

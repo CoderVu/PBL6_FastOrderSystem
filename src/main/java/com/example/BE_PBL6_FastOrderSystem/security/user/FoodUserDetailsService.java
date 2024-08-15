@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.security.user;
 
 import com.example.BE_PBL6_FastOrderSystem.model.User;
-import com.example.BE_PBL6_FastOrderSystem.repo.repository.UserRepository;
+import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

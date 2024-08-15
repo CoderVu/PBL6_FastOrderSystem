@@ -1,7 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service;
 
-import com.example.BE_PBL6_FastOrderSystem.dto.ProductResponse;
-import com.example.BE_PBL6_FastOrderSystem.model.Product;
+import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,9 +1,9 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.dto.ComboResponse;
-import com.example.BE_PBL6_FastOrderSystem.dto.ProductResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.ComboResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 import com.example.BE_PBL6_FastOrderSystem.model.Combo;
-import com.example.BE_PBL6_FastOrderSystem.repo.repository.ComboRepository;
+import com.example.BE_PBL6_FastOrderSystem.repository.ComboRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IComboService;
 import com.example.BE_PBL6_FastOrderSystem.util.ResponseConverter;
 import lombok.RequiredArgsConstructor;

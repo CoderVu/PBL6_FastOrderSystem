@@ -71,6 +71,7 @@ public class WebSecurityConfig {
                         .requestMatchers(AUTH).permitAll() // Allow access to auth endpoints
                         .requestMatchers(PUBLIC).permitAll() // Allow access to auth endpoints
                         .requestMatchers(USER).hasAnyRole("USER") // Allow access to user endpoints
+                        .requestMatchers(ADMIN).hasAnyRole("ADMIN") // Allow access to admin endpoints
                         .anyRequest().authenticated()
                 );
 

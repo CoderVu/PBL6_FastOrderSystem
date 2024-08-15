@@ -1,4 +1,4 @@
-package com.example.BE_PBL6_FastOrderSystem.dto;
+package com.example.BE_PBL6_FastOrderSystem.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -21,8 +21,7 @@ public class StoreResponse {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
-    // Constructor mới chỉ với các thuộc tính cần thiết
+    // Constructor mới
     public StoreResponse(Long storeId, String storeName, String location,  LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.storeId = storeId;
         this.storeName = storeName;

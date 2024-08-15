@@ -1,7 +1,7 @@
 // AuthController.java
 package com.example.BE_PBL6_FastOrderSystem.controller.Auth;
 
-import com.example.BE_PBL6_FastOrderSystem.dto.JwtResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import com.example.BE_PBL6_FastOrderSystem.exception.UserAlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.request.LoginRequest;

@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.dto.ProductResponse;
-import com.example.BE_PBL6_FastOrderSystem.repo.repository.ProductRepository;
+import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
+import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
 import com.example.BE_PBL6_FastOrderSystem.util.ResponseConverter;
 import lombok.RequiredArgsConstructor;

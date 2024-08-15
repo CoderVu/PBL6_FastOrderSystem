@@ -1,4 +1,4 @@
-package com.example.BE_PBL6_FastOrderSystem.repo.repository;
+package com.example.BE_PBL6_FastOrderSystem.repository;
 
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;

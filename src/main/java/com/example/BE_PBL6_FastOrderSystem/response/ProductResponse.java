@@ -1,6 +1,5 @@
-package com.example.BE_PBL6_FastOrderSystem.dto;
+package com.example.BE_PBL6_FastOrderSystem.response;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class ProductResponse {
