@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 
 @Entity
@@ -23,7 +24,9 @@ public class Product {
     private Integer stockQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean bestSale; // New field for best sale
+    private Boolean bestSale;
+    @ManyToMany(mappedBy = "products")
+    private Set<Combo> combos;
     public Long getProductId() {
         return productId;
     }
@@ -108,5 +111,12 @@ public class Product {
 
     public void setBestSale(Boolean bestSale) {
         this.bestSale = bestSale;
+    }
+    public Set<Combo> getCombos() {
+        return combos;
+    }
+
+    public void setCombos(Set<Combo> combos) {
+        this.combos = combos;
     }
 }

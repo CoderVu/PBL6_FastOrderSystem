@@ -33,7 +33,7 @@ public class WebSecurityConfig {
             "/api/v1/admin/**"
     };
     private static final String[] USER = {
-            "/api/v1/user/products/**"
+            "/api/v1/user/**"
     };
     private static final String[] PUBLIC = {
             "/api/v1/public/**"

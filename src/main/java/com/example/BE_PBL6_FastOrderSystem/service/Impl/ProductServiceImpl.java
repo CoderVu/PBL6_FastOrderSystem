@@ -1,11 +1,9 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.dto.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.dto.ProductResponse;
-import com.example.BE_PBL6_FastOrderSystem.dto.StoreResponse;
-import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.repo.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
+import com.example.BE_PBL6_FastOrderSystem.util.ResponseConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,48 +19,41 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<ProductResponse> getAllProduct() {
         return productRepository.findAll().stream()
-                .map(this::convertToProductResponse)
+                .map(ResponseConverter::convertToProductResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Optional<ProductResponse> getProductById(Long productId) {
         return productRepository.findById(productId)
-                .map(this::convertToProductResponse);
+                .map(ResponseConverter::convertToProductResponse);
     }
+
     @Override
     public List<ProductResponse> getProductsByStoreId(Long storeId) {
-        return productRepository.findByStore_StoreId(storeId).stream()// Find by storeId
-                .map(this::convertToProductResponse)// Convert to ProductResponse
-                .collect(Collectors.toList()); // Convert to List
+        return productRepository.findByStore_StoreId(storeId).stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
     }
 
-    private ProductResponse convertToProductResponse(Product product) {
-        CategoryResponse categoryResponse  = new CategoryResponse(
-                product.getCategory().getCategoryId(),
-                product.getCategory().getCategoryName(),
-                product.getCategory().getDescription()
-        );
-        StoreResponse storeResponse = new StoreResponse(
-                product.getStore().getStoreId(),
-                product.getStore().getStoreName(),
-                product.getStore().getLocation(),
-                product.getStore().getCreatedAt(),
-                product.getStore().getUpdatedAt()
-        );
+    @Override
+    public List<ProductResponse> getProductsByCategoryId(Long categoryId) {
+        return productRepository.findByCategory_CategoryId(categoryId).stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
+    }
 
-        return new ProductResponse(
-                product.getProductId(),
-                product.getProductName(),
-                product.getImage(),
-                product.getDescription(),
-                product.getPrice(),
-                categoryResponse,
-                storeResponse,
-                product.getStockQuantity(),
-                product.getCreatedAt(),
-                product.getUpdatedAt(),
-                product.getBestSale()
-        );
+    @Override
+    public List<ProductResponse> getProductByNames(String productName) {
+        return productRepository.findByProductNameContaining(productName).stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProductResponse> getBestSaleProduct() {
+        return productRepository.findByBestSale(true).stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
     }
 }

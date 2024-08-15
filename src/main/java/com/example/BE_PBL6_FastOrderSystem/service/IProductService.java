@@ -10,5 +10,8 @@ public interface IProductService {
     List<ProductResponse> getAllProduct();
     Optional<ProductResponse> getProductById(Long productId);
     List<ProductResponse> getProductsByStoreId(Long storeId);
+    List<ProductResponse> getProductsByCategoryId(Long categoryId);
+    List<ProductResponse> getProductByNames(String productName);
+    List<ProductResponse> getBestSaleProduct();
 }
 
