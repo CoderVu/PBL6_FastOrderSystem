@@ -3,7 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.response;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class JwtResponse {
@@ -12,13 +12,14 @@ public class JwtResponse {
     private String fullName;
     private String phoneNumber;
     private String address;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private boolean accountLocked;
     private String token;
     private String type = "Bearer";
     private List<String> roles;
 
-    public JwtResponse(Long id, String email, String fullName, String phoneNumber, String address, LocalDate createdAt, LocalDate updatedAt, String token, List<String> roles) {
+    public JwtResponse(Long id, String email, String fullName, String phoneNumber, String address, LocalDateTime createdAt, LocalDateTime updatedAt,boolean accountLocked, String token, List<String> roles) {
         this.id = id;
         this.email = email;
         this.fullName = fullName;
@@ -26,6 +27,7 @@ public class JwtResponse {
         this.address = address;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.accountLocked = accountLocked;
         this.token = token;
         this.roles = roles;
     }
@@ -70,20 +72,26 @@ public class JwtResponse {
         this.address = address;
     }
 
-    public LocalDate getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDate createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDate getUpdatedAt() {
+    public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDate updatedAt) {
+    public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    public boolean isAccountLocked() {
+        return accountLocked;
+    }
+    public void setAccountLocked(boolean accountLocked) {
+        this.accountLocked = accountLocked;
     }
 
     public String getToken() {
@@ -109,4 +117,5 @@ public class JwtResponse {
     public void setRoles(List<String> roles) {
         this.roles = roles;
     }
+
 }

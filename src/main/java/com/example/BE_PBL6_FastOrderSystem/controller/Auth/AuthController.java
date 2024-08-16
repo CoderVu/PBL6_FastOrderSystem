@@ -60,6 +60,7 @@ public class AuthController {
                 foodUserDetails.getAddress(),
                 foodUserDetails.getCreatedAt(),
                 foodUserDetails.getUpdatedAt(),
+                foodUserDetails.isAccountLocked(),
                 jwt,
                 roles
         ));

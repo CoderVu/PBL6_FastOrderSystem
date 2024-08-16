@@ -9,7 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,9 +25,10 @@ public class FoodUserDetails implements UserDetails {
     private String fullName;
     private String email;
     private String address;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
+    private boolean accountLocked; // Thêm trường này
     private Collection<GrantedAuthority> authorities;
 
     public static FoodUserDetails buildUserDetails(User user) {
@@ -43,6 +44,7 @@ public class FoodUserDetails implements UserDetails {
                 user.getAddress(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
+                user.isAccountLocked(), // Cập nhật trường này
                 authorities);
     }
 
@@ -61,8 +63,6 @@ public class FoodUserDetails implements UserDetails {
         return phoneNumber;
     }
 
-
-
     @Override
     public boolean isAccountNonExpired() {
         return true;
@@ -70,7 +70,7 @@ public class FoodUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !accountLocked; // Trả về trạng thái khóa tài khoản
     }
 
     @Override

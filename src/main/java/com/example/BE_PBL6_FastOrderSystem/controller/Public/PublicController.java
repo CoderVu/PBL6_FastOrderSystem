@@ -3,9 +3,11 @@ package com.example.BE_PBL6_FastOrderSystem.controller.Public;
 import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.ComboResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.PromotionResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.ICategoryService;
 import com.example.BE_PBL6_FastOrderSystem.service.IComboService;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
+import com.example.BE_PBL6_FastOrderSystem.service.IPromotionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +20,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @CrossOrigin
 @RequestMapping("/api/v1/public")
-public class PublicProductController {
+public class PublicController {
     private final IProductService productService;
     private final IComboService comboService;
     private final ICategoryService categoryService;
+    private final IPromotionService promotionService;
     @GetMapping("/categories/all")
     public ResponseEntity<List<CategoryResponse>> getAllCategories() {
         List<CategoryResponse> categoryResponses = categoryService.getAllCategories();
@@ -99,6 +102,12 @@ public class PublicProductController {
         } else {
             return ResponseEntity.ok(products);
         }
+    }
+    @GetMapping("/promotions/all")
+    public ResponseEntity <List<PromotionResponse>> getPromotions() {
+        List<PromotionResponse> promotionResponses = promotionService.getAllPromotion();
+        return ResponseEntity.ok(promotionResponses);
+
     }
 
 }

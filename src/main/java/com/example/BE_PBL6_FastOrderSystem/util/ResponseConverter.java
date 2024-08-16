@@ -34,4 +34,5 @@ public class ResponseConverter {
                 product.getBestSale()
         );
     }
+    // Đây là hàm chuyển đổi từ Product sang ProductResponse
 }

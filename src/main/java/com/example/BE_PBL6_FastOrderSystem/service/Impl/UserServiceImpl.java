@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.UserAlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.Role;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.RoleRepository;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -32,6 +34,25 @@ public class UserServiceImpl implements IUserService {
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         System.out.println(user.getPassword());
+        Optional<Role> optionalRole = roleRepository.findByName("ROLE_USER");
+        if (optionalRole.isEmpty()) {
+            throw new RuntimeException("ROLE_USER not found");
+        }
+        Role userRole = optionalRole.get();
+        user.setRoles(Collections.singletonList(userRole));
+        return userRepository.save(user);
+    }
+    @Override
+    public User registerAdmin(User user) {
+        validateUser(user);
+        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+            throw new UserAlreadyExistsException(user.getPhoneNumber() + " already exists");
+        }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new UserAlreadyExistsException(user.getEmail() + " already exists");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        System.out.println(user.getPassword());
         Optional<Role> optionalRole = roleRepository.findByName("ROLE_ADMIN");
         if (optionalRole.isEmpty()) {
             throw new RuntimeException("ROLE_USER not found");
@@ -41,6 +62,17 @@ public class UserServiceImpl implements IUserService {
         return userRepository.save(user);
     }
 
+    @Override
+    public List<User> getUsers(String roleName) {
+        return userRepository.findAllByRoles_Name(roleName);
+    }
+    @Override
+    public void lockUserAccount(Long userId) throws UserNotFoundException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        user.setAccountLocked(true);
+        userRepository.save(user);
+    }
     private void validateUser(User user) {
         if (user.getFullName() == null || user.getFullName().isEmpty()) {
             throw new UserAlreadyExistsException("Full name is required");

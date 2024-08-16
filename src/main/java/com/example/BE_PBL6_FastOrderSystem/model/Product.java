@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 
@@ -16,6 +17,9 @@ public class Product {
     private String description;
     private Double price;
     @ManyToOne
+    @JoinColumn(name = "promotion_id")
+    private Promotion promotion;
+    @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
     @ManyToOne
@@ -27,6 +31,16 @@ public class Product {
     private Boolean bestSale;
     @ManyToMany(mappedBy = "products")
     private Set<Combo> combos;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
     public Long getProductId() {
         return productId;
     }
@@ -104,6 +118,7 @@ public class Product {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
 
     public Boolean getBestSale() {
         return bestSale;

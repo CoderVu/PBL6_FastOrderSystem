@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service;
 
+import com.example.BE_PBL6_FastOrderSystem.request.ProductRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 
 import java.util.List;
@@ -12,5 +13,9 @@ public interface IProductService {
     List<ProductResponse> getProductsByCategoryId(Long categoryId);
     List<ProductResponse> getProductByNames(String productName);
     List<ProductResponse> getBestSaleProduct();
+    ProductResponse addProduct(ProductRequest productRequest);
+    ProductResponse updateProduct(Long id, ProductRequest productRequest);
+
+    void deleteProduct(Long id);
 }
 
