@@ -8,12 +8,14 @@ public class PromotionRequest {
     private double discountPercentage;
     private LocalDate startDate;
     private LocalDate endDate;
-    public PromotionRequest(String name, String description, double discountPercentage, LocalDate startDate, LocalDate endDate) {
+    private Long storeId;
+    public PromotionRequest(String name, String description, double discountPercentage, LocalDate startDate, LocalDate endDate, Long storeId) {
         this.name = name;
         this.description = description;
         this.discountPercentage = discountPercentage;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.storeId = storeId;
     }
 
     public String getName() {
@@ -54,5 +56,11 @@ public class PromotionRequest {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+    public Long getStoreId() {
+        return storeId;
+    }
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 }

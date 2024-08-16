@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
@@ -21,9 +22,24 @@ public class PromotionServiceImpl  implements IPromotionService {
                         promotion.getDescription(),
                         promotion.getDiscountPercentage(),
                         promotion.getStartDate(),
-                        promotion.getEndDate()
+                        promotion.getEndDate(),
+                        promotion.getStore().getStoreId()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<PromotionResponse> getPromotionById(Long promotionId) {
+        return promotionRepository.findById(promotionId)
+                .map(promotion -> new PromotionResponse(
+                        promotion.getId(),
+                        promotion.getName(),
+                        promotion.getDescription(),
+                        promotion.getDiscountPercentage(),
+                        promotion.getStartDate(),
+                        promotion.getEndDate(),
+                        promotion.getStore().getStoreId()
+                ));
     }
 
 

@@ -109,5 +109,14 @@ public class PublicController {
         return ResponseEntity.ok(promotionResponses);
 
     }
+    @GetMapping("/promotions/{id}")
+    public ResponseEntity<?> getPromotionById(@PathVariable("id") Long promotionId) {
+        Optional<PromotionResponse> promotionResponse = promotionService.getPromotionById(promotionId);
+        if (promotionResponse.isPresent()) {
+            return ResponseEntity.ok(promotionResponse.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 }

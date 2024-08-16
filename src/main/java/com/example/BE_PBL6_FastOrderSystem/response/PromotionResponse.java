@@ -9,18 +9,19 @@ public class PromotionResponse {
     private double discountPercentage;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Long storeId;
 
-    // Constructor
-    public PromotionResponse(Long id, String name, String description, double discountPercentage, LocalDate startDate, LocalDate endDate) {
+
+    public PromotionResponse(Long id, String name, String description, double discountPercentage, LocalDate startDate, LocalDate endDate, Long storeId) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.discountPercentage = discountPercentage;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.storeId = storeId;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -63,5 +64,11 @@ public class PromotionResponse {
 
     public LocalDate getEndDate() {
         return endDate;
+    }
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
+    }
+    public Long getStoreId() {
+        return storeId;
     }
 }

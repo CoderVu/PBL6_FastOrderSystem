@@ -14,7 +14,9 @@ public class Promotion {
     private double discountPercentage;
     private LocalDate startDate;
     private LocalDate endDate;
-
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private Store store;
     public Long getId() {
         return id;
     }
@@ -61,5 +63,11 @@ public class Promotion {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+    public Store getStore() {
+        return store;
+    }
+    public void setStore(Store store) {
+        this.store = store;
     }
 }

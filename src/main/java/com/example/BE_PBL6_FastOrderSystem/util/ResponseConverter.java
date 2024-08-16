@@ -16,6 +16,10 @@ public class ResponseConverter {
                 product.getStore().getStoreId(),
                 product.getStore().getStoreName(),
                 product.getStore().getLocation(),
+                product.getStore().getLongitude(),
+                product.getStore().getLatitude(),
+                product.getStore().getOpeningTime(),
+                product.getStore().getClosingTime(),
                 product.getStore().getCreatedAt(),
                 product.getStore().getUpdatedAt()
         );
@@ -34,5 +38,4 @@ public class ResponseConverter {
                 product.getBestSale()
         );
     }
-    // Đây là hàm chuyển đổi từ Product sang ProductResponse
 }
