@@ -1,12 +1,17 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
+import com.example.BE_PBL6_FastOrderSystem.model.Order;
+import lombok.Data;
+
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Data
 public class OrderResponse {
-
     private Long orderId;
-    private UserResponse user;
-    private StoreResponse store;
+    private Long userId;
+    private Long storeId;
     private LocalDateTime orderDate;
     private Double totalAmount;
     private String status;
@@ -14,101 +19,21 @@ public class OrderResponse {
     private String deliveryAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<OrderDetailResponse> orderDetails;
 
-
-
-    public static class UserResponse {
-        private Long userId;
-        private String userName;
-        private String email;
-
-
-    }
-
-    public static class StoreResponse {
-        private Long storeId;
-        private String storeName;
-
-
-    }
-
-    public Long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
-
-    public UserResponse getUser() {
-        return user;
-    }
-
-    public void setUser(UserResponse user) {
-        this.user = user;
-    }
-
-    public StoreResponse getStore() {
-        return store;
-    }
-
-    public void setStore(StoreResponse store) {
-        this.store = store;
-    }
-
-    public LocalDateTime getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate;
-    }
-
-    public Double getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(Double totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public String getDeliveryAddress() {
-        return deliveryAddress;
-    }
-
-    public void setDeliveryAddress(String deliveryAddress) {
-        this.deliveryAddress = deliveryAddress;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public OrderResponse(Order order) {
+        this.orderId = order.getOrderId();
+        this.userId = order.getUser().getId();
+        this.storeId = order.getStore().getStoreId();
+        this.orderDate = order.getOrderDate();
+        this.totalAmount = order.getTotalAmount();
+        this.status = order.getStatus();
+        this.paymentMethod = order.getPaymentMethod();
+        this.deliveryAddress = order.getDeliveryAddress();
+        this.createdAt = order.getCreatedAt();
+        this.updatedAt = order.getUpdatedAt();
+        this.orderDetails = order.getOrderDetails().stream()
+                .map(OrderDetailResponse::new)
+                .collect(Collectors.toList());
     }
 }

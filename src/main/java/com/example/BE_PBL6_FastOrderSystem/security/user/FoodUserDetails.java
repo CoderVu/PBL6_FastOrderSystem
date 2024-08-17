@@ -29,7 +29,7 @@ public class FoodUserDetails implements UserDetails {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private boolean accountLocked; // Thêm trường này
+    private boolean accountLocked;
     private Collection<GrantedAuthority> authorities;
 
     public static FoodUserDetails buildUserDetails(User user) {
@@ -45,13 +45,24 @@ public class FoodUserDetails implements UserDetails {
                 user.getAddress(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
-                user.isAccountLocked(), // Cập nhật trường này
+                user.isAccountLocked(),
                 authorities);
     }
 
     public static String getCurrentUserPhoneNumber() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userDetails.getUsername();
+    }
+
+    public static Long getCurrentUserId() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ((FoodUserDetails) userDetails).getId();
+    }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

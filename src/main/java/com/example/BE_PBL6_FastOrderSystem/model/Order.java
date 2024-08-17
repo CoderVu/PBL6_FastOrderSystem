@@ -3,7 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -24,11 +24,18 @@ public class Order {
     private String deliveryAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderDetail> orderDetails;
     public Long getOrderId() {
         return orderId;
     }
 
+    public void setOrderDetails(List<OrderDetail> orderDetails) {
+        this.orderDetails = orderDetails;
+    }
+    public List<OrderDetail> getOrderDetails() {
+        return orderDetails;
+    }
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
     }
