@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -46,6 +47,11 @@ public class FoodUserDetails implements UserDetails {
                 user.getUpdatedAt(),
                 user.isAccountLocked(), // Cập nhật trường này
                 authorities);
+    }
+
+    public static String getCurrentUserPhoneNumber() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userDetails.getUsername();
     }
 
     @Override

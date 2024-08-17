@@ -1,8 +1,8 @@
 package com.example.BE_PBL6_FastOrderSystem.model;
 
 import jakarta.persistence.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -11,14 +11,17 @@ import java.util.Set;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
     private Long productId;
     private String productName;
+    @Column(name = "image", columnDefinition = "LONGTEXT")
     private String image;
     private String description;
     private Double price;
     @ManyToOne
     @JoinColumn(name = "promotion_id")
     private Promotion promotion;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
@@ -59,7 +62,7 @@ public class Product {
     public String getImage() {
         return image;
     }
-    public void setImage(String image) {
+   public void setImage(String image) {
         this.image = image;
     }
 
@@ -77,6 +80,12 @@ public class Product {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+    public Promotion getPromotion() {
+        return promotion;
+    }
+    public void setPromotion(Promotion promotion) {
+        this.promotion = promotion;
     }
 
     public Category getCategory() {

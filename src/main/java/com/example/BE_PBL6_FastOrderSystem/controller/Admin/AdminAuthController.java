@@ -51,5 +51,16 @@ public class AdminAuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+    @PostMapping("/unlock-account/{userId}")
+    public ResponseEntity<?> unlockUserAccount(@PathVariable Long userId) {
+        try {
+            userService.unlockUserAccount(userId);
+            return ResponseEntity.ok("User account unlocked successfully!");
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 }

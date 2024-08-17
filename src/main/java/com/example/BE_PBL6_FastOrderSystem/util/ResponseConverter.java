@@ -1,9 +1,9 @@
 package com.example.BE_PBL6_FastOrderSystem.util;
 
-import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
-import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
-import com.example.BE_PBL6_FastOrderSystem.response.StoreResponse;
+import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.response.*;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
+import com.example.BE_PBL6_FastOrderSystem.model.Promotion;
 
 public class ResponseConverter {
     public static ProductResponse convertToProductResponse(Product product) {
@@ -18,11 +18,20 @@ public class ResponseConverter {
                 product.getStore().getLocation(),
                 product.getStore().getLongitude(),
                 product.getStore().getLatitude(),
+                product.getStore().getPhoneNumber(),
                 product.getStore().getOpeningTime(),
                 product.getStore().getClosingTime(),
                 product.getStore().getCreatedAt(),
                 product.getStore().getUpdatedAt()
         );
+
+        // Calculate discounted price if a promotion exists
+        Double discountedPrice = product.getPrice();
+        if (product.getPromotion() != null) {
+            Promotion promotion = product.getPromotion();
+            double discountPercentage = promotion.getDiscountPercentage();
+            discountedPrice = product.getPrice() * (1 - discountPercentage / 100);
+        }
 
         return new ProductResponse(
                 product.getProductId(),
@@ -30,6 +39,7 @@ public class ResponseConverter {
                 product.getImage(),
                 product.getDescription(),
                 product.getPrice(),
+                discountedPrice,
                 categoryResponse,
                 storeResponse,
                 product.getStockQuantity(),
@@ -38,4 +48,5 @@ public class ResponseConverter {
                 product.getBestSale()
         );
     }
+
 }

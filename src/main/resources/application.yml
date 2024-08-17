@@ -3,6 +3,8 @@ server:
 spring:
   application:
     name: BE_PBL6_FastOrderSystem
+  main:
+    allow-circular-references: true
   datasource:
     username: root
     password: 123456789
@@ -23,3 +25,11 @@ spring:
       max-file-size: 5MB
       max-request-size: 5MB
       file-size-threshold: 2KB
+logging:
+  level:
+    com:
+      example:
+        BE_PBL6_FastOrderSystem:
+          service:
+            Impl:
+              ProductServiceImpl=DEBUG: INFO

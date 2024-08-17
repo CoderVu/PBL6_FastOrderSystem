@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
-public class PromotionServiceImpl  implements IPromotionService {
+public class PromotionServiceImpl implements IPromotionService {
     private final PromotionRepository promotionRepository;
+
     @Override
     public List<PromotionResponse> getAllPromotion() {
         return promotionRepository.findAll().stream()
@@ -23,7 +25,7 @@ public class PromotionServiceImpl  implements IPromotionService {
                         promotion.getDiscountPercentage(),
                         promotion.getStartDate(),
                         promotion.getEndDate(),
-                        promotion.getStore().getStoreId()
+                        promotion.getStores().stream().map(store -> store.getStoreId()).collect(Collectors.toList())
                 ))
                 .collect(Collectors.toList());
     }
@@ -38,9 +40,7 @@ public class PromotionServiceImpl  implements IPromotionService {
                         promotion.getDiscountPercentage(),
                         promotion.getStartDate(),
                         promotion.getEndDate(),
-                        promotion.getStore().getStoreId()
+                        promotion.getStores().stream().map(store -> store.getStoreId()).collect(Collectors.toList())
                 ));
     }
-
-
 }

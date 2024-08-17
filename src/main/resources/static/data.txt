@@ -1,115 +1,46 @@
-// Store.java
-import javax.persistence.*;
-import java.time.LocalDateTime;
++----------------+         +----------------+         +----------------+
+|    Category    |         |    Product     |         |    Promotion   |
++----------------+         +----------------+         +----------------+
+|  categoryId PK |<-+      |  productId PK  |         |  promotionId PK|
+|  categoryName  |  |      |  productName   |         |  name          |
+|  description   |  |      |  price         |         |  description   |
++----------------+  |      |  stockQuantity |         |  discount      |
+                    |      |  bestSale      |         |  startDate     |
+                    |      |  categoryId FK |---------|  endDate       |
+                    |      |  promotionId FK|         +----------------+
+                    |      |  storeId FK    |
+                    |      +----------------+
+                    |
+                    |
++----------------+  |
+|     Combo      |  |
++----------------+  |
+|  comboId PK    |  |
+|  comboName     |  |
+|  comboPrice    |  |
++----------------+  |
+                    |
+                    |
+                    |
+                    |
++----------------+  |      +----------------+         +----------------+
+|    Product     |<-+--->| OrderDetail     |         |     Order      |
++----------------+         +----------------+         +----------------+
+|  productId PK  |         | orderDetailId PK|       |  orderId PK    |
+|  productName   |         | quantity        |        |  orderDate     |
+|  price         |         | unitPrice       |        |  totalAmount   |
+|  stockQuantity |         | totalPrice      |        |  paymentMethod |
+|  categoryId FK |         | productId FK    |--------|  userId FK     |
+|  promotionId FK|         | orderId FK      |         |  storeId FK    |
++----------------+         +----------------+         +----------------+
 
-@Entity
-public class Store {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long storeId;
-    private String storeName;
-    private String location;
-    @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private User manager;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    // Getters and Setters
-}
-// Product.java
-import javax.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-public class Product {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
-    private String productName;
-    private String description;
-    private Double price;
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
-    @ManyToOne
-    @JoinColumn(name = "store_id")
-    private Store store;
-    private Integer stockQuantity;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    // Getters and Setters
-}
-// Category.java
-import javax.persistence.*;
-
-@Entity
-public class Category {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryId;
-    private String categoryName;
-    private String description;
-    // Getters and Setters
-}
-// Order.java
-import javax.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "orders")
-public class Order {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-    @ManyToOne
-    @JoinColumn(name = "store_id")
-    private Store store;
-    private LocalDateTime orderDate;
-    private Double totalAmount;
-    private String status;
-    private String paymentMethod;
-    private String deliveryAddress;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    // Getters and Setters
-}
-// OrderDetail.java
-import javax.persistence.*;
-
-@Entity
-public class OrderDetail {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderDetailId;
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
-    private Integer quantity;
-    private Double unitPrice;
-    private Double totalPrice;
-    // Getters and Setters
-}
-// Payment.java
-import javax.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-public class Payment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long paymentId;
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
-    private LocalDateTime paymentDate;
-    private Double amountPaid;
-    private String paymentMethod;
-    private String status;
-    // Getters and Setters
-}
+                    +----------------+         +----------------+
+                    |     User       |         |     Store       |
+                    +----------------+         +----------------+
+                    |  userId PK     |         |  storeId PK     |
+                    |  fullName      |         |  storeName      |
+                    |  email         |         |  location       |
+                    |  password      |         |  managerId FK   |
+                    |  phoneNumber   |         +----------------+
+                    |  address       |
+                    +----------------+

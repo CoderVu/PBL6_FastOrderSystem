@@ -15,7 +15,6 @@ public interface IProductService {
     List<ProductResponse> getBestSaleProduct();
     ProductResponse addProduct(ProductRequest productRequest);
     ProductResponse updateProduct(Long id, ProductRequest productRequest);
-
     void deleteProduct(Long id);
 }
 

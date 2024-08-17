@@ -3,7 +3,8 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.util.Date;
+import java.util.Set;
 
 @Entity
 public class Store {
@@ -11,16 +12,30 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long storeId;
     private String storeName;
+    private String phoneNumber;
     private String location;
     private Double longitude;
     private Double latitude;
-    private LocalDateTime openingTime;
-    private LocalDateTime closingTime;
+    private Date openingTime;
+    private Date closingTime;
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private User manager;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @ManyToMany(mappedBy = "stores")
+    private Set<Promotion> promotions;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     public Long getStoreId() {
         return storeId;
@@ -33,7 +48,12 @@ public class Store {
     public String getStoreName() {
         return storeName;
     }
-
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
     public void setStoreName(String storeName) {
         this.storeName = storeName;
     }
@@ -62,19 +82,19 @@ public class Store {
         this.latitude = latitude;
     }
 
-    public LocalDateTime getOpeningTime() {
+    public Date getOpeningTime() {
         return openingTime;
     }
 
-    public void setOpeningTime(LocalDateTime openingTime) {
+    public void setOpeningTime(Date openingTime) {
         this.openingTime = openingTime;
     }
 
-    public LocalDateTime getClosingTime() {
+    public Date getClosingTime() {
         return closingTime;
     }
 
-    public void setClosingTime(LocalDateTime closingTime) {
+    public void setClosingTime(Date closingTime) {
         this.closingTime = closingTime;
     }
 
@@ -100,5 +120,11 @@ public class Store {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    public Set<Promotion> getPromotions() {
+        return promotions;
+    }
+    public void setPromotions(Set<Promotion> promotions) {
+        this.promotions = promotions;
     }
 }

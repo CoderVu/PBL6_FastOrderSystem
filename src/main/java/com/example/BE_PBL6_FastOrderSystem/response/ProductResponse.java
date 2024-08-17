@@ -8,6 +8,7 @@ public class ProductResponse {
     private String image;
     private String description;
     private Double price;
+    private Double discountedPrice;  // Discounted price
     private CategoryResponse category;
     private StoreResponse store;
     private Integer stockQuantity;
@@ -15,12 +16,13 @@ public class ProductResponse {
     private LocalDateTime updatedAt;
     private Boolean bestSale;
 
-    public ProductResponse(Long productId, String productName, String image, String description, Double price, CategoryResponse category, StoreResponse store, Integer stockQuantity, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean bestSale) {
+    public ProductResponse(Long productId, String productName, String image, String description, Double price, Double discountedPrice, CategoryResponse category, StoreResponse store, Integer stockQuantity, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean bestSale) {
         this.productId = productId;
         this.productName = productName;
         this.image = image;
         this.description = description;
         this.price = price;
+        this.discountedPrice = discountedPrice;
         this.category = category;
         this.store = store;
         this.stockQuantity = stockQuantity;
@@ -71,5 +73,13 @@ public class ProductResponse {
 
     public Boolean getBestSale() {
         return bestSale;
+    }
+
+    public Double getDiscountedPrice() {
+        return discountedPrice;
+    }
+
+    public void setDiscountedPrice(Double discountedPrice) {
+        this.discountedPrice = discountedPrice;
     }
 }

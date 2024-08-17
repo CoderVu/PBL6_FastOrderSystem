@@ -1,9 +1,11 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
+import com.example.BE_PBL6_FastOrderSystem.model.User;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class UserRespose {
+public class UserResponse {
     private Long id;
     private String phoneNumber;
     private String password; // Consider excluding sensitive data in response
@@ -13,10 +15,11 @@ public class UserRespose {
     private String address;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean accountLocked;
     private List<RoleResponse> roles;
     private List<StoreResponse> stores;
     private List<OrderResponse> orders;
-    public UserRespose(Long id, String phoneNumber, String password, String fullName, String avatar, String email, String address, LocalDateTime createdAt, LocalDateTime updatedAt, List<RoleResponse> roles, List<StoreResponse> stores, List<OrderResponse> orders) {
+    public UserResponse(Long id, String phoneNumber, String password, String fullName, String avatar, String email, String address, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean accountLocked,List<RoleResponse> roles, List<StoreResponse> stores, List<OrderResponse> orders) {
         this.id = id;
         this.phoneNumber = phoneNumber;
         this.password = password;
@@ -26,11 +29,26 @@ public class UserRespose {
         this.address = address;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.accountLocked = accountLocked;
         this.roles = roles;
         this.stores = stores;
         this.orders = orders;
     }
 
+    public UserResponse(User user) {
+        this.id = user.getId();
+        this.phoneNumber = user.getPhoneNumber();
+        this.fullName = user.getFullName();
+        this.avatar = user.getAvatar();
+        this.email = user.getEmail();
+        this.address = user.getAddress();
+        this.createdAt = user.getCreatedAt();
+        this.updatedAt = user.getUpdatedAt();
+        this.accountLocked = user.isAccountLocked();
+        this.roles = user.getRoles().stream()
+                .map(role -> new RoleResponse(role.getId(), role.getName()))
+                .toList();
+    }
     public Long getId() {
         return id;
     }

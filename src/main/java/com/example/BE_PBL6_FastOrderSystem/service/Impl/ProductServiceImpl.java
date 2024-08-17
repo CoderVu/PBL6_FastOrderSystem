@@ -11,10 +11,16 @@ import com.example.BE_PBL6_FastOrderSystem.request.ProductRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
+import com.example.BE_PBL6_FastOrderSystem.util.ImageGeneral;
 import com.example.BE_PBL6_FastOrderSystem.util.ResponseConverter;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,6 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements IProductService {
+    private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final StoreRepository storeRepository;
@@ -67,12 +74,13 @@ public class ProductServiceImpl implements IProductService {
                 .collect(Collectors.toList());
     }
 
+
     @Override
     public ProductResponse addProduct(ProductRequest productRequest) {
         if (productRepository.existsByProductName(productRequest.getProductName())) {
             throw new ProductAlreadyExistsException("Product already exists");
         }
-       if (!categoryRepository.existsById(productRequest.getCategoryId())) {
+        if (!categoryRepository.existsById(productRequest.getCategoryId())) {
             throw new ResourceNotFoundException("Category not found");
         }
         if (!storeRepository.existsById(productRequest.getStoreId())) {
@@ -80,7 +88,13 @@ public class ProductServiceImpl implements IProductService {
         }
         Product product = new Product();
         product.setProductName(productRequest.getProductName());
-        product.setImage(productRequest.getImage());
+        try {
+            InputStream imageInputStream = productRequest.getImage().getInputStream();
+            String base64Image = ImageGeneral.fileToBase64(imageInputStream);
+            product.setImage(base64Image);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
         Category category = categoryRepository.findById(productRequest.getCategoryId()).get();
@@ -92,22 +106,38 @@ public class ProductServiceImpl implements IProductService {
         product = productRepository.save(product);
         return ResponseConverter.convertToProductResponse(product);
     }
+
     @Override
     public ProductResponse updateProduct(Long id, ProductRequest productRequest) {
-        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        if (productRepository.existsByProductName(productRequest.getProductName())
+                && !product.getProductName().equals(productRequest.getProductName())) {
+            throw new ProductAlreadyExistsException("Product already exists");
+        }
+
         product.setProductName(productRequest.getProductName());
-        product.setImage(productRequest.getImage());
+        try {
+            InputStream imageInputStream = productRequest.getImage().getInputStream();
+            String base64Image = ImageGeneral.fileToBase64(imageInputStream);
+            product.setImage(base64Image);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
-        Category category = categoryRepository.findById(productRequest.getCategoryId()).get();
+        Category category = categoryRepository.findById(productRequest.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
         product.setCategory(category);
-        Store store = storeRepository.findById(productRequest.getStoreId()).get();
+        Store store = storeRepository.findById(productRequest.getStoreId())
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
         product.setStore(store);
         product.setStockQuantity(productRequest.getStockQuantity());
         product.setBestSale(productRequest.getBestSale());
         product = productRepository.save(product);
         return ResponseConverter.convertToProductResponse(product);
     }
+
 @Override
 public void deleteProduct(Long id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));

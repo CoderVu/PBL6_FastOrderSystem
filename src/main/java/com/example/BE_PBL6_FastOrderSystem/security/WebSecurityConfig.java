@@ -6,6 +6,7 @@ import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -18,14 +19,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
-
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
 public class WebSecurityConfig {
-    private final FoodUserDetailsService userDetailsService;
+    private final @Lazy FoodUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
+
     private static final String[] AUTH = {
             "/api/v1/auth/**"
     };
@@ -68,10 +68,10 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(AUTH).permitAll() // Allow access to auth endpoints
-                        .requestMatchers(PUBLIC).permitAll() // Allow access to auth endpoints
-                        .requestMatchers(USER).hasAnyRole("USER") // Allow access to user endpoints
-                        .requestMatchers(ADMIN).hasAnyRole("ADMIN") // Allow access to admin endpoints
+                        .requestMatchers(AUTH).permitAll()
+                        .requestMatchers(PUBLIC).permitAll()
+                        .requestMatchers(USER).hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(ADMIN).hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
                 );
 
@@ -80,11 +80,3 @@ public class WebSecurityConfig {
         return http.build();
     }
 }
-
-
-
-
-
-
-
-

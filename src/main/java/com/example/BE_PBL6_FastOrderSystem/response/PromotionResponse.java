@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class PromotionResponse {
     private Long id;
@@ -9,17 +10,17 @@ public class PromotionResponse {
     private double discountPercentage;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Long storeId;
+    private List<Long> storeIds;
 
 
-    public PromotionResponse(Long id, String name, String description, double discountPercentage, LocalDate startDate, LocalDate endDate, Long storeId) {
+    public PromotionResponse(Long id, String name, String description, double discountPercentage, LocalDate startDate, LocalDate endDate, List<Long> storeIds) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.discountPercentage = discountPercentage;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.storeId = storeId;
+        this.storeIds = storeIds;
     }
 
     public Long getId() {
@@ -65,10 +66,15 @@ public class PromotionResponse {
     public LocalDate getEndDate() {
         return endDate;
     }
-    public void setStoreId(Long storeId) {
-        this.storeId = storeId;
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
-    public Long getStoreId() {
-        return storeId;
+
+    public List<Long> getStoreIds() {
+        return storeIds;
+    }
+
+    public void setStoreIds(List<Long> storeIds) {
+        this.storeIds = storeIds;
     }
 }

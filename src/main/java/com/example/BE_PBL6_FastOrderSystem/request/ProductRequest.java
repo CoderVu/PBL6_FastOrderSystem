@@ -1,8 +1,10 @@
 package com.example.BE_PBL6_FastOrderSystem.request;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class ProductRequest {
     private String productName;
-    private String image;
+    private MultipartFile image;
     private String description;
     private Double price;
     private Long categoryId;
@@ -10,7 +12,7 @@ public class ProductRequest {
     private Integer stockQuantity;
     private Boolean bestSale;
 
-    public ProductRequest(String productName, String image, String description, Double price, Long categoryId, Long storeId, Integer stockQuantity, Boolean bestSale) {
+    public ProductRequest(String productName, MultipartFile image, String description, Double price, Long categoryId, Long storeId, Integer stockQuantity, Boolean bestSale) {
         this.productName = productName;
         this.image = image;
         this.description = description;
@@ -25,7 +27,7 @@ public class ProductRequest {
         return productName;
     }
 
-    public String getImage() {
+    public MultipartFile getImage() {
         return image;
     }
 

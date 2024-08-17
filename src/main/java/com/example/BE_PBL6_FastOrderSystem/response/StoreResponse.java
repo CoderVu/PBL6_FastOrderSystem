@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Date;
 
 public class StoreResponse {
     private Long storeId;
@@ -11,19 +12,21 @@ public class StoreResponse {
     private String location;
     private Double longitude;
     private Double latitude;
-    private  LocalDateTime openingTime;
-    private  LocalDateTime closingTime;
+    private String numberPhone;
+    private Date openingTime;
+    private  Date closingTime;
     @JsonIgnore
-    private UserRespose user;
+    private UserResponse user;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     // Constructor cũ
-    public StoreResponse(Long storeId, String storeName, String location, Double longitude, Double latitude, LocalDateTime openingTime, LocalDateTime closingTime, UserRespose user, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public StoreResponse(Long storeId, String storeName, String location, Double longitude, Double latitude, String numberPhone, Date openingTime, Date closingTime, UserResponse user, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.storeId = storeId;
         this.storeName = storeName;
         this.location = location;
         this.longitude = longitude;
         this.latitude = latitude;
+        this.numberPhone = numberPhone;
         this.openingTime = openingTime;
         this.closingTime = closingTime;
         this.user = user;
@@ -31,12 +34,13 @@ public class StoreResponse {
         this.updatedAt = updatedAt;
     }
     // Constructor mới
-    public StoreResponse(Long storeId, String storeName, String location, Double longitude, Double latitude, LocalDateTime openingTime, LocalDateTime closingTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public StoreResponse(Long storeId, String storeName, String location, Double longitude, Double latitude,String numberPhone, Date openingTime, Date closingTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.storeId = storeId;
         this.storeName = storeName;
         this.location = location;
         this.longitude = longitude != null ? longitude : 0.0;
         this.latitude = latitude != null ? latitude : 0.0;
+        this.numberPhone = numberPhone;
         this.openingTime = openingTime;
         this.closingTime = closingTime;
         this.createdAt = createdAt;
@@ -67,11 +71,10 @@ public class StoreResponse {
         this.location = location;
     }
 
-    public UserRespose getUser() {
+    public UserResponse getUser() {
         return user;
     }
-
-    public void setUser(UserRespose user) {
+    public void setUser(UserResponse user) {
         this.user = user;
     }
 
@@ -106,20 +109,26 @@ public class StoreResponse {
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
+    public String getNumberPhone() {
+        return numberPhone;
+    }
+    public void setNumberPhone(String numberPhone) {
+        this.numberPhone = numberPhone;
+    }
 
-    public LocalDateTime getOpeningTime() {
+    public Date getOpeningTime() {
         return openingTime;
     }
 
-    public void setOpeningTime(LocalDateTime openingTime) {
+    public void setOpeningTime(Date openingTime) {
         this.openingTime = openingTime;
     }
 
-    public LocalDateTime getClosingTime() {
+    public Date getClosingTime() {
         return closingTime;
     }
 
-    public void setClosingTime(LocalDateTime closingTime) {
+    public void setClosingTime(Date closingTime) {
         this.closingTime = closingTime;
     }
 }

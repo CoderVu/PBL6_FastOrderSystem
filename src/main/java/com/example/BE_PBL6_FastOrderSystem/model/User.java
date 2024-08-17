@@ -15,6 +15,7 @@ public class User {
     private String phoneNumber;
     private String password;
     private String fullName;
+    @Column(name = "avatar", columnDefinition = "LONGTEXT")
     private String avatar;
     private String email;
     private String address;
