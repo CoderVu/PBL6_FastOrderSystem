@@ -5,17 +5,15 @@ import java.time.LocalDate;
 public class PromotionRequest {
     private String name;
     private String description;
-    private double discountPercentage;
+    private Double discountPercentage;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Long storeId;
-    public PromotionRequest(String name, String description, double discountPercentage, LocalDate startDate, LocalDate endDate, Long storeId) {
+    public PromotionRequest(String name, String description, Double discountPercentage, LocalDate startDate, LocalDate endDate) {
         this.name = name;
         this.description = description;
         this.discountPercentage = discountPercentage;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.storeId = storeId;
     }
 
     public String getName() {
@@ -34,11 +32,11 @@ public class PromotionRequest {
         this.description = description;
     }
 
-    public double getDiscountPercentage() {
+    public Double getDiscountPercentage() {
         return discountPercentage;
     }
 
-    public void setDiscountPercentage(double discountPercentage) {
+    public void setDiscountPercentage(Double discountPercentage) {
         this.discountPercentage = discountPercentage;
     }
 
@@ -56,11 +54,5 @@ public class PromotionRequest {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-    }
-    public Long getStoreId() {
-        return storeId;
-    }
-    public void setStoreId(Long storeId) {
-        this.storeId = storeId;
     }
 }

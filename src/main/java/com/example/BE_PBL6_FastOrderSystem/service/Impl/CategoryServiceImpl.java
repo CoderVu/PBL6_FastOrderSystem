@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.CategoryAlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.model.Category;
 import com.example.BE_PBL6_FastOrderSystem.repository.CategoryRepository;
@@ -35,7 +35,7 @@ public class CategoryServiceImpl  implements ICategoryService {
     public CategoryResponse addCategory(CategoryRequest categoryRequest) {
         Category category = new Category();
         if (categoryRepository.existsByCategoryName(categoryRequest.getCategoryName())) {
-            throw new CategoryAlreadyExistsException("Category already exists");
+            throw new AlreadyExistsException("Category already exists");
         }
         category.setCategoryName(categoryRequest.getCategoryName());
         category.setDescription(categoryRequest.getDescription());

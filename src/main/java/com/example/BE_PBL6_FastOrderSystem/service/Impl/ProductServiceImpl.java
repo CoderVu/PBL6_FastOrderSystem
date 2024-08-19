@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.ProductAlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.Category;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,7 +47,7 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public List<ProductResponse> getProductsByStoreId(Long storeId) {
-        return productRepository.findByStore_StoreId(storeId).stream()
+        return productRepository.findByStores_StoreId(storeId).stream()
                 .map(ResponseConverter::convertToProductResponse)
                 .collect(Collectors.toList());
     }
@@ -78,7 +77,7 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public ProductResponse addProduct(ProductRequest productRequest) {
         if (productRepository.existsByProductName(productRequest.getProductName())) {
-            throw new ProductAlreadyExistsException("Product already exists");
+            throw new AlreadyExistsException("Product already exists");
         }
         if (!categoryRepository.existsById(productRequest.getCategoryId())) {
             throw new ResourceNotFoundException("Category not found");
@@ -100,7 +99,7 @@ public class ProductServiceImpl implements IProductService {
         Category category = categoryRepository.findById(productRequest.getCategoryId()).get();
         product.setCategory(category);
         Store store = storeRepository.findById(productRequest.getStoreId()).get();
-        product.setStore(store);
+        product.getStores().add(store);
         product.setStockQuantity(productRequest.getStockQuantity());
         product.setBestSale(productRequest.getBestSale());
         product = productRepository.save(product);
@@ -113,7 +112,7 @@ public class ProductServiceImpl implements IProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         if (productRepository.existsByProductName(productRequest.getProductName())
                 && !product.getProductName().equals(productRequest.getProductName())) {
-            throw new ProductAlreadyExistsException("Product already exists");
+            throw new AlreadyExistsException("Product already exists");
         }
 
         product.setProductName(productRequest.getProductName());
@@ -131,7 +130,7 @@ public class ProductServiceImpl implements IProductService {
         product.setCategory(category);
         Store store = storeRepository.findById(productRequest.getStoreId())
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
-        product.setStore(store);
+        product.getStores().add(store);
         product.setStockQuantity(productRequest.getStockQuantity());
         product.setBestSale(productRequest.getBestSale());
         product = productRepository.save(product);

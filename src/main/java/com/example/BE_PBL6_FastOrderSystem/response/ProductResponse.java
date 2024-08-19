@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductResponse {
     private Long productId;
@@ -10,13 +11,13 @@ public class ProductResponse {
     private Double price;
     private Double discountedPrice;  // Discounted price
     private CategoryResponse category;
-    private StoreResponse store;
+    private List<StoreResponse> stores;
     private Integer stockQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean bestSale;
 
-    public ProductResponse(Long productId, String productName, String image, String description, Double price, Double discountedPrice, CategoryResponse category, StoreResponse store, Integer stockQuantity, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean bestSale) {
+    public ProductResponse(Long productId, String productName, String image, String description, Double price, Double discountedPrice, CategoryResponse category, List<StoreResponse> stores, Integer stockQuantity, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean bestSale) {
         this.productId = productId;
         this.productName = productName;
         this.image = image;
@@ -24,7 +25,7 @@ public class ProductResponse {
         this.price = price;
         this.discountedPrice = discountedPrice;
         this.category = category;
-        this.store = store;
+        this.stores = stores;
         this.stockQuantity = stockQuantity;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -55,8 +56,8 @@ public class ProductResponse {
         return category;
     }
 
-    public StoreResponse getStore() {
-        return store;
+    public List<StoreResponse> getStores() {
+        return stores;
     }
 
     public Integer getStockQuantity() {

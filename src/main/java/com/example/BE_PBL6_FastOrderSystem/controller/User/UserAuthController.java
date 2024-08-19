@@ -1,20 +1,16 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.User;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.UserAlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
-import com.example.BE_PBL6_FastOrderSystem.util.ImageGeneral;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.InputStream;
 
 @CrossOrigin
 @RestController
@@ -46,7 +42,7 @@ public class UserAuthController {
              UserRequest userResquest = new UserRequest(phoneNumber, password, fullName, avatar, email, address);
               userService.updateUser(userId, userResquest);
                 return ResponseEntity.ok().body("User updated successfully");
-            } catch (UserAlreadyExistsException e) {
+            } catch (AlreadyExistsException e) {
            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
        }
     }

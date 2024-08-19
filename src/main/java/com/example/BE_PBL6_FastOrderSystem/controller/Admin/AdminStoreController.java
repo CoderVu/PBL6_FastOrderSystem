@@ -1,10 +1,8 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.ProductAlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
-import com.example.BE_PBL6_FastOrderSystem.exception.StoreAlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.request.StoreRequest;
-import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
 import com.example.BE_PBL6_FastOrderSystem.service.IStoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @RestController
@@ -34,7 +31,7 @@ public class AdminStoreController {
             StoreRequest storeRequest = new StoreRequest(storeName, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
             storeService.addStore(storeRequest);
             return ResponseEntity.ok().body("Store added successfully");
-        } catch (StoreAlreadyExistsException e) {
+        } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -55,7 +52,7 @@ public class AdminStoreController {
             StoreRequest storeRequest = new StoreRequest(storeName, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
             storeService.updateStore(id, storeRequest);
             return ResponseEntity.ok().body("Store updated successfully");
-        }  catch (StoreAlreadyExistsException e) {
+        }  catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

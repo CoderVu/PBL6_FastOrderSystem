@@ -26,6 +26,13 @@ public class Store {
     private LocalDateTime updatedAt;
     @ManyToMany(mappedBy = "stores")
     private Set<Promotion> promotions;
+    @ManyToMany(mappedBy = "stores")
+    private Set<Product> products;
+
+
+    public Set<Product> getProducts() {
+        return products;
+    }
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

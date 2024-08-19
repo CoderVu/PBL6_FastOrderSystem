@@ -1,8 +1,8 @@
 // AuthController.java
 package com.example.BE_PBL6_FastOrderSystem.controller.Public;
 
+import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
-import com.example.BE_PBL6_FastOrderSystem.exception.UserAlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.request.LoginRequest;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
@@ -37,7 +37,7 @@ public class AuthController {
         try {
             userService.registerUser(user);
             return ResponseEntity.ok("Registration successful!");
-        } catch (UserAlreadyExistsException e) {
+        } catch (AlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }

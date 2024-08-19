@@ -1,36 +1,44 @@
 package com.example.BE_PBL6_FastOrderSystem.util;
 
-import com.example.BE_PBL6_FastOrderSystem.model.User;
-import com.example.BE_PBL6_FastOrderSystem.response.*;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.model.Promotion;
+import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.StoreResponse;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ResponseConverter {
     public static ProductResponse convertToProductResponse(Product product) {
-        CategoryResponse categoryResponse  = new CategoryResponse(
+        CategoryResponse categoryResponse = new CategoryResponse(
                 product.getCategory().getCategoryId(),
                 product.getCategory().getCategoryName(),
                 product.getCategory().getDescription()
         );
-        StoreResponse storeResponse = new StoreResponse(
-                product.getStore().getStoreId(),
-                product.getStore().getStoreName(),
-                product.getStore().getLocation(),
-                product.getStore().getLongitude(),
-                product.getStore().getLatitude(),
-                product.getStore().getPhoneNumber(),
-                product.getStore().getOpeningTime(),
-                product.getStore().getClosingTime(),
-                product.getStore().getCreatedAt(),
-                product.getStore().getUpdatedAt()
-        );
+        List<StoreResponse> storeResponses = product.getStores().stream()
+                .map(store -> new StoreResponse(
+                        store.getStoreId(),
+                        store.getStoreName(),
+                        store.getLocation(),
+                        store.getLongitude(),
+                        store.getLatitude(),
+                        store.getPhoneNumber(),
+                        store.getOpeningTime(),
+                        store.getClosingTime(),
+                        store.getCreatedAt(),
+                        store.getUpdatedAt()
+                ))
+                .collect(Collectors.toList());
 
         // Calculate discounted price if a promotion exists
         Double discountedPrice = product.getPrice();
-        if (product.getPromotion() != null) {
-            Promotion promotion = product.getPromotion();
-            double discountPercentage = promotion.getDiscountPercentage();
-            discountedPrice = product.getPrice() * (1 - discountPercentage / 100);
+        if (product.getPromotions() != null && !product.getPromotions().isEmpty()) {
+            double maxDiscountPercentage = product.getPromotions().stream()
+                    .mapToDouble(Promotion::getDiscountPercentage)
+                    .max()
+                    .orElse(0);
+            discountedPrice = product.getPrice() * (1 - maxDiscountPercentage / 100);
         }
 
         return new ProductResponse(
@@ -41,12 +49,11 @@ public class ResponseConverter {
                 product.getPrice(),
                 discountedPrice,
                 categoryResponse,
-                storeResponse,
+                storeResponses,
                 product.getStockQuantity(),
                 product.getCreatedAt(),
                 product.getUpdatedAt(),
                 product.getBestSale()
         );
     }
-
 }

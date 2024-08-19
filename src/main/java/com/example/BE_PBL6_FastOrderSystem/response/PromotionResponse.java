@@ -22,6 +22,14 @@ public class PromotionResponse {
         this.endDate = endDate;
         this.storeIds = storeIds;
     }
+    public PromotionResponse(Long id, String name, String description, double discountPercentage, LocalDate startDate, LocalDate endDate) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.discountPercentage = discountPercentage;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
 
     public Long getId() {
         return id;

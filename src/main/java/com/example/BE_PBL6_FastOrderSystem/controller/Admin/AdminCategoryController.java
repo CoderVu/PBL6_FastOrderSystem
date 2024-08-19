@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.CategoryAlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.request.CategoryRequest;
 import com.example.BE_PBL6_FastOrderSystem.service.ICategoryService;
@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/categories")
@@ -21,7 +19,7 @@ public class AdminCategoryController {
         try {
             CategoryResponse categoryResponse = categoryService.addCategory(categoryRequest);
             return ResponseEntity.ok(categoryResponse);
-        } catch (CategoryAlreadyExistsException e){
+        } catch (AlreadyExistsException e){
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }

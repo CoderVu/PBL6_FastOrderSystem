@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -18,16 +19,19 @@ public class Product {
     private String image;
     private String description;
     private Double price;
-    @ManyToOne
-    @JoinColumn(name = "promotion_id")
-    private Promotion promotion;
+    @ManyToMany(mappedBy = "products") // để tránh việc tạo bảng trung gian
+    private Set<Promotion> promotions = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
-    @ManyToOne
-    @JoinColumn(name = "store_id")
-    private Store store;
+    @ManyToMany
+    @JoinTable(
+            name = "product_store",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "store_id")
+    )
+    private Set<Store> stores = new HashSet<>();
     private Integer stockQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -81,12 +85,13 @@ public class Product {
     public void setPrice(Double price) {
         this.price = price;
     }
-    public Promotion getPromotion() {
-        return promotion;
+    public Set<Promotion> getPromotions() {
+        return promotions;
     }
-    public void setPromotion(Promotion promotion) {
-        this.promotion = promotion;
+    public void setPromotions(Set<Promotion> promotions) {
+        this.promotions = promotions;
     }
+
 
     public Category getCategory() {
         return category;
@@ -96,12 +101,12 @@ public class Product {
         this.category = category;
     }
 
-    public Store getStore() {
-        return store;
+    public Set<Store> getStores() {
+        return stores;
     }
 
-    public void setStore(Store store) {
-        this.store = store;
+    public void setStores(Set<Store> stores) {
+        this.stores = stores;
     }
 
     public Integer getStockQuantity() {

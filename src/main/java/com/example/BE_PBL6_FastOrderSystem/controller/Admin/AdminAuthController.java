@@ -1,14 +1,12 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.UserAlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
-import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +22,7 @@ public class AdminAuthController {
         try{
             userService.registerAdmin(user);
             return ResponseEntity.ok("Registration successful!");
-        }catch (UserAlreadyExistsException e){
+        }catch (AlreadyExistsException e){
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }

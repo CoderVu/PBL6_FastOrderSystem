@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.UserAlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.Role;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
@@ -34,10 +34,10 @@ public class UserServiceImpl implements IUserService {
     public User registerUser(User user) {
         validateUser(user);
         if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
-            throw new UserAlreadyExistsException(user.getPhoneNumber() + " already exists");
+            throw new AlreadyExistsException(user.getPhoneNumber() + " already exists");
         }
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new UserAlreadyExistsException(user.getEmail() + " already exists");
+            throw new AlreadyExistsException(user.getEmail() + " already exists");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         System.out.println(user.getPassword());
@@ -53,10 +53,10 @@ public class UserServiceImpl implements IUserService {
     public User registerAdmin(User user) {
         validateUser(user);
         if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
-            throw new UserAlreadyExistsException(user.getPhoneNumber() + " already exists");
+            throw new AlreadyExistsException(user.getPhoneNumber() + " already exists");
         }
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new UserAlreadyExistsException(user.getEmail() + " already exists");
+            throw new AlreadyExistsException(user.getEmail() + " already exists");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         System.out.println(user.getPassword());
@@ -93,7 +93,7 @@ public class UserServiceImpl implements IUserService {
 
         if (!existingUser.getPhoneNumber().equals(userRequest.getPhoneNumber()) &&
                 userRepository.existsByPhoneNumber(userRequest.getPhoneNumber())) {
-            throw new UserAlreadyExistsException(userRequest.getPhoneNumber() + " already exists");
+            throw new AlreadyExistsException(userRequest.getPhoneNumber() + " already exists");
         }
         existingUser.setPhoneNumber(userRequest.getPhoneNumber());
         existingUser.setFullName(userRequest.getFullName());
@@ -120,38 +120,38 @@ public class UserServiceImpl implements IUserService {
 
     private void validateUser(User user) {
         if (user.getFullName() == null || user.getFullName().isEmpty()) {
-            throw new UserAlreadyExistsException("Full name is required");
+            throw new AlreadyExistsException("Full name is required");
         }
         if (user.getPassword() == null || user.getPassword().length() < 8) {
-            throw new UserAlreadyExistsException("Password must be at least 8 characters long");
+            throw new AlreadyExistsException("Password must be at least 8 characters long");
         }
         if (user.getPhoneNumber() == null || !user.getPhoneNumber().matches("\\d{10}") || user.getPhoneNumber().indexOf("0") != 0)
         {
-            throw new UserAlreadyExistsException("Phone number is invalid");
+            throw new AlreadyExistsException("Phone number is invalid");
         }
         if (user.getEmail() == null || !user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new UserAlreadyExistsException("Invalid email format");
+            throw new AlreadyExistsException("Invalid email format");
         }
         if (user.getAddress() == null || user.getAddress().isEmpty()) {
-            throw new UserAlreadyExistsException("Address is required");
+            throw new AlreadyExistsException("Address is required");
         }
     }
     private void validateUserRequest(UserRequest userRequest) {
         if (userRequest.getFullName() == null || userRequest.getFullName().isEmpty()) {
-            throw new UserAlreadyExistsException("Full name is required");
+            throw new AlreadyExistsException("Full name is required");
         }
         if (userRequest.getPassword() == null || userRequest.getPassword().length() < 8) {
-            throw new UserAlreadyExistsException("Password must be at least 8 characters long");
+            throw new AlreadyExistsException("Password must be at least 8 characters long");
         }
         if (userRequest.getPhoneNumber() == null || !userRequest.getPhoneNumber().matches("\\d{10}") || userRequest.getPhoneNumber().indexOf("0") != 0)
         {
-            throw new UserAlreadyExistsException("Phone number is invalid");
+            throw new AlreadyExistsException("Phone number is invalid");
         }
         if (userRequest.getEmail() == null || !userRequest.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new UserAlreadyExistsException("Invalid email format");
+            throw new AlreadyExistsException("Invalid email format");
         }
         if (userRequest.getAddress() == null || userRequest.getAddress().isEmpty()) {
-            throw new UserAlreadyExistsException("Address is required");
+            throw new AlreadyExistsException("Address is required");
         }
     }
 }

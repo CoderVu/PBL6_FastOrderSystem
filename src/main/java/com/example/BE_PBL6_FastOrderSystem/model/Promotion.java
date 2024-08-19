@@ -2,6 +2,7 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -12,7 +13,7 @@ public class Promotion {
     private Long id;
     private String name;
     private String description;
-    private double discountPercentage;
+    private Double discountPercentage;
     private LocalDate startDate;
     private LocalDate endDate;
     @ManyToMany
@@ -22,6 +23,13 @@ public class Promotion {
             inverseJoinColumns = @JoinColumn(name = "store_id")
     )
     private Set<Store> stores;
+    @ManyToMany
+    @JoinTable(
+            name = "promotion_product",
+            joinColumns = @JoinColumn(name = "promotion_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    private Set<Product> products = new HashSet<>();
     public Long getId() {
         return id;
     }
@@ -46,11 +54,11 @@ public class Promotion {
         this.description = description;
     }
 
-    public double getDiscountPercentage() {
+    public Double getDiscountPercentage() {
         return discountPercentage;
     }
 
-    public void setDiscountPercentage(double discountPercentage) {
+    public void setDiscountPercentage(Double discountPercentage) {
         this.discountPercentage = discountPercentage;
     }
 
@@ -76,4 +84,12 @@ public class Promotion {
     public void setStores(Set<Store> stores) {
         this.stores = stores;
     }
+  public Set<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<Product> products) {
+        this.products = products;
+    }
+
 }
