@@ -28,7 +28,7 @@ public class OrderResponse {
         this.orderDate = order.getOrderDate();
         this.totalAmount = order.getTotalAmount();
         this.status = order.getStatus();
-        this.paymentMethod = order.getPaymentMethod();
+        this.paymentMethod = order.getPaymentMethod().getName();
         this.deliveryAddress = order.getDeliveryAddress();
         this.createdAt = order.getCreatedAt();
         this.updatedAt = order.getUpdatedAt();

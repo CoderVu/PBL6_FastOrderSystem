@@ -32,6 +32,9 @@ public class WebSecurityConfig {
     private static final String[] ADMIN = {
             "/api/v1/admin/**"
     };
+    private static final String[] OWNER = {
+            "/api/v1/owner/**"
+    };
     private static final String[] USER = {
             "/api/v1/user/**"
     };
@@ -71,6 +74,7 @@ public class WebSecurityConfig {
                         .requestMatchers(AUTH).permitAll()
                         .requestMatchers(PUBLIC).permitAll()
                         .requestMatchers(USER).hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers(ADMIN).hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
                 );

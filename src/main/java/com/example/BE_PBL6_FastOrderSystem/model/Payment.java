@@ -14,8 +14,11 @@ public class Payment {
     @JoinColumn(name = "order_id")
     private Order order;
     private LocalDateTime paymentDate;
-    private Double amountPaid;
-    private String paymentMethod;
+    private Double amountPaid; // số tiền đã thanh toán
+   // trỏ tới bảng payment_methods
+    @ManyToOne
+    @JoinColumn(name = "payment_method_id")
+    private PaymentMethod paymentMethod;
     private String status;
     private LocalDateTime createdAt;
 
@@ -51,11 +54,10 @@ public class Payment {
         this.amountPaid = amountPaid;
     }
 
-    public String getPaymentMethod() {
+   public PaymentMethod getPaymentMethod() {
         return paymentMethod;
     }
-
-    public void setPaymentMethod(String paymentMethod) {
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 

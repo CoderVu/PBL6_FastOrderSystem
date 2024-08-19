@@ -6,8 +6,10 @@ import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import java.util.List;
 
 public interface IOrderService {
-    OrderResponse createOrder(OrderRequest orderRequest);
-    OrderResponse getOrderById(Long orderId);
-    List<OrderResponse> getAllOrders();
-    List<OrderResponse> getOrdersByUserId(Long userId);
+    OrderResponse createOrder(Long userId, OrderRequest orderRequest);
+
+    String updateOrderStatus(Long orderId, Long ownerId, String status);
+
+    OrderResponse getOrderByIdAndUserId(Long orderId, Long userId);
+    List<OrderResponse> getAllOrdersByUser(Long userId);
 }

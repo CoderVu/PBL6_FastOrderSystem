@@ -14,10 +14,5 @@ import java.util.List;
 @RequestMapping("/api/v1/admin/order")
 @RequiredArgsConstructor
 public class AdminOrderController {
-    private final IOrderService orderService;
-    @GetMapping("/all")
-    public ResponseEntity<List<OrderResponse>> getAllOrders() {
-        List<OrderResponse> orders = orderService.getAllOrders();
-        return ResponseEntity.ok(orders);
-    }
+
 }

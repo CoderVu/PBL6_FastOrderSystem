@@ -20,7 +20,9 @@ public class Order {
     private LocalDateTime orderDate;
     private Double totalAmount;
     private String status;
-    private String paymentMethod;
+    @ManyToOne
+    @JoinColumn(name = "payment_method_id")
+    private PaymentMethod paymentMethod;
     private String deliveryAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -80,11 +82,10 @@ public class Order {
         this.status = status;
     }
 
-    public String getPaymentMethod() {
+    public PaymentMethod getPaymentMethod() {
         return paymentMethod;
     }
-
-    public void setPaymentMethod(String paymentMethod) {
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
 
