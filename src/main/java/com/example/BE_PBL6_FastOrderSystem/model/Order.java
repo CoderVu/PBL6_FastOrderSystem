@@ -29,6 +29,16 @@ public class Order {
     private String deliveryAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<CartItem> cartItems;
 

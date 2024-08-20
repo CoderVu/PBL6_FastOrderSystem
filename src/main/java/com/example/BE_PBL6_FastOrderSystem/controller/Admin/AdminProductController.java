@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.request.ProductRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
 import com.example.BE_PBL6_FastOrderSystem.service.IStoreService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class AdminProductController {
     private final IStoreService storeService;
 
     @PostMapping("/add")
-    public ResponseEntity<?> addProduct(
+    public ResponseEntity<APIRespone> addProduct(
             @RequestParam("productName") String productName,
             @RequestParam("price") Double price,
             @RequestParam("description") String description,
@@ -29,20 +30,13 @@ public class AdminProductController {
             @RequestParam("storeId") Long storeId,
             @RequestParam("image") MultipartFile image,
             @RequestParam("stockQuantity") Integer stockQuantity,
-            @RequestParam("bestSale") Boolean bestSale) throws IOException {
-        try {
-            ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, storeId, stockQuantity, bestSale);
-            productService.addProduct(productRequest);
-            return ResponseEntity.ok().body("Product added successfully");
-        } catch (AlreadyExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+            @RequestParam("bestSale") Boolean bestSale)  {
+        ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, storeId, stockQuantity, bestSale);
+        return productService.addProduct(productRequest);
     }
 
     @PutMapping("update/{id}")
-    public ResponseEntity<?> updateProduct(
+    public ResponseEntity<APIRespone> updateProduct(
             @PathVariable Long id,
             @RequestParam("productName") String productName,
             @RequestParam("price") Double price,
@@ -52,25 +46,13 @@ public class AdminProductController {
             @RequestParam("image") MultipartFile image,
             @RequestParam("stockQuantity") Integer stockQuantity,
             @RequestParam("bestSale") Boolean bestSale) {
-        try {
-            ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, storeId, stockQuantity, bestSale);
-            productService.updateProduct(id, productRequest);
-            return ResponseEntity.ok().body("Product updated successfully");
-        }
-        catch (AlreadyExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, storeId, stockQuantity, bestSale);
+        return productService.updateProduct(id, productRequest);
+
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
-        try {
-            productService.deleteProduct(id);
-            return ResponseEntity.ok().body("Product deleted successfully");
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found");
-        }
+    public ResponseEntity<APIRespone>  deleteProduct(@PathVariable Long id) {
+        return productService.deleteProduct(id);
     }
 }

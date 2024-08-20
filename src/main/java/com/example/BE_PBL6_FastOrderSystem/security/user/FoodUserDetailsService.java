@@ -28,15 +28,9 @@ public class FoodUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String numberPhone) throws UsernameNotFoundException {
-        User user = userRepository.findByPhoneNumber(numberPhone)
-                .filter(u -> !u.isAccountLocked())
-                .orElseThrow(() -> new CustomAuthenticationException("Invalid phone number or password"));
+        User user = userRepository.findByPhoneNumber(numberPhone);
         return FoodUserDetails.buildUserDetails(user);
     }
 
-    public UserResponse getCurrentUser() {
-        User user = userRepository.findByPhoneNumber(FoodUserDetails.getCurrentUserPhoneNumber())
-                .orElseThrow(() -> new CustomAuthenticationException("User not found"));
-        return new UserResponse(user);
-    }
+
 }

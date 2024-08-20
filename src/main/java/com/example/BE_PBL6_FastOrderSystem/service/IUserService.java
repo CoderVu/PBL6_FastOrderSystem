@@ -9,9 +9,6 @@ import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import java.util.List;
 
 public interface IUserService {
-    User registerUser(User user);
-
-    User registerAdmin(User user);
 
     List<User> getUsers(String role);
 

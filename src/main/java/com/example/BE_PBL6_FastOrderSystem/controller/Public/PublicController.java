@@ -31,54 +31,29 @@ public class PublicController {
         return ResponseEntity.ok(categoryResponse);
     }
     @GetMapping("/products/all")
-    public ResponseEntity<List<ProductResponse>> getAllProducts() throws SQLException {
-        List<ProductResponse> products = productService.getAllProduct();
-        return ResponseEntity.ok(products);
+    public ResponseEntity<APIRespone> getAllProducts() throws SQLException {
+       return productService.getAllProduct();
+
     }
     @GetMapping("/products/{id}")
-    public ResponseEntity<?> getProductById(@PathVariable("id") Long productId) {
-        Optional<ProductResponse> productResponse = productService.getProductById(productId);
-        if (productResponse.isPresent()) {
-            return ResponseEntity.ok(productResponse.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<APIRespone> getProductById(@PathVariable("id") Long productId) {
+        return productService.getProductById(productId);
     }
     @GetMapping("/products/store/{storeId}")
-    public ResponseEntity<?> getProductsByStoreId(@PathVariable("storeId") Long storeId) {
-        List<ProductResponse> products = productService.getProductsByStoreId(storeId);
-        if (products.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(products);
-        }
+    public ResponseEntity<APIRespone> getProductsByStoreId(@PathVariable("storeId") Long storeId) {
+       return productService.getProductsByStoreId(storeId);
     }
     @GetMapping("/products/category/{categoryId}")
-    public ResponseEntity<?> getProductsByCategoryId(@PathVariable("categoryId") Long categoryId) {
-        List<ProductResponse> products = productService.getProductsByCategoryId(categoryId);
-        if (products.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(products);
-        }
+    public ResponseEntity<APIRespone> getProductsByCategoryId(@PathVariable("categoryId") Long categoryId) {
+       return productService.getProductsByCategoryId(categoryId);
     }
     @GetMapping("/products/search")
-    public ResponseEntity<?> getProductByNames(@RequestParam("name") String productName) {
-        List<ProductResponse> products = productService.getProductByNames(productName);
-        if (products.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(products);
-        }
+    public ResponseEntity<APIRespone> getProductByNames(@RequestParam("name") String productName) {
+     return productService.getProductByNames(productName);
     }
     @GetMapping("/products/best-sale")
-    public ResponseEntity<?> getBestsellingCombos() {
-        List<ProductResponse> products = productService.getBestSaleProduct();
-        if (products.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(products);
-        }
+    public ResponseEntity<APIRespone> getBestSaleProducts() {
+       return productService.getBestSaleProduct();
     }
     @GetMapping("/products/combos")
     public ResponseEntity<?> getCombos() {

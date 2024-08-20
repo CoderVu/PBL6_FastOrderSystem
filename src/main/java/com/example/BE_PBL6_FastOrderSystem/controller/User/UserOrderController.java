@@ -20,10 +20,11 @@ public class UserOrderController {
     @PostMapping("/create")
     public ResponseEntity<OrderResponse> placeOrder(
             @RequestParam String paymentMethod,
-            @RequestParam Long cartId) {
+            @RequestParam Long cartId,
+            @RequestParam String deliveryAddress) {
             Long userId = getCurrentUserId();
         try {
-            OrderResponse orderResponse = orderService.placeOrder(userId, paymentMethod, cartId);
+            OrderResponse orderResponse = orderService.placeOrder(userId, paymentMethod, cartId, deliveryAddress);
             return ResponseEntity.ok(orderResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);

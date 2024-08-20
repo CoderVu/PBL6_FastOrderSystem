@@ -30,44 +30,8 @@ public class UserServiceImpl implements IUserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final FoodUserDetailsService userDetailsService;
-    @Override
-    public User registerUser(User user) {
-        validateUser(user);
-        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
-            throw new AlreadyExistsException(user.getPhoneNumber() + " already exists");
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new AlreadyExistsException(user.getEmail() + " already exists");
-        }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        System.out.println(user.getPassword());
-        Optional<Role> optionalRole = roleRepository.findByName("ROLE_USER");
-        if (optionalRole.isEmpty()) {
-            throw new RuntimeException("ROLE_USER not found");
-        }
-        Role userRole = optionalRole.get();
-        user.setRole(userRole);
-        return userRepository.save(user);
-    }
-    @Override
-    public User registerAdmin(User user) {
-        validateUser(user);
-        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
-            throw new AlreadyExistsException(user.getPhoneNumber() + " already exists");
-        }
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new AlreadyExistsException(user.getEmail() + " already exists");
-        }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        System.out.println(user.getPassword());
-        Optional<Role> optionalRole = roleRepository.findByName("ROLE_ADMIN");
-        if (optionalRole.isEmpty()) {
-            throw new RuntimeException("ROLE_USER not found");
-        }
-        Role userRole = optionalRole.get();
-        user.setRole(userRole);
-        return userRepository.save(user);
-    }
+
+
     @Override
     public List<User> getUsers(String roleName) {
         return userRepository.findAllByRole_Name(roleName);
@@ -118,24 +82,6 @@ public class UserServiceImpl implements IUserService {
         userRepository.save(user);
     }
 
-    private void validateUser(User user) {
-        if (user.getFullName() == null || user.getFullName().isEmpty()) {
-            throw new AlreadyExistsException("Full name is required");
-        }
-        if (user.getPassword() == null || user.getPassword().length() < 8) {
-            throw new AlreadyExistsException("Password must be at least 8 characters long");
-        }
-        if (user.getPhoneNumber() == null || !user.getPhoneNumber().matches("\\d{10}") || user.getPhoneNumber().indexOf("0") != 0)
-        {
-            throw new AlreadyExistsException("Phone number is invalid");
-        }
-        if (user.getEmail() == null || !user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new AlreadyExistsException("Invalid email format");
-        }
-        if (user.getAddress() == null || user.getAddress().isEmpty()) {
-            throw new AlreadyExistsException("Address is required");
-        }
-    }
     private void validateUserRequest(UserRequest userRequest) {
         if (userRequest.getFullName() == null || userRequest.getFullName().isEmpty()) {
             throw new AlreadyExistsException("Full name is required");

@@ -8,13 +8,11 @@ public class CartRequest {
     private int quantity;
     private Long storeId;
     private String status;
-    private String deliveryAddress;
-    public CartRequest(Long productId, int quantity, Long storeId, String status, String deliveryAddress) {
+    public CartRequest(Long productId, int quantity, Long storeId, String status) {
         this.productId = productId;
         this.quantity = quantity;
         this.storeId = storeId;
         this.status = status;
-        this.deliveryAddress = deliveryAddress;
     }
 
     public Long getProductId() {
@@ -49,11 +47,4 @@ public class CartRequest {
         this.status = status;
     }
 
-    public String getDeliveryAddress() {
-        return deliveryAddress;
-    }
-
-    public void setDeliveryAddress(String deliveryAddress) {
-        this.deliveryAddress = deliveryAddress;
-    }
 }

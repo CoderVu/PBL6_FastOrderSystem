@@ -5,7 +5,7 @@ import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import java.util.List;
 
 public interface IOrderService {
-    OrderResponse placeOrder(Long userId, String paymentMethod, Long cartId);
+    OrderResponse placeOrder(Long userId, String paymentMethod, Long cartId, String deliveryAddress);
 
     String updateOrderStatus(Long orderId, Long ownerId, String status);
 

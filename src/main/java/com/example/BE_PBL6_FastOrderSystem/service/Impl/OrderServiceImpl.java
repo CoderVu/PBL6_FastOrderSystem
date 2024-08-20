@@ -33,7 +33,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public OrderResponse placeOrder(Long userId, String paymentMethod, Long cartId) {
+    public OrderResponse placeOrder(Long userId, String paymentMethod, Long cartId, String deliveryAddress) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         List<CartItem> cartItems = cartItemRepository.findByUserIdAndCartId(userId, cartId);
@@ -47,7 +47,9 @@ public class OrderServiceImpl implements IOrderService {
         order.setStatus(cartItems.get(0).getStatus());
         order.setOrderCode(generateUniqueOrderCode());
         order.setCreatedAt(LocalDateTime.now());
+
         order.setUpdatedAt(LocalDateTime.now());
+
         Store store = storeRepository.findById(cartItems.get(0).getStoreId())
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
         order.setStore(store);
@@ -55,8 +57,6 @@ public class OrderServiceImpl implements IOrderService {
         PaymentMethod paymentMethod1 = paymentMethodRepository.findByName(paymentMethod)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment method not found"));
         order.setPaymentMethod(paymentMethod1);
-        order.setDeliveryAddress(cartItems.get(0).getDeliveryAddress());
-
         List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
@@ -67,9 +67,10 @@ public class OrderServiceImpl implements IOrderService {
             return orderDetail;
         }).collect(Collectors.toList());
 
+
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
-
+        order.setDeliveryAddress(deliveryAddress);
         orderRepository.save(order);
         cartItemRepository.deleteAll(cartItems);
 

@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,10 +18,11 @@ import java.util.List;
 @RequestMapping("/api/v1/admin/auth")
 public class AdminAuthController {
     private final IUserService userService;
+    private final IAuthService authService;
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerAdmin(@RequestBody User user) {
         try{
-            userService.registerAdmin(user);
+            authService.registerAdmin(user);
             return ResponseEntity.ok("Registration successful!");
         }catch (AlreadyExistsException e){
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());

@@ -2,11 +2,13 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Public;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.request.LoginRequest;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
+import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,49 +30,17 @@ import java.util.List;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final IUserService userService;
+    private final IAuthService authService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
 
     @PostMapping("/register-user")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
-        try {
-            userService.registerUser(user);
-            return ResponseEntity.ok("Registration successful!");
-        } catch (AlreadyExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
+      return authService.registerUser(user);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest request) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getNumberPhone(), request.getPassword())
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            String jwt = jwtUtils.generateJwtTokenForUser(authentication);
-            FoodUserDetails foodUserDetails = (FoodUserDetails) authentication.getPrincipal();
-            List<String> roles = foodUserDetails.getAuthorities()
-                    .stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .toList(); // Đây là
-            return ResponseEntity.ok(new JwtResponse(
-                    foodUserDetails.getId(),
-                    foodUserDetails.getEmail(),
-                    foodUserDetails.getFullName(),
-                    foodUserDetails.getPhoneNumber(),
-                    foodUserDetails.getAddress(),
-                    foodUserDetails.getCreatedAt(),
-                    foodUserDetails.getUpdatedAt(),
-                    foodUserDetails.isAccountLocked(),
-                    jwt,
-                    roles
-            ));
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid phone number or password");
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+    public ResponseEntity<APIRespone> authenticateUser(@Valid @RequestBody LoginRequest request) {
+        return authService.authenticateUser(request.getNumberPhone(), request.getPassword());
     }
 }

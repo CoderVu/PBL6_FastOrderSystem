@@ -2,6 +2,8 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "cart_items")
 public class CartItem {
@@ -26,7 +28,20 @@ public class CartItem {
     private double totalPrice;
     private Long storeId;
     private String status;
-    private String deliveryAddress;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
     public Long getCartId() {
         return cartId;
     }
@@ -97,14 +112,22 @@ public class CartItem {
     public void setStatus(String status) {
         this.status = status;
     }
-
-
-    public String getDeliveryAddress() {
-        return deliveryAddress;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setDeliveryAddress(String deliveryAddress) {
-        this.deliveryAddress = deliveryAddress;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+
 
 }
