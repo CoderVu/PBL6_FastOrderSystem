@@ -22,12 +22,9 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean accountLocked;
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
-    @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private Collection<Role> roles = new HashSet<>();
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", referencedColumnName = "id")
+    private Role role;
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -109,12 +106,11 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public Collection<Role> getRoles() {
-        return roles;
+  public Role getRole() {
+        return role;
     }
-
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
+    public void setRole(Role role) {
+        this.role = role;
     }
     public boolean isAccountLocked() {
         return accountLocked;

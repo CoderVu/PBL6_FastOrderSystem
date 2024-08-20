@@ -46,7 +46,7 @@ public class UserServiceImpl implements IUserService {
             throw new RuntimeException("ROLE_USER not found");
         }
         Role userRole = optionalRole.get();
-        user.setRoles(Collections.singletonList(userRole));
+        user.setRole(userRole);
         return userRepository.save(user);
     }
     @Override
@@ -65,12 +65,12 @@ public class UserServiceImpl implements IUserService {
             throw new RuntimeException("ROLE_USER not found");
         }
         Role userRole = optionalRole.get();
-        user.setRoles(Collections.singletonList(userRole));
+        user.setRole(userRole);
         return userRepository.save(user);
     }
     @Override
     public List<User> getUsers(String roleName) {
-        return userRepository.findAllByRoles_Name(roleName);
+        return userRepository.findAllByRole_Name(roleName);
     }
     @Override
     public void lockUserAccount(Long userId) throws UserNotFoundException {

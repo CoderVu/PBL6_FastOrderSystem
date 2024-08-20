@@ -1,7 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.User;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.OrderNotFoundException;
-import com.example.BE_PBL6_FastOrderSystem.request.OrderRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
@@ -19,13 +18,14 @@ public class UserOrderController {
     private final IOrderService orderService;
 
     @PostMapping("/create")
-    public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest orderRequest) {
-        try {
+    public ResponseEntity<OrderResponse> placeOrder(
+            @RequestParam String paymentMethod,
+            @RequestParam Long cartId) {
             Long userId = getCurrentUserId();
-            OrderResponse orderResponse = orderService.createOrder(userId,orderRequest);
+        try {
+            OrderResponse orderResponse = orderService.placeOrder(userId, paymentMethod, cartId);
             return ResponseEntity.ok(orderResponse);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);
         }
     }

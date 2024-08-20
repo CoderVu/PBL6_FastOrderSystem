@@ -8,7 +8,6 @@ import java.util.List;
 public class UserResponse {
     private Long id;
     private String phoneNumber;
-    private String password; // Consider excluding sensitive data in response
     private String fullName;
     private String avatar;
     private String email;
@@ -16,13 +15,13 @@ public class UserResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean accountLocked;
-    private List<RoleResponse> roles;
+    private RoleResponse role;  // Change from List<RoleResponse> to a single RoleResponse
     private List<StoreResponse> stores;
     private List<OrderResponse> orders;
-    public UserResponse(Long id, String phoneNumber, String password, String fullName, String avatar, String email, String address, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean accountLocked,List<RoleResponse> roles, List<StoreResponse> stores, List<OrderResponse> orders) {
+
+    public UserResponse(Long id, String phoneNumber, String fullName, String avatar, String email, String address, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean accountLocked, RoleResponse role, List<StoreResponse> stores, List<OrderResponse> orders) {
         this.id = id;
         this.phoneNumber = phoneNumber;
-        this.password = password;
         this.fullName = fullName;
         this.avatar = avatar;
         this.email = email;
@@ -30,7 +29,7 @@ public class UserResponse {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.accountLocked = accountLocked;
-        this.roles = roles;
+        this.role = role;
         this.stores = stores;
         this.orders = orders;
     }
@@ -45,10 +44,9 @@ public class UserResponse {
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
         this.accountLocked = user.isAccountLocked();
-        this.roles = user.getRoles().stream()
-                .map(role -> new RoleResponse(role.getId(), role.getName()))
-                .toList();
+        this.role = new RoleResponse(user.getRole().getId(), user.getRole().getName());  // Use the single role
     }
+
     public Long getId() {
         return id;
     }
@@ -63,14 +61,6 @@ public class UserResponse {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getFullName() {
@@ -121,12 +111,20 @@ public class UserResponse {
         this.updatedAt = updatedAt;
     }
 
-    public List<RoleResponse> getRoles() {
-        return roles;
+    public Boolean getAccountLocked() {
+        return accountLocked;
     }
 
-    public void setRoles(List<RoleResponse> roles) {
-        this.roles = roles;
+    public void setAccountLocked(Boolean accountLocked) {
+        this.accountLocked = accountLocked;
+    }
+
+    public RoleResponse getRole() {  // Change from getRoles() to getRole()
+        return role;
+    }
+
+    public void setRole(RoleResponse role) {  // Change from setRoles() to setRole()
+        this.role = role;
     }
 
     public List<StoreResponse> getStores() {

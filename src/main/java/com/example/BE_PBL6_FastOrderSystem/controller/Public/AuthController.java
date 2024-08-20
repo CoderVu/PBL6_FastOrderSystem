@@ -54,7 +54,7 @@ public class AuthController {
             List<String> roles = foodUserDetails.getAuthorities()
                     .stream()
                     .map(GrantedAuthority::getAuthority)
-                    .toList();
+                    .toList(); // Đây là
             return ResponseEntity.ok(new JwtResponse(
                     foodUserDetails.getId(),
                     foodUserDetails.getEmail(),

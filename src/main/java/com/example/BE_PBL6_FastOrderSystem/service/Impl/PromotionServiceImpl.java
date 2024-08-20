@@ -99,11 +99,9 @@ public class PromotionServiceImpl implements IPromotionService {
     public PromotionResponse applyPromotionToAllStores(Long promotionId) {
         Promotion promotion = promotionRepository.findById(promotionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Promotion not found"));
-        // lấy ra tất cả id của các store
         List<Long> storeIds = storeRepository.findAll().stream()
                 .map(Store::getStoreId)
                 .collect(Collectors.toList());
-        // lưu promotion vào tất cả các store bằng storeId
         storeIds.forEach(id -> applyPromotionToStore(promotionId, id));
         promotionRepository.save(promotion);
         return new PromotionResponse(
@@ -126,13 +124,8 @@ public class PromotionServiceImpl implements IPromotionService {
                 .anyMatch(store -> promotion.getStores().contains(store));
 
         if (isPromotionInProductStores) {
-            // Thêm khuyến mãi vào sản phẩm
             product.getPromotions().add(promotion);
-
-            // Thêm sản phẩm vào khuyến mãi
             promotion.getProducts().add(product);
-
-            // Lưu sản phẩm và khuyến mãi
             productRepository.save(product);
             promotionRepository.save(promotion);
         } else {

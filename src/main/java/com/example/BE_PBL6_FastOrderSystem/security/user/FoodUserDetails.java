@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -33,9 +32,7 @@ public class FoodUserDetails implements UserDetails {
     private Collection<GrantedAuthority> authorities;
 
     public static FoodUserDetails buildUserDetails(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
+        GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().getName());
         return new FoodUserDetails(
                 user.getId(),
                 user.getPhoneNumber(),
@@ -46,7 +43,7 @@ public class FoodUserDetails implements UserDetails {
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.isAccountLocked(),
-                authorities);
+                List.of(authority));
     }
 
     public static String getCurrentUserPhoneNumber() {
@@ -57,12 +54,6 @@ public class FoodUserDetails implements UserDetails {
     public static Long getCurrentUserId() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return ((FoodUserDetails) userDetails).getId();
-    }
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 @Data
 public class OrderResponse {
     private Long orderId;
+    private String orderCode;
     private Long userId;
     private Long storeId;
     private LocalDateTime orderDate;
@@ -23,6 +24,7 @@ public class OrderResponse {
 
     public OrderResponse(Order order) {
         this.orderId = order.getOrderId();
+        this.orderCode = order.getOrderCode();
         this.userId = order.getUser().getId();
         this.storeId = order.getStore().getStoreId();
         this.orderDate = order.getOrderDate();

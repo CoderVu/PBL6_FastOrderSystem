@@ -20,7 +20,7 @@ public class Role {
     private String name;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "roles")
+    @OneToMany(mappedBy = "role")
     private Collection<User> users = new HashSet<>();
 
     public Role(String name) {

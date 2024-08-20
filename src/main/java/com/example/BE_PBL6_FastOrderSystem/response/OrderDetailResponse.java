@@ -7,6 +7,11 @@ import lombok.Data;
 public class OrderDetailResponse {
     private Long orderDetailId;
     private Long productId;
+    private String productName;
+    private String description;
+    private String productImage;
+    private String category;
+    private boolean isBestSeller;
     private Integer quantity;
     private Double unitPrice;
     private Double totalPrice;
@@ -14,6 +19,11 @@ public class OrderDetailResponse {
     public OrderDetailResponse(OrderDetail orderDetail) {
         this.orderDetailId = orderDetail.getOrderDetailId();
         this.productId = orderDetail.getProduct().getProductId();
+        this.productName = orderDetail.getProduct().getProductName();
+        this.description = orderDetail.getProduct().getDescription();
+        this.productImage = orderDetail.getProduct().getImage();
+        this.category = orderDetail.getProduct().getCategory().getCategoryName();
+        this.isBestSeller = orderDetail.getProduct().getBestSale();
         this.quantity = orderDetail.getQuantity();
         this.unitPrice = orderDetail.getUnitPrice();
         this.totalPrice = orderDetail.getTotalPrice();

@@ -11,6 +11,9 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
+    // Mã đơn hàng gồm 6 số random nhưng không trùng với mã đơn hàng khác
+    // Mã đơn hàng được tạo ngẫu nhiên khi khách hàng đặt hàng
+    private String orderCode;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -27,9 +30,21 @@ public class Order {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<CartItem> cartItems;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
+
     public Long getOrderId() {
         return orderId;
+    }
+
+    public String getOrderCode() {
+        return orderCode;
+    }
+
+    public void setOrderCode(String orderCode) {
+        this.orderCode = orderCode;
     }
 
     public void setOrderDetails(List<OrderDetail> orderDetails) {
@@ -40,6 +55,13 @@ public class Order {
     }
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
+    }
+    public List<CartItem> getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(List<CartItem> cartItems) {
+        this.cartItems = cartItems;
     }
 
     public User getUser() {

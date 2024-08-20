@@ -3,7 +3,6 @@ package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
-import com.example.BE_PBL6_FastOrderSystem.request.OrderRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import lombok.RequiredArgsConstructor;
@@ -11,48 +10,69 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements IOrderService {
     private final OrderRepository orderRepository;
+    private final CartItemRepository cartItemRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
     private final PaymentMethodRepository paymentMethodRepository;
 
+    private String generateUniqueOrderCode() {
+        Random random = new Random();
+        String orderCode;
+        do {
+            orderCode = String.format("%06d", random.nextInt(900000) + 100000); // Generate a random 6-digit number
+        } while (orderRepository.existsByOrderCode(orderCode)); // Check if the order code already exists
+        return orderCode;
+    }
+
     @Override
-    public OrderResponse createOrder(Long userId ,OrderRequest orderRequest) {
+    public OrderResponse placeOrder(Long userId, String paymentMethod, Long cartId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        List<CartItem> cartItems = cartItemRepository.findByUserIdAndCartId(userId, cartId);
+        if (cartItems.isEmpty()) {
+            throw new IllegalStateException("Cart is empty");
+        }
+
         Order order = new Order();
         order.setUser(user);
-        order.setStore(storeRepository.findById(orderRequest.getStoreId())
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found")));
         order.setOrderDate(LocalDateTime.now());
-        order.setTotalAmount(orderRequest.getTotalAmount());
-        order.setStatus(orderRequest.getStatus());
-        PaymentMethod paymentMethod = paymentMethodRepository.findByName(orderRequest.getPaymentMethod())
-                .orElseThrow(() -> new ResourceNotFoundException("Payment method not found"));
-        order.setPaymentMethod(paymentMethod);
-        order.setDeliveryAddress(orderRequest.getDeliveryAddress());
+        order.setStatus(cartItems.get(0).getStatus());
+        order.setOrderCode(generateUniqueOrderCode());
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
+        Store store = storeRepository.findById(cartItems.get(0).getStoreId())
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
+        order.setStore(store);
 
-        List<OrderDetail> orderDetails = orderRequest.getOrderDetails().stream().map(detailRequest -> {
-            Product product = productRepository.findById(detailRequest.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        PaymentMethod paymentMethod1 = paymentMethodRepository.findByName(paymentMethod)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment method not found"));
+        order.setPaymentMethod(paymentMethod1);
+        order.setDeliveryAddress(cartItems.get(0).getDeliveryAddress());
+
+        List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
-            orderDetail.setProduct(product);
-            orderDetail.setQuantity(detailRequest.getQuantity());
-            orderDetail.setUnitPrice(detailRequest.getUnitPrice());
-            orderDetail.setTotalPrice(detailRequest.getTotalPrice());
+            orderDetail.setProduct(cartItem.getProduct());
+            orderDetail.setQuantity(cartItem.getQuantity());
+            orderDetail.setUnitPrice(cartItem.getUnitPrice());
+            orderDetail.setTotalPrice(cartItem.getTotalPrice());
             return orderDetail;
         }).collect(Collectors.toList());
+
         order.setOrderDetails(orderDetails);
+        order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
+
         orderRepository.save(order);
+        cartItemRepository.deleteAll(cartItems);
+
         return new OrderResponse(order);
     }
     @Override
