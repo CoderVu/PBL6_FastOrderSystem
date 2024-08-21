@@ -31,7 +31,7 @@ public class CreateOrderPaymentService {
         json.put("requestId", String.valueOf(System.currentTimeMillis()));
         json.put("amount", orderRequest.getAmount().toString());
         json.put("orderId", orderRequest.getOrderId());
-        json.put("cartId", orderRequest.getCartId()); // Ensure the key is "cartId"
+        json.put("cartId", orderRequest.getCartIds());
         json.put("orderInfo", "Thanh toan don hang " + orderRequest.getOrderId());
         json.put("returnUrl", MoMoConstant.REDIRECT_URL);
         json.put("notifyUrl", MoMoConstant.NOTIFY_URL);

@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
+import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
@@ -24,21 +25,23 @@ public class OrderServiceImpl implements IOrderService {
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
     private final PaymentMethodRepository paymentMethodRepository;
- @Override
- public String generateUniqueOrderCode() {
+
+    public String generateUniqueOrderCode() {
         Random random = new Random();
-        String orderId;
+        String orderCode;
         do {
-            orderId = String.format("%06d", random.nextInt(900000) + 100000);
-        } while (orderRepository.existsByOrderCode(orderId));
-        return orderId;
+            orderCode = String.format("%06d", random.nextInt(900000) + 100000);
+        } while (orderRepository.existsByOrderCode(orderCode));
+        return orderCode;
     }
 
     @Override
-    public ResponseEntity<APIRespone> placeOrder(Long UserId, String paymentMethod, Long cartId, String deliveryAddress) {
-        List<CartItem> cartItems = cartItemRepository.findByCartId(cartId);
+    public ResponseEntity<APIRespone> placeOrder(Long UserId, String paymentMethod, List<Long> cartIds, String deliveryAddress) {
+        List<CartItem> cartItems = cartIds.stream()
+                .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
+                .collect(Collectors.toList());
         if (cartItems.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Cart is empty", ""));
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
         }
         Long storeId = cartItems.get(0).getStoreId();
         Optional<Store> storeOptional = storeRepository.findById(storeId);
@@ -82,10 +85,9 @@ public class OrderServiceImpl implements IOrderService {
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", new OrderResponse(order)));
     }
 
-
     @Override
     public ResponseEntity<APIRespone> updateOrderStatus(Long orderId, Long ownerId, String status) {
-       if (orderRepository.findById(orderId).isEmpty()) {
+        if (orderRepository.findById(orderId).isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
         }
         Order order = orderRepository.findById(orderId).get();
@@ -109,7 +111,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ResponseEntity<APIRespone>  getAllOrdersByUser(Long userId) {
+    public ResponseEntity<APIRespone> getAllOrdersByUser(Long userId) {
         List<Order> orders = orderRepository.findAllByUserId(userId);
         if (orders.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
@@ -122,5 +124,4 @@ public class OrderServiceImpl implements IOrderService {
     public List<CartItem> getCartItemsByCartId(Long cartId) {
         return cartItemRepository.findByCartId(cartId);
     }
-
 }

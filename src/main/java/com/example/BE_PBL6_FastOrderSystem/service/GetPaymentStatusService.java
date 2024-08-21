@@ -28,7 +28,7 @@ public class GetPaymentStatusService {
         json.put("accessKey", MoMoConstant.ACCESS_KEY);
         json.put("requestId", String.valueOf(System.currentTimeMillis()));
         json.put("orderId", requestDTO.getOrderId());
-        json.put("cardId", requestDTO.getCartId());
+        json.put("cardId", requestDTO.getCartIds());
         json.put("requestType", MoMoConstant.CHECK_STATUS_TYPE);
 
         String data = "partnerCode=" + MoMoConstant.PARTNER_CODE

@@ -35,7 +35,7 @@ public class MomoCallbackController {
             OrderRequestDTO orderRequest = orderRequestCache.get(orderId);
             if (orderRequest != null) {
                 // Place the order
-                return orderService.placeOrder(orderRequest.getUserId(), "MOMO", orderRequest.getCartId(), orderRequest.getDeliveryAddress());
+                return orderService.placeOrder(orderRequest.getUserId(), "MOMO", orderRequest.getCartIds(), orderRequest.getDeliveryAddress());
             } else {
                 // Order information not found
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -48,9 +48,8 @@ public class MomoCallbackController {
         }
     }
 
-    // Thêm phương thức để lưu thông tin đơn hàng vào cache
+    // Method to cache order request
     public void cacheOrderRequest(OrderRequestDTO orderRequest) {
         orderRequestCache.put(orderRequest.getOrderId(), orderRequest);
-
     }
 }
