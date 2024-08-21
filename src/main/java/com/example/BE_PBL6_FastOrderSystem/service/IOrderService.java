@@ -10,7 +10,7 @@ import java.util.List;
 public interface IOrderService {
     String generateUniqueOrderCode();
 
-    ResponseEntity<APIRespone> placeOrder(String paymentMethod, Long cartId, String deliveryAddress);
+    ResponseEntity<APIRespone> placeOrder(Long UserId ,String paymentMethod, Long cartId, String deliveryAddress);
 
     ResponseEntity<APIRespone> updateOrderStatus(Long orderId, Long ownerId, String status);
 

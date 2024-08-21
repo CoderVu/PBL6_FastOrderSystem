@@ -25,6 +25,7 @@ public class OrderResponse {
     public OrderResponse(Order order) {
         this.orderId = order.getOrderId();
         this.orderCode = order.getOrderCode();
+        this.userId = order.getUser().getId();
         this.storeId = order.getStore().getStoreId();
         this.orderDate = order.getOrderDate();
         this.totalAmount = order.getTotalAmount();

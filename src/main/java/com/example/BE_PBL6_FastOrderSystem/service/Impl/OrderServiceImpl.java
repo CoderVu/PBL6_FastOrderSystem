@@ -35,7 +35,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ResponseEntity<APIRespone> placeOrder( String paymentMethod, Long cartId, String deliveryAddress) {
+    public ResponseEntity<APIRespone> placeOrder(Long UserId, String paymentMethod, Long cartId, String deliveryAddress) {
         List<CartItem> cartItems = cartItemRepository.findByCartId(cartId);
         if (cartItems.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Cart is empty", ""));
@@ -58,6 +58,12 @@ public class OrderServiceImpl implements IOrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
         order.setStore(store);
+        Optional<User> userOptional = userRepository.findById(UserId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+        }
+        User user = userOptional.get();
+        order.setUser(user);
         order.setPaymentMethod(paymentMethodEntity);
         List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
             OrderDetail orderDetail = new OrderDetail();

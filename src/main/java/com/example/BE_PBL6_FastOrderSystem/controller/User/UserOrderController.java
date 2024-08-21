@@ -4,10 +4,12 @@ import com.example.BE_PBL6_FastOrderSystem.controller.MomoController.MomoCallbac
 import com.example.BE_PBL6_FastOrderSystem.model.CartItem;
 import com.example.BE_PBL6_FastOrderSystem.request.OrderRequestDTO;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
+import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.CreateOrderPaymentService;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -37,32 +39,38 @@ public class UserOrderController {
         if (cartItems.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Cart is empty", ""));
         }
+        Long userId = FoodUserDetails.getCurrentUserId();
 
         if ("MOMO".equalsIgnoreCase(paymentMethod)) {
-            // Tạo ID đơn hàng ngẫu nhiên 6 chữ số
+            // Generate random 6-digit order ID
             String orderId = orderService.generateUniqueOrderCode();
             System.out.println("Order ID: " + orderId);
-
-            // Khởi tạo thanh toán MoMo
+            // Create order request from user input
             OrderRequestDTO orderRequest = new OrderRequestDTO();
             orderRequest.setAmount(calculateOrderAmount(cartId));
             System.out.println("Amount: " + orderRequest.getAmount());
             orderRequest.setOrderId(orderId);
             orderRequest.setCartId(cartId);
+            orderRequest.setUserId(userId);
+            orderRequest.setDeliveryAddress(deliveryAddress);
+            // Check if cartId belongs to the current user
+            if (!orderService.getCartItemsByCartId(cartId).get(0).getUser().getId().equals(userId)) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Cart does not belong to current user", ""));
+            }
+
             System.out.println("Cart ID: " + orderRequest.getCartId());
+            System.out.println("User ID: " + orderRequest.getUserId());
             orderRequest.setOrderInfo("Payment for order " + orderId);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-
-            // Lưu trữ thông tin đơn hàng vào cache của MoMo callback controller
+            // Store order information in MoMo callback controller cache
             momoCallbackController.cacheOrderRequest(orderRequest);
-
             Map<String, Object> momoResponse = paymentService.createOrder(orderRequest);
             APIRespone apiResponse = new APIRespone(true, "MoMo payment initiated", momoResponse);
             return ResponseEntity.ok(apiResponse);
         } else {
-            // Tiến hành đặt hàng bình thường
-            return orderService.placeOrder(paymentMethod, cartId, deliveryAddress);
+            // Proceed with normal order placement
+            return orderService.placeOrder(userId, paymentMethod, cartId, deliveryAddress);
         }
     }
 
@@ -73,5 +81,10 @@ public class UserOrderController {
             totalAmount += item.getTotalPrice();
         }
         return totalAmount;
+    }
+    @GetMapping("/history/all")
+    public ResponseEntity<APIRespone> getAllOrdersByUser() {
+        Long userId = FoodUserDetails.getCurrentUserId();
+        return orderService.getAllOrdersByUser(userId);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.MomoController;
 
+import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.CreateOrderPaymentService;
@@ -30,18 +31,18 @@ public class MomoCallbackController {
         String message = callbackRequestDTO.get("message");
 
         if ("Success".equalsIgnoreCase(message)) {
-            // Lấy thông tin đơn hàng từ cache
+            // Retrieve order information from cache
             OrderRequestDTO orderRequest = orderRequestCache.get(orderId);
             if (orderRequest != null) {
-                // Thực hiện đặt hàng
-                return orderService.placeOrder("MOMO", orderRequest.getCartId(), orderRequest.getOrderInfo());
+                // Place the order
+                return orderService.placeOrder(orderRequest.getUserId(), "MOMO", orderRequest.getCartId(), orderRequest.getDeliveryAddress());
             } else {
-                // Thông tin đơn hàng không tồn tại
+                // Order information not found
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new APIRespone(false, "Order information not found", null));
             }
         } else {
-            // Thanh toán thất bại
+            // Payment failed
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new APIRespone(false, "Payment failed: " + message, null));
         }
@@ -50,5 +51,6 @@ public class MomoCallbackController {
     // Thêm phương thức để lưu thông tin đơn hàng vào cache
     public void cacheOrderRequest(OrderRequestDTO orderRequest) {
         orderRequestCache.put(orderRequest.getOrderId(), orderRequest);
+
     }
 }

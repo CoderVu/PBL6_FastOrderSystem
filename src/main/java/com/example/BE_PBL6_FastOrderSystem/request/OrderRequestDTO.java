@@ -11,6 +11,8 @@ public class OrderRequestDTO {
     private Long amount;
     private String orderId;
     private Long cartId;
+    private Long userId;
+    private String deliveryAddress;
     private String orderInfo;
     private String lang;
     private String extraData;
