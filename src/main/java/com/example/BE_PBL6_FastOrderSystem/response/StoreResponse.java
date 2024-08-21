@@ -17,10 +17,11 @@ public class StoreResponse {
     private  Date closingTime;
     @JsonIgnore
     private UserResponse user;
+    private String managerName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     // Constructor cũ
-    public StoreResponse(Long storeId, String storeName, String location, Double longitude, Double latitude, String numberPhone, Date openingTime, Date closingTime, UserResponse user, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public StoreResponse(Long storeId, String storeName, String location, Double longitude, Double latitude, String numberPhone, Date openingTime, Date closingTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.storeId = storeId;
         this.storeName = storeName;
         this.location = location;
@@ -29,12 +30,11 @@ public class StoreResponse {
         this.numberPhone = numberPhone;
         this.openingTime = openingTime;
         this.closingTime = closingTime;
-        this.user = user;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
     // Constructor mới
-    public StoreResponse(Long storeId, String storeName, String location, Double longitude, Double latitude,String numberPhone, Date openingTime, Date closingTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public StoreResponse(Long storeId, String storeName, String location, Double longitude, Double latitude,String numberPhone, Date openingTime, Date closingTime, String managerName, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.storeId = storeId;
         this.storeName = storeName;
         this.location = location;
@@ -43,6 +43,7 @@ public class StoreResponse {
         this.numberPhone = numberPhone;
         this.openingTime = openingTime;
         this.closingTime = closingTime;
+        this.managerName = managerName;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -92,6 +93,12 @@ public class StoreResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    public String getManagerName() {
+        return managerName;
+    }
+    public void setManagerName(String managerName) {
+        this.managerName = managerName;
     }
 
     public double getLongitude() {

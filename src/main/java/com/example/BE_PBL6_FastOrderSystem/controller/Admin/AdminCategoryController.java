@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.request.CategoryRequest;
 import com.example.BE_PBL6_FastOrderSystem.service.ICategoryService;
@@ -15,32 +16,17 @@ import org.springframework.web.bind.annotation.*;
 public class AdminCategoryController {
     private final ICategoryService categoryService;
     @PostMapping("/add")
-    public ResponseEntity<?> addCategory(@RequestBody CategoryRequest categoryRequest) {
-        try {
-            CategoryResponse categoryResponse = categoryService.addCategory(categoryRequest);
-            return ResponseEntity.ok(categoryResponse);
-        } catch (AlreadyExistsException e){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
+    public ResponseEntity<APIRespone> addCategory(@RequestBody CategoryRequest categoryRequest) {
+       return categoryService.addCategory(categoryRequest);
     }
 
     @PutMapping("update/{id}")
-    public ResponseEntity<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest categoryRequest) {
-       try {
-           CategoryResponse categoryResponse = categoryService.updateCategory(id, categoryRequest);
-           return ResponseEntity.ok(categoryResponse);
-       } catch (Exception e) {
-           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-       }
+    public ResponseEntity<APIRespone> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest categoryRequest) {
+      return categoryService.updateCategory(id, categoryRequest);
     }
 
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
-        try {
-            categoryService.deleteCategory(id);
-            return ResponseEntity.ok().body("Category deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category not found");
-        }
+    public ResponseEntity<APIRespone>  deleteCategory(@PathVariable Long id) {
+        return categoryService.deleteCategory(id);
     }
 }

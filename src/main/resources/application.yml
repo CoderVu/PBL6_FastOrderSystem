@@ -14,7 +14,9 @@ spring:
       jwt:
         secret-key: xTKk7Ald/su3sDOWzUozdd8E/7X5q6HYKUKZfl+4qrQ=
         expire-length: 3600000
-
+  jackson:
+    serialization:
+     fail-on-empty-beans: false
   jpa:
     show-sql: true
     hibernate:

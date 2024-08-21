@@ -1,15 +1,17 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -22,41 +24,41 @@ public class OrderServiceImpl implements IOrderService {
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
     private final PaymentMethodRepository paymentMethodRepository;
-
-    private String generateUniqueOrderCode() {
+ @Override
+ public String generateUniqueOrderCode() {
         Random random = new Random();
-        String orderCode;
+        String orderId;
         do {
-            orderCode = String.format("%06d", random.nextInt(900000) + 100000); // Generate a random 6-digit number
-        } while (orderRepository.existsByOrderCode(orderCode)); // Check if the order code already exists
-        return orderCode;
+            orderId = String.format("%06d", random.nextInt(900000) + 100000);
+        } while (orderRepository.existsByOrderCode(orderId));
+        return orderId;
     }
 
     @Override
-    public OrderResponse placeOrder(Long userId, String paymentMethod, Long cartId, String deliveryAddress) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        List<CartItem> cartItems = cartItemRepository.findByUserIdAndCartId(userId, cartId);
+    public ResponseEntity<APIRespone> placeOrder( String paymentMethod, Long cartId, String deliveryAddress) {
+        List<CartItem> cartItems = cartItemRepository.findByCartId(cartId);
         if (cartItems.isEmpty()) {
-            throw new IllegalStateException("Cart is empty");
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Cart is empty", ""));
         }
-
+        Long storeId = cartItems.get(0).getStoreId();
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        Store store = storeOptional.get();
+        Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
+        if (paymentMethodOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
+        }
+        PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
         Order order = new Order();
-        order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(cartItems.get(0).getStatus());
         order.setOrderCode(generateUniqueOrderCode());
         order.setCreatedAt(LocalDateTime.now());
-
         order.setUpdatedAt(LocalDateTime.now());
-
-        Store store = storeRepository.findById(cartItems.get(0).getStoreId())
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
         order.setStore(store);
-
-        PaymentMethod paymentMethod1 = paymentMethodRepository.findByName(paymentMethod)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment method not found"));
-        order.setPaymentMethod(paymentMethod1);
+        order.setPaymentMethod(paymentMethodEntity);
         List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
@@ -66,46 +68,53 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setTotalPrice(cartItem.getTotalPrice());
             return orderDetail;
         }).collect(Collectors.toList());
-
-
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
         order.setDeliveryAddress(deliveryAddress);
         orderRepository.save(order);
         cartItemRepository.deleteAll(cartItems);
-
-        return new OrderResponse(order);
+        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", new OrderResponse(order)));
     }
+
+
     @Override
-    public String updateOrderStatus(Long orderId, Long ownerId, String status) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+    public ResponseEntity<APIRespone> updateOrderStatus(Long orderId, Long ownerId, String status) {
+       if (orderRepository.findById(orderId).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
+        }
+        Order order = orderRepository.findById(orderId).get();
         Store store = order.getStore();
         if (!store.getManager().getId().equals(ownerId)) {
-            throw new IllegalStateException("You can only update the status of orders from your own store");
+            return ResponseEntity.badRequest().body(new APIRespone(false, "You are not authorized to update this order", ""));
         }
         order.setStatus(status);
-        order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
-        return "Đã thanh toán";
+        return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully", new OrderResponse(order)));
     }
 
     @Override
-    public OrderResponse getOrderByIdAndUserId(Long orderId, Long userId) {
-        Order order = orderRepository.findByOrderIdAndUserId(orderId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-        return new OrderResponse(order);
+    public ResponseEntity<APIRespone> getOrderByIdAndUserId(Long orderId, Long userId) {
+        Optional<Order> orderOptional = orderRepository.findByOrderIdAndUserId(orderId, userId);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
+        }
+        Order order = orderOptional.get();
+        return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
     }
 
     @Override
-    public List<OrderResponse> getAllOrdersByUser(Long userId) {
+    public ResponseEntity<APIRespone>  getAllOrdersByUser(Long userId) {
         List<Order> orders = orderRepository.findAllByUserId(userId);
         if (orders.isEmpty()) {
-            throw new ResourceNotFoundException("No orders found for the user");
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
         }
-        return orders.stream()
-                .map(OrderResponse::new)
-                .collect(Collectors.toList());
+        List<OrderResponse> orderResponses = orders.stream().map(OrderResponse::new).collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
+    }
+
+    @Override
+    public List<CartItem> getCartItemsByCartId(Long cartId) {
+        return cartItemRepository.findByCartId(cartId);
     }
 
 }

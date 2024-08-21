@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -29,38 +30,16 @@ public class AdminAuthController {
         }
     }
     @GetMapping("/all_roles")
-    public ResponseEntity<List<User>> getUsers(@RequestParam String role) {
-        try {
-            List<User> users = userService.getUsers(role);
-            if (users.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-            return new ResponseEntity<>(users, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public ResponseEntity<APIRespone> getUsers(@RequestParam String role) {
+        return userService.getUsers(role);
     }
     @PostMapping("/lock-account/{userId}")
-    public ResponseEntity<?> lockUserAccount(@PathVariable Long userId) {
-        try {
-            userService.lockUserAccount(userId);
-            return ResponseEntity.ok("User account locked successfully!");
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public ResponseEntity<APIRespone> lockUserAccount(@PathVariable Long userId) {
+      return userService.lockUserAccount(userId);
     }
     @PostMapping("/unlock-account/{userId}")
-    public ResponseEntity<?> unlockUserAccount(@PathVariable Long userId) {
-        try {
-            userService.unlockUserAccount(userId);
-            return ResponseEntity.ok("User account unlocked successfully!");
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+    public ResponseEntity<APIRespone> unlockUserAccount(@PathVariable Long userId) {
+        return userService.unlockUserAccount(userId);
     }
 
 }

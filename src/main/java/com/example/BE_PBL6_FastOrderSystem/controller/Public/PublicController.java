@@ -21,14 +21,12 @@ public class PublicController {
     private final IPromotionService promotionService;
     private final IStoreService storeService;
     @GetMapping("/categories/all")
-    public ResponseEntity<List<CategoryResponse>> getAllCategories() {
-        List<CategoryResponse> categoryResponses = categoryService.getAllCategories();
-        return ResponseEntity.ok(categoryResponses);
+    public  ResponseEntity<APIRespone> getAllCategories() {
+     return categoryService.getAllCategories();
     }
     @GetMapping("/categories/{id}")
-    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
-        CategoryResponse categoryResponse = categoryService.getCategoryById(id);
-        return ResponseEntity.ok(categoryResponse);
+    public ResponseEntity<APIRespone>  getCategoryById(@PathVariable Long id) {
+        return categoryService.getCategoryById(id);
     }
     @GetMapping("/products/all")
     public ResponseEntity<APIRespone> getAllProducts() throws SQLException {
@@ -57,42 +55,28 @@ public class PublicController {
     }
     @GetMapping("/products/combos")
     public ResponseEntity<?> getCombos() {
-        List<ComboResponse> products = comboService.getAllCombos();
-        if (products.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(products);
-        }
+       return comboService.getAllCombos();
     }
     @GetMapping("/products/combos/{id}")
     public ResponseEntity<?> getProductsByComboId(@PathVariable("id") Long comboId) {
-        List<ProductResponse> products = comboService.getProductsByComboId(comboId);
-        if (products.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(products);
-        }
+       return comboService.getProductsByComboId(comboId);
     }
     @GetMapping("/stores/all")
-    public ResponseEntity<List<StoreResponse>> getStores() {
-        List<StoreResponse> storeResponses = storeService.getAllStores();
-        return ResponseEntity.ok(storeResponses);
+    public ResponseEntity<APIRespone> getStores() {
+         return storeService.getAllStores();
     }
-
+    @GetMapping("/stores/{id}")
+    public ResponseEntity<APIRespone> getStoreById(@PathVariable("id") Long storeId) {
+        return storeService.getStoreById(storeId);
+    }
     @GetMapping("/promotions/all")
-    public ResponseEntity <List<PromotionResponse>> getPromotions() {
-        List<PromotionResponse> promotionResponses = promotionService.getAllPromotion();
-        return ResponseEntity.ok(promotionResponses);
+    public ResponseEntity<APIRespone> getPromotions() {
+       return promotionService.getAllPromotion();
 
     }
     @GetMapping("/promotions/{id}")
     public ResponseEntity<?> getPromotionById(@PathVariable("id") Long promotionId) {
-        Optional<PromotionResponse> promotionResponse = promotionService.getPromotionById(promotionId);
-        if (promotionResponse.isPresent()) {
-            return ResponseEntity.ok(promotionResponse.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+         return promotionService.getPromotionById(promotionId);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.example.BE_PBL6_FastOrderSystem.util;
+package com.example.BE_PBL6_FastOrderSystem.utils;
 
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.model.Promotion;

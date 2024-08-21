@@ -1,15 +1,18 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.model.Category;
 import com.example.BE_PBL6_FastOrderSystem.repository.CategoryRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.CategoryRequest;
 import com.example.BE_PBL6_FastOrderSystem.service.ICategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,43 +21,60 @@ public class CategoryServiceImpl  implements ICategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public List<CategoryResponse> getAllCategories() {
-        return categoryRepository.findAll().stream()
+    public ResponseEntity<APIRespone> getAllCategories() {
+      if (categoryRepository.findAll().isEmpty()) {
+          return ResponseEntity.badRequest().body(new APIRespone(false, "No categories found", ""));
+      }
+        List<CategoryResponse> categories = categoryRepository.findAll().stream()
                 .map(category -> new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription()))
                 .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", categories));
     }
 
     @Override
-    public CategoryResponse getCategoryById(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found"));
-        return new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription());
-    }
-
-
-    @Override
-    public CategoryResponse addCategory(CategoryRequest categoryRequest) {
-        Category category = new Category();
-        if (categoryRepository.existsByCategoryName(categoryRequest.getCategoryName())) {
-            throw new AlreadyExistsException("Category already exists");
+    public  ResponseEntity<APIRespone> getCategoryById(Long categoryId) {
+        if (categoryRepository.findById(categoryId).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Category not found", ""));
         }
+        Category category = categoryRepository.findById(categoryId).get();
+        return ResponseEntity.ok(new APIRespone(true, "Success", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription())));
+    }
+
+
+    @Override
+    public ResponseEntity<APIRespone>  addCategory(CategoryRequest categoryRequest) {
+         if (categoryRepository.existsByCategoryName(categoryRequest.getCategoryName())) {
+             return ResponseEntity.badRequest().body(new APIRespone(false, "Category already exists", ""));
+         }
+        Category category = new Category();
         category.setCategoryName(categoryRequest.getCategoryName());
         category.setDescription(categoryRequest.getDescription());
         category = categoryRepository.save(category);
-        return new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription());
+        return ResponseEntity.ok(new APIRespone(true, "Add category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription())));
     }
 
     @Override
-    public CategoryResponse updateCategory(Long id, CategoryRequest categoryRequest) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
+    public ResponseEntity<APIRespone> updateCategory(Long id, CategoryRequest categoryRequest) {
+         if (categoryRepository.findById(id).isEmpty()) {
+             return ResponseEntity.badRequest().body(new APIRespone(false, "Category not found", ""));
+         }
+         if (categoryRepository.existsByCategoryName(categoryRequest.getCategoryName())) {
+             return ResponseEntity.badRequest().body(new APIRespone(false, "Category already exists", ""));
+         }
+        Category category = categoryRepository.findById(id).get();
         category.setCategoryName(categoryRequest.getCategoryName());
         category.setDescription(categoryRequest.getDescription());
         category = categoryRepository.save(category);
-        return new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription());
+        return ResponseEntity.ok(new APIRespone(true, "Update category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription())));
     }
 
     @Override
-    public void deleteCategory(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found"));
-        categoryRepository.delete(category);
+    public ResponseEntity<APIRespone>  deleteCategory(Long id) {
+        Optional<Category> category = categoryRepository.findById(id);
+        if (category.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Category not found", ""));
+        }
+        categoryRepository.deleteById(id);
+        return ResponseEntity.ok(new APIRespone(true, "Delete category successfully", ""));
     }
 }

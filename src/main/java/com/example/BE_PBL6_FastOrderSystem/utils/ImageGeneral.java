@@ -1,4 +1,4 @@
-package com.example.BE_PBL6_FastOrderSystem.util;
+package com.example.BE_PBL6_FastOrderSystem.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

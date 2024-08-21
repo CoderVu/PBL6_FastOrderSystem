@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.controller.User;
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -19,16 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserAuthController {
     private final IUserService userService;
     @GetMapping("/profile/{userId}")
-    public ResponseEntity<?> getUserProfile(@PathVariable("userId") String userId) {
-        try {
-            User user = userService.getUserProfile(userId);
-            UserResponse userProfileResponse = new UserResponse(user);
-            return ResponseEntity.ok(userProfileResponse);
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching user profile");
-        }
+    public ResponseEntity<APIRespone> getUserProfile(@PathVariable("userId") String userId) {
+      return userService.getUserProfile(userId);
     }
     @PostMapping("/profile/update/{userId}")
     public ResponseEntity<?> updateUser(@PathVariable Long userId,

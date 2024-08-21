@@ -1,7 +1,5 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
-import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.Category;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.model.Store;
@@ -12,8 +10,8 @@ import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
-import com.example.BE_PBL6_FastOrderSystem.util.ImageGeneral;
-import com.example.BE_PBL6_FastOrderSystem.util.ResponseConverter;
+import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
+import com.example.BE_PBL6_FastOrderSystem.utils.ResponseConverter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +130,7 @@ public class ProductServiceImpl implements IProductService {
         product.setStockQuantity(productRequest.getStockQuantity());
         product.setBestSale(productRequest.getBestSale());
         product = productRepository.save(product);
-        return new ResponseEntity<>(new APIRespone(true, "Product added successfully", ResponseConverter.convertToProductResponse(product)), HttpStatus.CREATED);
+        return new ResponseEntity<>(new APIRespone(true, "Product added successfully", ResponseConverter.convertToProductResponse(product)), HttpStatus.OK);
     }
 
     @Override

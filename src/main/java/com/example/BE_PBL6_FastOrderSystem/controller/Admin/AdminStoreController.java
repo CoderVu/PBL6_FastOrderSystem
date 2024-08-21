@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.request.StoreRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.IStoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,7 +19,7 @@ import java.util.Date;
 public class AdminStoreController {
     private final IStoreService storeService;
     @PostMapping("/add")
-    public ResponseEntity<?> addStore(
+    public ResponseEntity<APIRespone> addStore(
             @RequestParam("storeName") String storeName,
             @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("location") String location,
@@ -27,18 +28,11 @@ public class AdminStoreController {
             @RequestParam("openingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date openingTime,
             @RequestParam("closingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date closingTime,
             @RequestParam("managerId") Long managerId) {
-        try {
-            StoreRequest storeRequest = new StoreRequest(storeName, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
-            storeService.addStore(storeRequest);
-            return ResponseEntity.ok().body("Store added successfully");
-        } catch (AlreadyExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        StoreRequest storeRequest = new StoreRequest(storeName, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
+        return storeService.addStore(storeRequest);
     }
     @PutMapping("update/{id}")
-    public ResponseEntity<?> updateStore(
+    public  ResponseEntity<APIRespone> updateStore(
             @PathVariable Long id,
             @RequestParam("storeName") String storeName,
             @RequestParam("phoneNumber") String phoneNumber,
@@ -48,24 +42,11 @@ public class AdminStoreController {
             @RequestParam("openingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date openingTime,
             @RequestParam("closingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date closingTime,
             @RequestParam("managerId") Long managerId) {
-        try {
-            StoreRequest storeRequest = new StoreRequest(storeName, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
-            storeService.updateStore(id, storeRequest);
-            return ResponseEntity.ok().body("Store updated successfully");
-        }  catch (AlreadyExistsException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        StoreRequest storeRequest = new StoreRequest(storeName, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
+        return storeService.updateStore(id, storeRequest);
     }
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<?> deleteStore(@PathVariable Long id) {
-        try {
-            storeService.deleteStore(id);
-            return ResponseEntity.ok().body("Store deleted successfully");
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<APIRespone> deleteStore(@PathVariable Long id) {
+         return storeService.deleteStore(id);
     }
-
 }

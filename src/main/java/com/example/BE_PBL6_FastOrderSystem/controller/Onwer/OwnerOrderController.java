@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Onwer;
 
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
@@ -14,15 +15,8 @@ public class OwnerOrderController {
     private final IOrderService orderService;
 
     @PutMapping("/update-status/{orderId}")
-    public ResponseEntity<String> updateOrderStatus(@PathVariable Long orderId, @RequestParam String status) {
-        try {
+    public ResponseEntity<APIRespone> updateOrderStatus(@PathVariable Long orderId, @RequestParam String status) {
             Long ownerId = FoodUserDetails.getCurrentUserId();
-            String message = orderService.updateOrderStatus(orderId, ownerId, status);
-            return ResponseEntity.ok(message);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(403).body(e.getMessage()); // Forbidden status code
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
-        }
+            return orderService.updateOrderStatus(orderId, ownerId, status);
     }
 }

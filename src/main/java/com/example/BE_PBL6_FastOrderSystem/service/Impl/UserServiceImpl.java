@@ -2,25 +2,26 @@ package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
-import com.example.BE_PBL6_FastOrderSystem.model.Role;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.RoleRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetailsService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
-import com.example.BE_PBL6_FastOrderSystem.util.ImageGeneral;
+import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -33,31 +34,49 @@ public class UserServiceImpl implements IUserService {
 
 
     @Override
-    public List<User> getUsers(String roleName) {
-        return userRepository.findAllByRole_Name(roleName);
+    public ResponseEntity<APIRespone> getUsers(String roleName) {
+        List<User> users = userRepository.findAllByRole_Name((roleName));
+        if (users.isEmpty()) {
+            return ResponseEntity.ok(new APIRespone(false, "No user found", ""));
+        }
+        List<UserResponse> userResponses = users.stream()
+                .map(UserResponse::new)
+                .collect(Collectors.toList()); // Chuyển danh sách user thành danh sách userResponse
+        return ResponseEntity.ok(new APIRespone(true, "Success", userResponses));
     }
     @Override
-    public void lockUserAccount(Long userId) throws UserNotFoundException {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    public ResponseEntity<APIRespone> lockUserAccount(Long userId) throws UserNotFoundException {
+      if (userRepository.findById(userId).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+        }
+        User user = userRepository.findById(userId).get(); // Lấy user từ id
         user.setAccountLocked(true);
         userRepository.save(user);
+        return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
     @Override
-    public User getUserProfile(String userId) {
-        return userRepository.findById(Long.valueOf(userId))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with ID: " + userId));
+    public ResponseEntity<APIRespone> getUserProfile(String userId) {
+        if (userRepository.findById(Long.parseLong(userId)).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+        }
+        User user = userRepository.findById(Long.parseLong(userId)).get();
+        UserResponse userResponse = new UserResponse(user);
+        return ResponseEntity.ok(new APIRespone(true, "Success", userResponse));
     }
 
     @Override
-    public UserResponse updateUser(Long id, UserRequest userRequest) {
+    public ResponseEntity<APIRespone> updateUser(Long id, UserRequest userRequest) {
         validateUserRequest(userRequest);
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new APIRespone(false, "User not found", ""));
+        }
+        User existingUser = optionalUser.get();
         if (!existingUser.getPhoneNumber().equals(userRequest.getPhoneNumber()) &&
                 userRepository.existsByPhoneNumber(userRequest.getPhoneNumber())) {
-            throw new AlreadyExistsException(userRequest.getPhoneNumber() + " already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new APIRespone(false, userRequest.getPhoneNumber() + " already exists", ""));
         }
         existingUser.setPhoneNumber(userRequest.getPhoneNumber());
         existingUser.setFullName(userRequest.getFullName());
@@ -67,19 +86,24 @@ public class UserServiceImpl implements IUserService {
             String base64Image = ImageGeneral.fileToBase64(imageInputStream);
             existingUser.setAvatar(base64Image);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new APIRespone(false, "Failed to process avatar image", ""));
         }
         existingUser.setEmail(userRequest.getEmail());
         existingUser.setAddress(userRequest.getAddress());
         userRepository.save(existingUser);
-        return new UserResponse(existingUser);
+        return ResponseEntity.ok(new APIRespone(true, "User updated successfully", ""));
     }
+
     @Override
-    public void unlockUserAccount(Long userId) throws UserNotFoundException {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+    public ResponseEntity<APIRespone> unlockUserAccount(Long userId) throws UserNotFoundException {
+       if (userRepository.findById(userId).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+        }
+        User user = userRepository.findById(userId).get();
         user.setAccountLocked(false);
         userRepository.save(user);
+        return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
 
     private void validateUserRequest(UserRequest userRequest) {

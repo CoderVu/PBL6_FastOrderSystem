@@ -1,12 +1,12 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.ComboResponse;
-import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 import com.example.BE_PBL6_FastOrderSystem.model.Combo;
 import com.example.BE_PBL6_FastOrderSystem.repository.ComboRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IComboService;
-import com.example.BE_PBL6_FastOrderSystem.util.ResponseConverter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,18 +18,23 @@ public class ComboServiceImlp implements IComboService {
     private final ComboRepository comboRepository;
 
     @Override
-    public List<ComboResponse> getAllCombos() {
-        return comboRepository.findAll().stream()
+    public ResponseEntity<APIRespone> getAllCombos() {
+        if (comboRepository.findAll().isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No combo found", ""));
+        }
+        List<ComboResponse> comboResponses = comboRepository.findAll().stream()
                 .map(this::convertToComboResponse)
                 .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", comboResponses));
     }
 
     @Override
-    public List<ProductResponse> getProductsByComboId(Long comboId) {
-        Combo combo = comboRepository.findById(comboId).orElseThrow(() -> new RuntimeException("Combo not found"));
-        return combo.getProducts().stream()
-                .map(ResponseConverter::convertToProductResponse)
-                .collect(Collectors.toList());
+    public ResponseEntity<APIRespone> getProductsByComboId(Long comboId) {
+      if (comboRepository.findById(comboId).isEmpty()) {
+          return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
+      }
+        Combo combo = comboRepository.findById(comboId).get();
+        return ResponseEntity.ok(new APIRespone(true, "Success", convertToComboResponse(combo)));
     }
 
     public ComboResponse convertToComboResponse(Combo combo) {

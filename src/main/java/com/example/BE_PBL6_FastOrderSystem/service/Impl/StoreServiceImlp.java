@@ -8,12 +8,15 @@ import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.StoreRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.StoreRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.StoreResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IStoreService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,33 +24,55 @@ import java.util.stream.Collectors;
 public class StoreServiceImlp implements IStoreService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+
     @Override
-    public Store getStoreById(Long storeId) {
-        return storeRepository.findById(storeId).orElse(null);
+    public ResponseEntity<APIRespone> getStoreById(Long storeId) {
+        if (storeRepository.findById(storeId).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        Store store = storeRepository.findById(storeId).get();
+        return ResponseEntity.ok(new APIRespone(true, "Success", new StoreResponse(
+                store.getStoreId(),
+                store.getStoreName(),
+                store.getLocation(),
+                store.getLatitude(),
+                store.getLongitude(),
+                store.getPhoneNumber(),
+                store.getOpeningTime(),
+                store.getClosingTime(),
+                store.getManager().getFullName(),
+                store.getCreatedAt(),
+                store.getUpdatedAt()
+        )));
     }
 
     @Override
-    public List<StoreResponse> getAllStores() {
-       return storeRepository.findAll().stream()
-               .map(store -> new StoreResponse(
-                       store.getStoreId(),
-                       store.getStoreName(),
-                       store.getLocation(),
-                       store.getLatitude(),
-                       store.getLongitude(),
-                       store.getPhoneNumber(),
-                       store.getOpeningTime(),
-                       store.getClosingTime(),
-                       store.getCreatedAt(),
-                       store.getUpdatedAt()
+    public ResponseEntity<APIRespone> getAllStores() {
+        if (storeRepository.findAll().isEmpty()) {
+            return ResponseEntity.ok(new APIRespone(false, "No store found", ""));
+        }
+        List<StoreResponse> storeResponses = storeRepository.findAll().stream()
+                .map(store -> new StoreResponse(
+                        store.getStoreId(),
+                        store.getStoreName(),
+                        store.getLocation(),
+                        store.getLatitude(),
+                        store.getLongitude(),
+                        store.getPhoneNumber(),
+                        store.getOpeningTime(),
+                        store.getClosingTime(),
+                        store.getManager().getFullName(),
+                        store.getCreatedAt(),
+                        store.getUpdatedAt()
                 ))
                 .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", storeResponses));
     }
 
     @Override
-    public StoreResponse addStore(StoreRequest storeRequest) {
+    public ResponseEntity<APIRespone> addStore(StoreRequest storeRequest) {
         if (storeRepository.existsByStoreName(storeRequest.getStoreName())) {
-            throw new AlreadyExistsException("Product already exists");
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store already exists", ""));
         }
         Store store = new Store();
         store.setStoreName(storeRequest.getStoreName());
@@ -57,11 +82,13 @@ public class StoreServiceImlp implements IStoreService {
         store.setLatitude(storeRequest.getLatitude());
         store.setOpeningTime(storeRequest.getOpeningTime());
         store.setClosingTime(storeRequest.getClosingTime());
-        User manager = userRepository.findById(storeRequest.getManagerId())
-                .orElseThrow(() -> new UserNotFoundException("Manager not found"));
+        if (userRepository.findById(storeRequest.getManagerId()).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Manager not found", ""));
+        }
+        User manager = userRepository.findById(storeRequest.getManagerId()).get();
         store.setManager(manager);
-        storeRepository.save(store);
-        return new StoreResponse(
+        store = storeRepository.save(store);
+        return ResponseEntity.ok(new APIRespone(true, "Add store successfully", new StoreResponse(
                 store.getStoreId(),
                 store.getStoreName(),
                 store.getLocation(),
@@ -70,17 +97,24 @@ public class StoreServiceImlp implements IStoreService {
                 store.getPhoneNumber(),
                 store.getOpeningTime(),
                 store.getClosingTime(),
+                store.getManager().getFullName(),
                 store.getCreatedAt(),
                 store.getUpdatedAt()
-        );
-
-
+        )));
     }
 
     @Override
-    public StoreResponse updateStore(Long id, StoreRequest storeRequest) {
-        Store store = storeRepository.findById(id)
-                .orElseThrow(() -> new AlreadyExistsException("Store not found"));
+    public ResponseEntity<APIRespone> updateStore(Long id, StoreRequest storeRequest) {
+        if (storeRepository.findById(id).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        Store store = storeRepository.findById(id).get();
+        if (storeRepository.existsByStoreName(storeRequest.getStoreName())) {
+            Optional<Store> existingStore = storeRepository.findByStoreName(storeRequest.getStoreName());
+            if (existingStore.isPresent() && !existingStore.get().getStoreId().equals(id)) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Store already exists", ""));
+            }
+        }
         store.setStoreName(storeRequest.getStoreName());
         store.setPhoneNumber(storeRequest.getPhoneNumber());
         store.setLocation(storeRequest.getLocation());
@@ -88,11 +122,13 @@ public class StoreServiceImlp implements IStoreService {
         store.setLatitude(storeRequest.getLatitude());
         store.setOpeningTime(storeRequest.getOpeningTime());
         store.setClosingTime(storeRequest.getClosingTime());
-        User manager = userRepository.findById(storeRequest.getManagerId())
-                .orElseThrow(() -> new UserNotFoundException("Manager not found"));
+        if (userRepository.findById(storeRequest.getManagerId()).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Manager not found", ""));
+        }
+        User manager = userRepository.findById(storeRequest.getManagerId()).get();
         store.setManager(manager);
-        storeRepository.save(store);
-        return new StoreResponse(
+        store = storeRepository.save(store);
+        return ResponseEntity.ok(new APIRespone(true, "Update store successfully", new StoreResponse(
                 store.getStoreId(),
                 store.getStoreName(),
                 store.getLocation(),
@@ -101,15 +137,19 @@ public class StoreServiceImlp implements IStoreService {
                 store.getPhoneNumber(),
                 store.getOpeningTime(),
                 store.getClosingTime(),
+                store.getManager().getFullName(),
                 store.getCreatedAt(),
                 store.getUpdatedAt()
-        );
+        )));
     }
 
     @Override
-    public void deleteStore(Long id) {
-        Store store = storeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
-        storeRepository.delete(store);
+    public ResponseEntity<APIRespone> deleteStore(Long id) {
+        Optional<Store> store = storeRepository.findById(id);
+        if (store.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        storeRepository.deleteById(id);
+        return ResponseEntity.ok(new APIRespone(true, "Delete store successfully", ""));
     }
 }

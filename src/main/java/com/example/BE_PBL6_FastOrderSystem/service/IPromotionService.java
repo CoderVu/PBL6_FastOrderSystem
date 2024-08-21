@@ -3,22 +3,24 @@ package com.example.BE_PBL6_FastOrderSystem.service;
 import com.example.BE_PBL6_FastOrderSystem.model.Promotion;
 import com.example.BE_PBL6_FastOrderSystem.repository.PromotionRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.PromotionRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.PromotionResponse;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface IPromotionService {
 
-    List<PromotionResponse> getAllPromotion();
+    ResponseEntity<APIRespone> getAllPromotion();
 
-    Optional<PromotionResponse> getPromotionById(Long promotionId);
+    ResponseEntity<APIRespone> getPromotionById(Long promotionId);
 
-    PromotionResponse addPromotion(PromotionRequest promotionRequest);
+    ResponseEntity<APIRespone> addPromotion(PromotionRequest promotionRequest);
 
-    PromotionResponse applyPromotionToStore(Long promotionId, Long storeId);
+    ResponseEntity<APIRespone> applyPromotionToStore(Long promotionId, Long storeId);
 
-    PromotionResponse applyPromotionToAllStores(Long promotionId);
+    ResponseEntity<APIRespone> applyPromotionToAllStores(Long promotionId);
 
-    PromotionResponse applyPromotionToProduct(Long promotionId, Long productId);
+    ResponseEntity<APIRespone> applyPromotionToProduct(Long promotionId, Long productId);
 }

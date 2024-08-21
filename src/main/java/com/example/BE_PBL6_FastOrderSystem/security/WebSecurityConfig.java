@@ -41,6 +41,9 @@ public class WebSecurityConfig {
     private static final String[] PUBLIC = {
             "/api/v1/public/**"
     };
+    private static final String[] MOMO = {
+             "/api/v1/momo/**"
+    };
 
     @Bean
     public AuthTokenFilter authenticationTokenFilter(){
@@ -73,6 +76,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(AUTH).permitAll()
                         .requestMatchers(PUBLIC).permitAll()
+                        .requestMatchers(MOMO).permitAll()
                         .requestMatchers(USER).hasAnyRole("ADMIN", "USER")
                         .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers(ADMIN).hasAnyRole("ADMIN")
