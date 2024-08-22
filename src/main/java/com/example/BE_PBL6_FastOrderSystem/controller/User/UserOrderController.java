@@ -73,7 +73,7 @@ public class UserOrderController {
 
             System.out.println("Cart IDs: " + orderRequest.getCartIds());
             System.out.println("User ID: " + orderRequest.getUserId());
-            orderRequest.setOrderInfo("Payment for order " + orderCode);
+            orderRequest.setOrderInfo("Payment MOMO for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
             // Store order information in MoMo callback controller cache
@@ -83,21 +83,24 @@ public class UserOrderController {
             return ResponseEntity.ok(apiResponse);
         } else if ("CASH".equalsIgnoreCase(paymentMethod)) {
             // Proceed with normal order placement
+            orderRequest.setOrderCode(orderCode);
+            orderRequest.setUserId(userId);
+            orderRequest.setOrderInfo("Payment CASH for order " + orderCode);
+            orderRequest.setLang("en");
+            orderRequest.setExtraData("additional data");
             ResponseEntity<APIRespone> response = orderService.placeOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
             if (response.getStatusCode() == HttpStatus.OK) {
                 // Update order status to "Pending"
-                orderService.updateOrderStatus(orderCode, "Chưa giao hàng bảng Order");
-
+                orderService.updateOrderStatus(orderCode, "Chưa giao hàng");
                 // Retrieve the Order object
                 Order order = orderService.findOrderByOrderCode(orderCode);
-
                 // Create and save Payment entity
                 Payment payment = new Payment();
                 payment.setOrder(order);
                 payment.setPaymentDate(LocalDateTime.now());
                 payment.setAmountPaid(orderRequest.getAmount().doubleValue());
                 payment.setPaymentMethod(paymentService.findPaymentMethodByName("CASH"));
-                payment.setStatus("Chưa thanh toán trong bảng Payment");
+                payment.setStatus("Chưa thanh toán");
                 payment.setCreatedAt(LocalDateTime.now());
                 payment.setOrderCode(orderCode);
                 payment.setUserId(userId);

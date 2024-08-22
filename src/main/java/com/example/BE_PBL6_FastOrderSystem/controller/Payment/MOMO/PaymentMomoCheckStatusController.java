@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO;
 
 import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.IPaymentService;
 import com.example.BE_PBL6_FastOrderSystem.service.Impl.PaymentServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,9 @@ public class PaymentMomoCheckStatusController {
     private final IPaymentService paymentService;
 
     @PostMapping("/api/v1/momo/get-status")
-    public ResponseEntity<Map<String, Object>> getStatus(@RequestBody PaymentRequest requestDTO) throws IOException {
-
+    public ResponseEntity<APIRespone> getStatus(@RequestBody PaymentRequest requestDTO) throws IOException {
         Map<String, Object> result = this.paymentService.getStatus(requestDTO);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(new APIRespone(true, "Get status successfully", result), HttpStatus.OK);
 
     }
 

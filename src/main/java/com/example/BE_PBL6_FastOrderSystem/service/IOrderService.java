@@ -13,7 +13,7 @@ public interface IOrderService {
 
     ResponseEntity<APIRespone> placeOrder(Long UserId ,String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
 
-    ResponseEntity<APIRespone> updateOrderStatusOfOwner(Long orderId, Long ownerId, String status);
+    ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status);
 
     ResponseEntity<APIRespone> updateOrderStatus(String orderCode, String status);
 
@@ -27,7 +27,7 @@ public interface IOrderService {
 
     Order findOrderByOrderCode(String orderCode);
 
-    Order findOrderByOrderIdAndOwnerId(Long orderId, Long ownerId);
+    Order findOrderByOrderIdAndOwnerId(String orderCode, Long ownerId);
 
     ResponseEntity<APIRespone> getAllOrdersByOwner(Long ownerId);
 }

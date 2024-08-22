@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class OwnerOrderController {
     private final IOrderService orderService;
 
-    @PutMapping("/update-status/{orderId}")
-    public ResponseEntity<APIRespone> updateOrderStatus(@PathVariable Long orderId, @RequestParam String status) {
+    @PutMapping("/update-status")
+    public ResponseEntity<APIRespone> updateOrderStatus(
+            @RequestParam String orderCode,
+            @RequestParam String status) {
             Long ownerId = FoodUserDetails.getCurrentUserId();
-            return orderService.updateOrderStatusOfOwner(orderId, ownerId, status);
+            return orderService.updateOrderStatusOfOwner(orderCode, ownerId, status);
     }
     @GetMapping("/get-all")
     public  ResponseEntity<APIRespone> getAllOrders() {

@@ -11,8 +11,6 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
-    // Mã đơn hàng gồm 6 số random nhưng không trùng với mã đơn hàng khác
-    // Mã đơn hàng được tạo ngẫu nhiên khi khách hàng đặt hàng
     private String orderCode;
     @ManyToOne
     @JoinColumn(name = "user_id")

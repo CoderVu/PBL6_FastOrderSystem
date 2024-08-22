@@ -31,10 +31,9 @@ public class CartController {
     public  ResponseEntity<APIRespone> addToCart(
             @RequestParam Long productId,
             @RequestParam int quantity,
-            @RequestParam Long storeId,
-            @RequestParam String status) {
+            @RequestParam Long storeId) {
         Long userId = getCurrentUserId();
-        CartRequest cartRequest = new CartRequest(productId, quantity, storeId, status);
+        CartRequest cartRequest = new CartRequest(productId, quantity, storeId, "PENDING");
         return cartService.addToCart(userId, cartRequest);
     }
     @GetMapping("/history")

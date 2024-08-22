@@ -85,11 +85,11 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ResponseEntity<APIRespone> updateOrderStatusOfOwner(Long orderId, Long ownerId, String status) {
-        if (orderRepository.findById(orderId).isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
+    public ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status) {
+        if (orderRepository.findByOrderCode(orderCode).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
         }
-        Order order = orderRepository.findById(orderId).get();
+        Order order = orderRepository.findByOrderCode(orderCode).get();
         Store store = order.getStore();
         if (!store.getManager().getId().equals(ownerId)) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "You are not authorized to update this order", ""));
@@ -152,8 +152,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public Order findOrderByOrderIdAndOwnerId(Long orderId, Long ownerId) {
-        Optional<Order> orderOptional = orderRepository.findById(orderId);
+    public Order findOrderByOrderIdAndOwnerId(String orderCode, Long ownerId) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
         if (orderOptional.isEmpty()) {
             return null;
         }
