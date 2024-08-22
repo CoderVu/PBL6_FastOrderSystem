@@ -46,11 +46,6 @@ public class FoodUserDetails implements UserDetails {
                 List.of(authority));
     }
 
-    public static String getCurrentUserPhoneNumber() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userDetails.getUsername();
-    }
-
     public static Long getCurrentUserId() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return ((FoodUserDetails) userDetails).getId();

@@ -11,7 +11,9 @@ import java.util.List;
 public interface IOrderService {
     String generateUniqueOrderCode();
 
-    ResponseEntity<APIRespone> placeOrder(Long UserId ,String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
+    ResponseEntity<APIRespone> processOrder(Long UserId ,String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
+
+    ResponseEntity<APIRespone> updateQuantityProduct(Long productId, int quantity);
 
     ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status);
 
@@ -19,6 +21,8 @@ public interface IOrderService {
 
     ResponseEntity<APIRespone> getOrderByIdAndUserId(Long orderId, Long userId);
     ResponseEntity<APIRespone> getAllOrdersByUser(Long userId);
+
+    ResponseEntity<APIRespone> getAllOrdersByAdmin();
 
     List<CartItem> getCartItemsByCartId(Long cartId);
 

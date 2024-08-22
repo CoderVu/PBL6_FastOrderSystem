@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
@@ -32,41 +31,46 @@ public class UserServiceImpl implements IUserService {
     private final RoleRepository roleRepository;
     private final FoodUserDetailsService userDetailsService;
 
-
     @Override
     public ResponseEntity<APIRespone> getUsers(String roleName) {
-        List<User> users = userRepository.findAllByRole_Name((roleName));
+        List<User> users = userRepository.findAllByRole_Name(roleName);
         if (users.isEmpty()) {
             return ResponseEntity.ok(new APIRespone(false, "No user found", ""));
         }
         List<UserResponse> userResponses = users.stream()
                 .map(UserResponse::new)
-                .collect(Collectors.toList()); // Chuyển danh sách user thành danh sách userResponse
+                .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", userResponses));
     }
+
     @Override
     public ResponseEntity<APIRespone> lockUserAccount(Long userId) throws UserNotFoundException {
-      if (userRepository.findById(userId).isEmpty()) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
         }
-        User user = userRepository.findById(userId).get(); // Lấy user từ id
+        User user = optionalUser.get();
         user.setAccountLocked(true);
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
+
     @Override
-    public ResponseEntity<APIRespone> getUserProfile(String userId) {
-        if (userRepository.findById(Long.parseLong(userId)).isEmpty()) {
+    public ResponseEntity<APIRespone> getUserProfile(Long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
         }
-        User user = userRepository.findById(Long.parseLong(userId)).get();
+        User user = optionalUser.get();
         UserResponse userResponse = new UserResponse(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", userResponse));
     }
-
     @Override
     public ResponseEntity<APIRespone> updateUser(Long id, UserRequest userRequest) {
-        validateUserRequest(userRequest);
+        ResponseEntity<APIRespone> validationResponse = validateUserRequest(userRequest);
+        if (validationResponse != null) {
+            return validationResponse;
+        }
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -92,36 +96,38 @@ public class UserServiceImpl implements IUserService {
         existingUser.setEmail(userRequest.getEmail());
         existingUser.setAddress(userRequest.getAddress());
         userRepository.save(existingUser);
-        return ResponseEntity.ok(new APIRespone(true, "User updated successfully", ""));
+        return ResponseEntity.ok(new APIRespone(true, "User updated susccessfully", ""));
     }
+
+    private ResponseEntity<APIRespone> validateUserRequest(UserRequest userRequest) {
+        if (userRequest.getFullName() == null || userRequest.getFullName().isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Full name is required", ""));
+        }
+        if (userRequest.getPassword() == null || userRequest.getPassword().length() < 8) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Password must be at least 8 characters long", ""));
+        }
+        if (userRequest.getPhoneNumber() == null || !userRequest.getPhoneNumber().matches("\\d{10}") || userRequest.getPhoneNumber().indexOf("0") != 0) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Phone number is invalid", ""));
+        }
+        if (userRequest.getEmail() == null || !userRequest.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid email format", ""));
+        }
+        if (userRequest.getAddress() == null || userRequest.getAddress().isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Address is required", ""));
+        }
+        return null;
+    }
+
 
     @Override
     public ResponseEntity<APIRespone> unlockUserAccount(Long userId) throws UserNotFoundException {
-       if (userRepository.findById(userId).isEmpty()) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
         }
-        User user = userRepository.findById(userId).get();
+        User user = optionalUser.get();
         user.setAccountLocked(false);
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
-    }
-
-    private void validateUserRequest(UserRequest userRequest) {
-        if (userRequest.getFullName() == null || userRequest.getFullName().isEmpty()) {
-            throw new AlreadyExistsException("Full name is required");
-        }
-        if (userRequest.getPassword() == null || userRequest.getPassword().length() < 8) {
-            throw new AlreadyExistsException("Password must be at least 8 characters long");
-        }
-        if (userRequest.getPhoneNumber() == null || !userRequest.getPhoneNumber().matches("\\d{10}") || userRequest.getPhoneNumber().indexOf("0") != 0)
-        {
-            throw new AlreadyExistsException("Phone number is invalid");
-        }
-        if (userRequest.getEmail() == null || !userRequest.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new AlreadyExistsException("Invalid email format");
-        }
-        if (userRequest.getAddress() == null || userRequest.getAddress().isEmpty()) {
-            throw new AlreadyExistsException("Address is required");
-        }
     }
 }

@@ -16,8 +16,7 @@ public class UserResponse {
     private LocalDateTime updatedAt;
     private Boolean accountLocked;
     private RoleResponse role;  // Change from List<RoleResponse> to a single RoleResponse
-    private List<StoreResponse> stores;
-    private List<OrderResponse> orders;
+
 
     public UserResponse(Long id, String phoneNumber, String fullName, String avatar, String email, String address, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean accountLocked, RoleResponse role, List<StoreResponse> stores, List<OrderResponse> orders) {
         this.id = id;
@@ -30,8 +29,6 @@ public class UserResponse {
         this.updatedAt = updatedAt;
         this.accountLocked = accountLocked;
         this.role = role;
-        this.stores = stores;
-        this.orders = orders;
     }
 
     public UserResponse(User user) {
@@ -127,19 +124,4 @@ public class UserResponse {
         this.role = role;
     }
 
-    public List<StoreResponse> getStores() {
-        return stores;
-    }
-
-    public void setStores(List<StoreResponse> stores) {
-        this.stores = stores;
-    }
-
-    public List<OrderResponse> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<OrderResponse> orders) {
-        this.orders = orders;
-    }
 }
