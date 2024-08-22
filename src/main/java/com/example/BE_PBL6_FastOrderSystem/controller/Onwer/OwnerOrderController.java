@@ -17,6 +17,12 @@ public class OwnerOrderController {
     @PutMapping("/update-status/{orderId}")
     public ResponseEntity<APIRespone> updateOrderStatus(@PathVariable Long orderId, @RequestParam String status) {
             Long ownerId = FoodUserDetails.getCurrentUserId();
-            return orderService.updateOrderStatus(orderId, ownerId, status);
+            return orderService.updateOrderStatusOfOwner(orderId, ownerId, status);
+    }
+    @GetMapping("/get-all")
+    public  ResponseEntity<APIRespone> getAllOrders() {
+        Long ownerId = FoodUserDetails.getCurrentUserId();
+        return orderService.getAllOrdersByOwner(ownerId);
+
     }
 }

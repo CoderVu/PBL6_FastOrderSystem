@@ -1,19 +1,24 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.User;
 
-import com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO.MomoCallbackController;
+import com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO.PaymentMomoCallbackController;
 import com.example.BE_PBL6_FastOrderSystem.model.CartItem;
-import com.example.BE_PBL6_FastOrderSystem.request.OrderRequestDTO;
+import com.example.BE_PBL6_FastOrderSystem.model.Order;
+import com.example.BE_PBL6_FastOrderSystem.model.Payment;
+import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
-import com.example.BE_PBL6_FastOrderSystem.service.CreateOrderPaymentService;
+import com.example.BE_PBL6_FastOrderSystem.service.IPaymentService;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
+import com.example.BE_PBL6_FastOrderSystem.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,12 +28,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserOrderController {
     private final IOrderService orderService;
-    private final CreateOrderPaymentService paymentService;
-    private final MomoCallbackController momoCallbackController;
+    private final IPaymentService paymentService;
+    private final PaymentMomoCallbackController paymentMomoCallbackController;
+    private final PaymentRepository paymentRepository;
 
     @PostMapping("/create")
     public ResponseEntity<APIRespone> placeOrder(
-            @RequestBody OrderRequestDTO orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+            @RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
 
         // Extract fields from orderRequest
         String paymentMethod = orderRequest.getPaymentMethod();
@@ -48,10 +54,14 @@ public class UserOrderController {
         String orderCode = orderService.generateUniqueOrderCode();
         orderRequest.setOrderCode(orderCode);
         System.out.println("Order code: " + orderCode);
+
+        // Calculate total amount and set it to orderRequest
+        Long totalAmount = calculateOrderAmount(cartIds);
+        orderRequest.setAmount(totalAmount);
+        System.out.println("Amount: " + orderRequest.getAmount());
+
         if ("MOMO".equalsIgnoreCase(paymentMethod)) {
             // Set additional fields in orderRequest
-            orderRequest.setAmount(calculateOrderAmount(cartIds));
-            System.out.println("Amount: " + orderRequest.getAmount());
             orderRequest.setOrderCode(orderCode);
             orderRequest.setUserId(userId);
             // Check if cartIds belong to the current user
@@ -67,13 +77,40 @@ public class UserOrderController {
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
             // Store order information in MoMo callback controller cache
-            momoCallbackController.cacheOrderRequest(orderRequest);
+            paymentMomoCallbackController.cacheOrderRequest(orderRequest);
             Map<String, Object> momoResponse = paymentService.createOrder(orderRequest);
             APIRespone apiResponse = new APIRespone(true, "MoMo payment initiated", momoResponse);
             return ResponseEntity.ok(apiResponse);
-        } else {
+        } else if ("CASH".equalsIgnoreCase(paymentMethod)) {
             // Proceed with normal order placement
-            return orderService.placeOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
+            ResponseEntity<APIRespone> response = orderService.placeOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
+            if (response.getStatusCode() == HttpStatus.OK) {
+                // Update order status to "Pending"
+                orderService.updateOrderStatus(orderCode, "Chưa giao hàng bảng Order");
+
+                // Retrieve the Order object
+                Order order = orderService.findOrderByOrderCode(orderCode);
+
+                // Create and save Payment entity
+                Payment payment = new Payment();
+                payment.setOrder(order);
+                payment.setPaymentDate(LocalDateTime.now());
+                payment.setAmountPaid(orderRequest.getAmount().doubleValue());
+                payment.setPaymentMethod(paymentService.findPaymentMethodByName("CASH"));
+                payment.setStatus("Chưa thanh toán trong bảng Payment");
+                payment.setCreatedAt(LocalDateTime.now());
+                payment.setOrderCode(orderCode);
+                payment.setUserId(userId);
+                payment.setDeliveryAddress(deliveryAddress);
+                payment.setOrderInfo(orderRequest.getOrderInfo());
+                payment.setLang(orderRequest.getLang());
+                payment.setExtraData(orderRequest.getExtraData());
+
+                paymentRepository.save(payment);
+            }
+            return response;
+        } else {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Unsupported payment method", ""));
         }
     }
 
@@ -92,6 +129,11 @@ public class UserOrderController {
     public ResponseEntity<APIRespone> getAllOrdersByUser() {
         Long userId = FoodUserDetails.getCurrentUserId();
         return orderService.getAllOrdersByUser(userId);
+    }
+    @GetMapping("/history/{orderId}")
+    public ResponseEntity<APIRespone> getOrderById(@PathVariable Long orderId) {
+        Long userId = FoodUserDetails.getCurrentUserId();
+        return orderService.getOrderByIdAndUserId(orderId, userId);
     }
     @GetMapping("/status/{orderId}")
     public ResponseEntity<APIRespone> getStatus(@PathVariable Long orderId) {

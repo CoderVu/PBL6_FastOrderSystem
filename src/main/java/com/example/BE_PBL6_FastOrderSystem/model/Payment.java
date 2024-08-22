@@ -1,8 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.model;
 
-
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,17 +8,30 @@ public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long paymentId;
+
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
     private LocalDateTime paymentDate;
     private Double amountPaid; // số tiền đã thanh toán
-   // trỏ tới bảng payment_methods
+
     @ManyToOne
     @JoinColumn(name = "payment_method_id")
     private PaymentMethod paymentMethod;
+
     private String status;
     private LocalDateTime createdAt;
+
+    // Additional fields from PaymentRequest
+    private String orderCode;
+    private Long userId;
+    private String deliveryAddress;
+    private String orderInfo;
+    private String lang;
+    private String extraData;
+
+    // Getters and Setters
 
     public Long getPaymentId() {
         return paymentId;
@@ -54,9 +65,10 @@ public class Payment {
         this.amountPaid = amountPaid;
     }
 
-   public PaymentMethod getPaymentMethod() {
+    public PaymentMethod getPaymentMethod() {
         return paymentMethod;
     }
+
     public void setPaymentMethod(PaymentMethod paymentMethod) {
         this.paymentMethod = paymentMethod;
     }
@@ -75,5 +87,53 @@ public class Payment {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getOrderCode() {
+        return orderCode;
+    }
+
+    public void setOrderCode(String orderCode) {
+        this.orderCode = orderCode;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public String getOrderInfo() {
+        return orderInfo;
+    }
+
+    public void setOrderInfo(String orderInfo) {
+        this.orderInfo = orderInfo;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
+    }
+
+    public String getExtraData() {
+        return extraData;
+    }
+
+    public void setExtraData(String extraData) {
+        this.extraData = extraData;
     }
 }

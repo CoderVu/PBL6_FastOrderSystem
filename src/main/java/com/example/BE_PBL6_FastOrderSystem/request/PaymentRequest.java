@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderRequestDTO {
+public class PaymentRequest {
     private Long amount;
     private String orderCode;
     private List<Long> cartIds;

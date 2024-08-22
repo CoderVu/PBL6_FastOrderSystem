@@ -11,4 +11,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByUserId(Long userId);
 
     boolean existsByOrderCode(String orderCode);
+
+    Optional<Order> findByOrderCode(String orderCode);
 }

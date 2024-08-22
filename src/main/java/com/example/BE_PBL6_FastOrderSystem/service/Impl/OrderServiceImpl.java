@@ -1,6 +1,5 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
@@ -86,7 +85,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ResponseEntity<APIRespone> updateOrderStatus(Long orderId, Long ownerId, String status) {
+    public ResponseEntity<APIRespone> updateOrderStatusOfOwner(Long orderId, Long ownerId, String status) {
         if (orderRepository.findById(orderId).isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
         }
@@ -95,6 +94,17 @@ public class OrderServiceImpl implements IOrderService {
         if (!store.getManager().getId().equals(ownerId)) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "You are not authorized to update this order", ""));
         }
+        order.setStatus(status);
+        orderRepository.save(order);
+        return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully", new OrderResponse(order)));
+    }
+    @Override
+    public ResponseEntity<APIRespone> updateOrderStatus(String orderCode, String status) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "OrderCode not found", ""));
+        }
+        Order order = orderOptional.get();
         order.setStatus(status);
         orderRepository.save(order);
         return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully", new OrderResponse(order)));
@@ -134,4 +144,36 @@ public class OrderServiceImpl implements IOrderService {
         Order order = orderOptional.get();
         return ResponseEntity.ok(new APIRespone(true, "Success", order.getStatus()));
     }
+
+    @Override
+    public Order findOrderByOrderCode(String orderCode) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
+        return orderOptional.orElse(null);
+    }
+
+    @Override
+    public Order findOrderByOrderIdAndOwnerId(Long orderId, Long ownerId) {
+        Optional<Order> orderOptional = orderRepository.findById(orderId);
+        if (orderOptional.isEmpty()) {
+            return null;
+        }
+        Order order = orderOptional.get();
+        Store store = order.getStore();
+        if (!store.getManager().getId().equals(ownerId)) {
+            return null;
+        }
+        return order;
+    }
+
+    @Override
+    public  ResponseEntity<APIRespone> getAllOrdersByOwner(Long ownerId) {
+        List<Order> orders = orderRepository.findAll();
+        List<Order> ownerOrders = orders.stream()
+                .filter(order -> order.getStore().getManager().getId().equals(ownerId))
+                .collect(Collectors.toList());
+        List<OrderResponse> orderResponses = ownerOrders.stream().map(OrderResponse::new).collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
+    }
+
+
 }
