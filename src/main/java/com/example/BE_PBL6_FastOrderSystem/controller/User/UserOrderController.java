@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.User;
 
-import com.example.BE_PBL6_FastOrderSystem.controller.MomoController.MomoCallbackController;
+import com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO.MomoCallbackController;
 import com.example.BE_PBL6_FastOrderSystem.model.CartItem;
 import com.example.BE_PBL6_FastOrderSystem.request.OrderRequestDTO;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
@@ -16,7 +16,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,17 +42,17 @@ public class UserOrderController {
         if (cartItems.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
         }
+        // Get current user ID
         Long userId = FoodUserDetails.getCurrentUserId();
-
+        // Generate random 6-digit order ID
+        String orderCode = orderService.generateUniqueOrderCode();
+        orderRequest.setOrderCode(orderCode);
+        System.out.println("Order code: " + orderCode);
         if ("MOMO".equalsIgnoreCase(paymentMethod)) {
-            // Generate random 6-digit order ID
-            String orderId = orderService.generateUniqueOrderCode();
-            System.out.println("Order ID: " + orderId);
-
             // Set additional fields in orderRequest
             orderRequest.setAmount(calculateOrderAmount(cartIds));
             System.out.println("Amount: " + orderRequest.getAmount());
-            orderRequest.setOrderId(orderId);
+            orderRequest.setOrderCode(orderCode);
             orderRequest.setUserId(userId);
             // Check if cartIds belong to the current user
             for (Long cartId : cartIds) {
@@ -64,7 +63,7 @@ public class UserOrderController {
 
             System.out.println("Cart IDs: " + orderRequest.getCartIds());
             System.out.println("User ID: " + orderRequest.getUserId());
-            orderRequest.setOrderInfo("Payment for order " + orderId);
+            orderRequest.setOrderInfo("Payment for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
             // Store order information in MoMo callback controller cache
@@ -74,7 +73,7 @@ public class UserOrderController {
             return ResponseEntity.ok(apiResponse);
         } else {
             // Proceed with normal order placement
-            return orderService.placeOrder(userId, paymentMethod, cartIds, deliveryAddress);
+            return orderService.placeOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
         }
     }
 
@@ -93,5 +92,10 @@ public class UserOrderController {
     public ResponseEntity<APIRespone> getAllOrdersByUser() {
         Long userId = FoodUserDetails.getCurrentUserId();
         return orderService.getAllOrdersByUser(userId);
+    }
+    @GetMapping("/status/{orderId}")
+    public ResponseEntity<APIRespone> getStatus(@PathVariable Long orderId) {
+        Long userId = FoodUserDetails.getCurrentUserId();
+        return orderService.getStatusOrder(orderId, userId);
     }
 }

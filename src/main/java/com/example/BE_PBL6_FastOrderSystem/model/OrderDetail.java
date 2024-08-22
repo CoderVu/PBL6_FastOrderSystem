@@ -7,7 +7,7 @@ public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderDetailId;
-    @ManyToOne
+    @ManyToOne // nhiều order detail có thể thuộc về 1 order
     @JoinColumn(name = "order_id")
     private Order order;
     @ManyToOne

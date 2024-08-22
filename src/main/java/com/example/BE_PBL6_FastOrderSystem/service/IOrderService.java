@@ -10,7 +10,7 @@ import java.util.List;
 public interface IOrderService {
     String generateUniqueOrderCode();
 
-    ResponseEntity<APIRespone> placeOrder(Long UserId ,String paymentMethod, List<Long> cartIds, String deliveryAddress);
+    ResponseEntity<APIRespone> placeOrder(Long UserId ,String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
 
     ResponseEntity<APIRespone> updateOrderStatus(Long orderId, Long ownerId, String status);
 
@@ -18,4 +18,6 @@ public interface IOrderService {
     ResponseEntity<APIRespone> getAllOrdersByUser(Long userId);
 
     List<CartItem> getCartItemsByCartId(Long cartId);
+
+    ResponseEntity<APIRespone> getStatusOrder(Long orderId, Long userId);
 }

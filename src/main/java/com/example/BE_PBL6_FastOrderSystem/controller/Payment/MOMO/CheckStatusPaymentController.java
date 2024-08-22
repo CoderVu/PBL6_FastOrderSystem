@@ -1,4 +1,4 @@
-package com.example.BE_PBL6_FastOrderSystem.controller.MomoController;
+package com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO;
 
 import com.example.BE_PBL6_FastOrderSystem.request.OrderRequestDTO;
 import com.example.BE_PBL6_FastOrderSystem.service.GetPaymentStatusService;

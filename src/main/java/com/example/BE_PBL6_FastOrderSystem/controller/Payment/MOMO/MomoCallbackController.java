@@ -1,6 +1,5 @@
-package com.example.BE_PBL6_FastOrderSystem.controller.MomoController;
+package com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO;
 
-import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.CreateOrderPaymentService;
@@ -35,7 +34,7 @@ public class MomoCallbackController {
             OrderRequestDTO orderRequest = orderRequestCache.get(orderId);
             if (orderRequest != null) {
                 // Place the order
-                return orderService.placeOrder(orderRequest.getUserId(), "MOMO", orderRequest.getCartIds(), orderRequest.getDeliveryAddress());
+                return orderService.placeOrder(orderRequest.getUserId(), "MOMO", orderRequest.getCartIds(), orderRequest.getDeliveryAddress(), orderRequest.getOrderCode());
             } else {
                 // Order information not found
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -50,6 +49,6 @@ public class MomoCallbackController {
 
     // Method to cache order request
     public void cacheOrderRequest(OrderRequestDTO orderRequest) {
-        orderRequestCache.put(orderRequest.getOrderId(), orderRequest);
+        orderRequestCache.put(orderRequest.getOrderCode(), orderRequest);
     }
 }

@@ -36,7 +36,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ResponseEntity<APIRespone> placeOrder(Long UserId, String paymentMethod, List<Long> cartIds, String deliveryAddress) {
+    public ResponseEntity<APIRespone> placeOrder(Long UserId, String paymentMethod, List<Long> cartIds, String deliveryAddress,String orderCode) {
         List<CartItem> cartItems = cartIds.stream()
                 .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
                 .collect(Collectors.toList());
@@ -57,7 +57,7 @@ public class OrderServiceImpl implements IOrderService {
         Order order = new Order();
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(cartItems.get(0).getStatus());
-        order.setOrderCode(generateUniqueOrderCode());
+        order.setOrderCode(orderCode); // Để tránh trùng mã order
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
         order.setStore(store);
@@ -78,11 +78,11 @@ public class OrderServiceImpl implements IOrderService {
             return orderDetail;
         }).collect(Collectors.toList());
         order.setOrderDetails(orderDetails);
-        order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
+        order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum()); // Tính tổng tiền
         order.setDeliveryAddress(deliveryAddress);
         orderRepository.save(order);
         cartItemRepository.deleteAll(cartItems);
-        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", new OrderResponse(order)));
+        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
 
     @Override
@@ -123,5 +123,15 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public List<CartItem> getCartItemsByCartId(Long cartId) {
         return cartItemRepository.findByCartId(cartId);
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> getStatusOrder(Long orderId, Long userId) {
+        Optional<Order> orderOptional = orderRepository.findByOrderIdAndUserId(orderId, userId);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
+        }
+        Order order = orderOptional.get();
+        return ResponseEntity.ok(new APIRespone(true, "Success", order.getStatus()));
     }
 }

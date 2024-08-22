@@ -30,9 +30,9 @@ public class CreateOrderPaymentService {
         json.put("accessKey", MoMoConstant.ACCESS_KEY);
         json.put("requestId", String.valueOf(System.currentTimeMillis()));
         json.put("amount", orderRequest.getAmount().toString());
-        json.put("orderId", orderRequest.getOrderId());
+        json.put("orderId", orderRequest.getOrderCode());
         json.put("cartId", orderRequest.getCartIds());
-        json.put("orderInfo", "Thanh toan don hang " + orderRequest.getOrderId());
+        json.put("orderInfo", "Thanh toan don hang " + orderRequest.getOrderCode());
         json.put("returnUrl", MoMoConstant.REDIRECT_URL);
         json.put("notifyUrl", MoMoConstant.NOTIFY_URL);
         json.put("requestType", MoMoConstant.REQUEST_TYPE);

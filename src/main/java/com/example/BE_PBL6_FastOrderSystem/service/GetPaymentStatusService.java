@@ -27,15 +27,15 @@ public class GetPaymentStatusService {
         json.put("partnerCode", MoMoConstant.PARTNER_CODE);
         json.put("accessKey", MoMoConstant.ACCESS_KEY);
         json.put("requestId", String.valueOf(System.currentTimeMillis()));
-        json.put("orderId", requestDTO.getOrderId());
-        json.put("cardId", requestDTO.getCartIds());
+        json.put("orderId", requestDTO.getOrderCode());
+        //json.put("cardId", requestDTO.getCartIds());
         json.put("requestType", MoMoConstant.CHECK_STATUS_TYPE);
 
         String data = "partnerCode=" + MoMoConstant.PARTNER_CODE
                 + "&accessKey=" + json.get("accessKey")
                 + "&requestId=" + json.get("requestId")
                 + "&orderId=" + json.get("orderId")
-                + "&cardId=" + json.get("cardId")
+              //  + "&cardId=" + json.get("cardId")
                 + "&requestType=" + json.get("requestType");
 
         String signatureKey = MoMoHelper.computeHmacSha256(data, MoMoConstant.SECRET_KEY);
