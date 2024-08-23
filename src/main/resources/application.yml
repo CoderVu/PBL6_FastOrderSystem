@@ -12,11 +12,15 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     security:
       jwt:
-        secret-key: xTKk7Ald/su3sDOWzUozdd8E/7X5q6HYKUKZfl+4qrQ=
+        secret-key: xzTXSzUBtPJCnTG8jGrJuzHCQxKv58bLEkOvMQAb7mB6CmfD/19kMxtNgmnT53LR
         expire-length: 3600000
   jackson:
     serialization:
      fail-on-empty-beans: false
+jwt:
+  signerKey: "W31fqJQUxdNSy/Y+F+RFsa/Zi4hx3sX2tfRH/dAk/0342mbKCFpdljSyUkeE59vxGYdSPYIAW2UW+pExDCD+1Q=="
+  valid-duration: 3600 # in seconds
+  refreshable-duration: 3600 # in seconds
   jpa:
     show-sql: true
     hibernate:

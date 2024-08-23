@@ -7,6 +7,7 @@ import com.example.BE_PBL6_FastOrderSystem.request.UserRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface IUserService {
     ResponseEntity<APIRespone> updateUser (Long id, UserRequest userRequest);
 
     ResponseEntity<APIRespone> unlockUserAccount(Long userId) throws UserNotFoundException;
+
+    UserDetails loadUserByUsername(String username);
 }

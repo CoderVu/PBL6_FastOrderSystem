@@ -1,13 +1,12 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.model.Role;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.RoleRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
+import com.example.BE_PBL6_FastOrderSystem.request.RefreshRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
-import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
@@ -20,7 +19,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -131,6 +129,16 @@ public class AuthServiceImpl implements IAuthService {
         user.setRole(adminRole);
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success",""));
+    }
+    @Override
+    public ResponseEntity<APIRespone> refreshToken(RefreshRequest request) {
+        String refreshToken = request.getRefreshToken();
+        if (jwtUtils.validateToken(refreshToken)) {
+            String newAccessToken = jwtUtils.generateTokenFromRefreshToken(refreshToken);
+            return ResponseEntity.ok(new APIRespone(true, "Token refreshed successfully", newAccessToken));
+        } else {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid token", null));
+        }
     }
 
 }

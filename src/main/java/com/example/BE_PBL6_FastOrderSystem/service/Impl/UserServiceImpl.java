@@ -14,6 +14,7 @@ import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -129,5 +130,10 @@ public class UserServiceImpl implements IUserService {
         user.setAccountLocked(false);
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String numberPhone) {
+        return userDetailsService.loadUserByUsername(numberPhone);
     }
 }

@@ -1,14 +1,16 @@
 package com.example.BE_PBL6_FastOrderSystem.security;
 
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+
+import javax.crypto.SecretKey;
 import java.security.SecureRandom;
 import java.util.Base64;
 
 public class SecretKeyGenerator {
     public static void main(String[] args) {
-        SecureRandom secureRandom = new SecureRandom();
-        byte[] key = new byte[32]; // 256 bits
-        secureRandom.nextBytes(key);
-        String encodedKey = Base64.getEncoder().encodeToString(key);
-        System.out.println("Generated Secret Key: " + encodedKey);
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+        String base64Key = Base64.getEncoder().encodeToString(key.getEncoded());
+        System.out.println("Generated Key: " + base64Key);
     }
 }
