@@ -37,8 +37,6 @@ public class Order {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<CartItem> cartItems;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
@@ -63,13 +61,6 @@ public class Order {
     }
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
-    }
-    public List<CartItem> getCartItems() {
-        return cartItems;
-    }
-
-    public void setCartItems(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
     }
 
     public User getUser() {
@@ -157,7 +148,6 @@ public class Order {
                 ", deliveryAddress='" + deliveryAddress + '\'' +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
-                ", cartItems=" + cartItems +
                 ", orderDetails=" + orderDetails +
                 '}';
     }

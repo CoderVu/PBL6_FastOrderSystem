@@ -27,11 +27,11 @@ import java.util.stream.Collectors;
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${jwt.signerKey}")
+    @Value("${spring.datasource.security.jwt.signerKey}")
     private String jwtSecret;
 
     @NonFinal
-    @Value("${jwt.valid-duration}")
+    @Value("${spring.datasource.security.jwt.valid-duration}")
     private int jwtExpirationMs;
 
     @Autowired

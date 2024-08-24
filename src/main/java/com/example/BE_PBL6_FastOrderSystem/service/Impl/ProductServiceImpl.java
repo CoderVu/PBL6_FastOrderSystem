@@ -43,7 +43,6 @@ public class ProductServiceImpl implements IProductService {
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
     }
-
     @Override
     public ResponseEntity<APIRespone>  getProductById(Long productId) {
         Optional<Product> product = productRepository.findById(productId);
@@ -177,5 +176,49 @@ public ResponseEntity<APIRespone> deleteProduct(Long id) {
     return new ResponseEntity<>(new APIRespone(true, "Product deleted successfully", ""), HttpStatus.OK);
 
    }
+
+    @Override
+    public ResponseEntity<APIRespone> applyProductToStore(Long storeId, Long productId) {
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+        Store store = storeOptional.get();
+        Product product = productOptional.get();
+        store.getProducts().add(product);
+        product.getStores().add(store); // luu vao bang trung gian
+        storeRepository.save(store);
+        productRepository.save(product); // luu vao bang trung gian
+
+        return new ResponseEntity<>(new APIRespone(true, "Product applied to store successfully", ""), HttpStatus.OK);
+    }
+    @Override
+    public ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId) {
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Store store = storeOptional.get();
+        Product product = productOptional.get();
+
+        store.getProducts().remove(product);
+        product.getStores().remove(store); // Ensure bidirectional relationship is maintained
+
+        storeRepository.save(store); // Save store to update join table
+        productRepository.save(product); // Save product to update join table
+
+        return new ResponseEntity<>(new APIRespone(true, "Product removed from store successfully", ""), HttpStatus.OK);
+    }
 
 }

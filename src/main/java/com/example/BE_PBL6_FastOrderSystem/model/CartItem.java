@@ -19,9 +19,6 @@ public class CartItem {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    @ManyToOne // Một cartItem chỉ thuộc về một order và một order có thể có nhiều cartItem
-    @JoinColumn(name = "order_id")
-    private Order order;
 
     private int quantity;
     private double unitPrice;
@@ -65,13 +62,7 @@ public class CartItem {
     public void setProduct(Product product) {
         this.product = product;
     }
-    public Order getOrder() {
-        return order;
-    }
 
-    public void setOrder(Order order) {
-        this.order = order;
-    }
 
     public int getQuantity() {
         return quantity;
@@ -134,7 +125,6 @@ public class CartItem {
                 "cartId=" + cartId +
                 ", user=" + user +
                 ", product=" + product +
-                ", order=" + order +
                 ", quantity=" + quantity +
                 ", unitPrice=" + unitPrice +
                 ", totalPrice=" + totalPrice +
