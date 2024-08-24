@@ -94,22 +94,8 @@ public class UserOrderController {
                 orderService.updateOrderStatus(orderCode, "Chưa giao hàng");
                 // Retrieve the Order object
                 Order order = orderService.findOrderByOrderCode(orderCode);
-                // Create and save Payment entity
-                Payment payment = new Payment();
-                payment.setOrder(order);
-                payment.setPaymentDate(LocalDateTime.now());
-                payment.setAmountPaid(orderRequest.getAmount().doubleValue());
-                payment.setPaymentMethod(paymentService.findPaymentMethodByName("CASH"));
-                payment.setStatus("Chưa thanh toán");
-                payment.setCreatedAt(LocalDateTime.now());
-                payment.setOrderCode(orderCode);
-                payment.setUserId(userId);
-                payment.setDeliveryAddress(deliveryAddress);
-                payment.setOrderInfo(orderRequest.getOrderInfo());
-                payment.setLang(orderRequest.getLang());
-                payment.setExtraData(orderRequest.getExtraData());
-
-                paymentRepository.save(payment);
+                // Create and save Payment entityD
+                return paymentService.savePayment(orderRequest, order, userId, deliveryAddress);
             }
             return response;
         } else {

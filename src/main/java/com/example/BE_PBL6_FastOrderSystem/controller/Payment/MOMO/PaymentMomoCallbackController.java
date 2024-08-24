@@ -44,24 +44,12 @@ public class PaymentMomoCallbackController {
                     // Nhận thông tin đơn hàng
                     Order order = orderService.findOrderByOrderCode(orderRequest.getOrderCode());
 
-                    // Tạo và lưu Payment entity
-                    Payment payment = new Payment();
-                    payment.setOrder(order);
-                    payment.setPaymentDate(LocalDateTime.now());
-                    payment.setAmountPaid(orderRequest.getAmount().doubleValue());
-                    payment.setPaymentMethod(paymentService.findPaymentMethodByName("MOMO"));
-                    payment.setStatus("Đã thanh toán");
-                    payment.setCreatedAt(LocalDateTime.now());
-                    payment.setOrderCode(orderRequest.getOrderCode());
-                    payment.setUserId(orderRequest.getUserId());
-                    payment.setDeliveryAddress(orderRequest.getDeliveryAddress());
-                    payment.setOrderInfo(orderRequest.getOrderInfo());
-                    payment.setLang(orderRequest.getLang());
-                    payment.setExtraData(orderRequest.getExtraData());
-
-                    paymentRepository.save(payment);
+                    // Lưu Payment entity bằng payment service với trạng thái "Đã thanh toán"
+                    return paymentService.savePayment(orderRequest, order, orderRequest.getUserId(), orderRequest.getDeliveryAddress());
+                } else {
+                    // Đặt hàng thất bại
+                    return response;
                 }
-                return response;
             } else {
                 // Không tìm thấy thông tin đơn hàng
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -73,8 +61,7 @@ public class PaymentMomoCallbackController {
                     .body(new APIRespone(false, "Payment failed: " + message, null));
         }
     }
-
-    // Method to cache order request
+    // Lưu thông tin đơn hàng vào cache
     public void cacheOrderRequest(PaymentRequest orderRequest) {
         orderRequestCache.put(orderRequest.getOrderCode(), orderRequest);
     }

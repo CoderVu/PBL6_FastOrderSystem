@@ -14,6 +14,7 @@ import static com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails.
 @RestController
 @RequestMapping("/api/v1/owner/promotions")
 @RequiredArgsConstructor
+
 public class OwnerPromotionController {
     final IPromotionService promotionService;
 
@@ -23,4 +24,9 @@ public class OwnerPromotionController {
             @RequestParam("productId") Long productId) {
         return promotionService.applyPromotionToProduct(promotionId, productId);
     }
+    @GetMapping("/store/{storeId}")
+    public ResponseEntity<APIRespone> getAllPromoByStoreId(@PathVariable Long storeId) {
+        return promotionService.getAllPromoByStoreId(storeId);
+    }
+
 }

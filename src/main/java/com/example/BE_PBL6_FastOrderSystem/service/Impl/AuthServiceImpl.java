@@ -22,8 +22,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class AuthServiceImpl implements IAuthService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Phone number is required", ""));
         }
         if (userRepository.findByPhoneNumber(numberPhone).getPassword() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Password is required",""));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Password is required", ""));
         }
         if (userRepository.findByPhoneNumber(numberPhone).isAccountLocked()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Account is locked", ""));
@@ -56,13 +58,14 @@ public class AuthServiceImpl implements IAuthService {
             List<String> roles = userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .toList();
-            return ResponseEntity.ok(new APIRespone(true,"Success" ,new JwtResponse((userDetails.getId()),
+            return ResponseEntity.ok(new APIRespone(true, "Success", new JwtResponse((userDetails.getId()),
                     userDetails.getEmail(), userDetails.getFullName(), userDetails.getPhoneNumber(), userDetails.getAddress(),
                     userDetails.getCreatedAt(), userDetails.getUpdatedAt(), userDetails.isAccountLocked(), jwt, roles)));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Invalid phone number or password", ""));
+        }
     }
-    }
+
     @Override
     public ResponseEntity<APIRespone> registerUser(User user) {
         if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
@@ -80,10 +83,10 @@ public class AuthServiceImpl implements IAuthService {
         if (user.getFullName() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Full name is required", ""));
         }
-        if (user.getEmail() == null ||  !user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (user.getEmail() == null || !user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Email is required", ""));
         }
-        if (user.getAddress() == null ) {
+        if (user.getAddress() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Address is required", ""));
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -96,6 +99,7 @@ public class AuthServiceImpl implements IAuthService {
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
+
     @Override
     public ResponseEntity<APIRespone> registerAdmin(User user) {
         if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
@@ -114,10 +118,10 @@ public class AuthServiceImpl implements IAuthService {
         if (user.getFullName() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Full name is required", ""));
         }
-        if (user.getEmail() == null ||  !user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (user.getEmail() == null || !user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Email is required", ""));
         }
-        if (user.getAddress() == null ) {
+        if (user.getAddress() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Address is required", ""));
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -128,8 +132,9 @@ public class AuthServiceImpl implements IAuthService {
         Role adminRole = optionalRole.get();
         user.setRole(adminRole);
         userRepository.save(user);
-        return ResponseEntity.ok(new APIRespone(true, "Success",""));
+        return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
+
     @Override
     public ResponseEntity<APIRespone> refreshToken(RefreshRequest request) {
         String refreshToken = request.getRefreshToken();
@@ -140,5 +145,21 @@ public class AuthServiceImpl implements IAuthService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid token", null));
         }
     }
+    private final Set<String> invalidTokens = new HashSet<>();
+
+    @Override
+    public void logout(String token) {
+        invalidTokens.add(token);
+    }
+    @Override
+    public boolean isTokenInvalid(String token) {
+        return invalidTokens.contains(token);
+    }
+
+    @Override
+    public void invalidateToken(String refreshToken) {
+        invalidTokens.add(refreshToken);
+    }
+
 
 }

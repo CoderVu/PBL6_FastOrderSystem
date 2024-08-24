@@ -9,7 +9,7 @@ spring:
     username: root
     password: 123456789
     url: jdbc:mysql://localhost:3306/db_pbl6
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     security:
       jwt:
         secret-key: xzTXSzUBtPJCnTG8jGrJuzHCQxKv58bLEkOvMQAb7mB6CmfD/19kMxtNgmnT53LR
@@ -17,10 +17,13 @@ spring:
   jackson:
     serialization:
      fail-on-empty-beans: false
+  mvc:
+    async:
+      request-timeout: 60000 # Increase timeout to 60 seconds
 jwt:
   signerKey: "W31fqJQUxdNSy/Y+F+RFsa/Zi4hx3sX2tfRH/dAk/0342mbKCFpdljSyUkeE59vxGYdSPYIAW2UW+pExDCD+1Q=="
-  valid-duration: 3600 # in seconds
-  refreshable-duration: 3600 # in seconds
+  valid-duration:  86400
+  refreshable-duration: 86400 # in seconds
   jpa:
     show-sql: true
     hibernate:
@@ -33,9 +36,9 @@ jwt:
       file-size-threshold: 2KB
 logging:
   level:
+    org:
+      springframework:
+        web: DEBUG
+        security: DEBUG
     com:
-      example:
-        BE_PBL6_FastOrderSystem:
-          service:
-            Impl:
-              ProductServiceImpl=DEBUG: INFO
+      BE_PBL6_FastOrderSystem : DEBUG

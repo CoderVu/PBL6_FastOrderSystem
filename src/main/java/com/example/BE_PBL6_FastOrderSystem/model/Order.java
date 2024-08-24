@@ -142,4 +142,23 @@ public class Order {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "orderId=" + orderId +
+                ", orderCode='" + orderCode + '\'' +
+                ", user=" + user +
+                ", store=" + store +
+                ", orderDate=" + orderDate +
+                ", totalAmount=" + totalAmount +
+                ", status='" + status + '\'' +
+                ", paymentMethod=" + paymentMethod +
+                ", deliveryAddress='" + deliveryAddress + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", cartItems=" + cartItems +
+                ", orderDetails=" + orderDetails +
+                '}';
+    }
 }

@@ -128,6 +128,20 @@ public class CartItem {
         this.updatedAt = updatedAt;
     }
 
-
-
+    @Override
+    public String toString() {
+        return "CartItem{" +
+                "cartId=" + cartId +
+                ", user=" + user +
+                ", product=" + product +
+                ", order=" + order +
+                ", quantity=" + quantity +
+                ", unitPrice=" + unitPrice +
+                ", totalPrice=" + totalPrice +
+                ", storeId=" + storeId +
+                ", status='" + status + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }
