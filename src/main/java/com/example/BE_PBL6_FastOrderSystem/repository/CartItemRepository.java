@@ -8,6 +8,9 @@ import java.util.List;
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findByUserId(Long userId);
 
-
+// interface là nơi chứa các phương thức truy vấn dữ liệu từ cơ sở dữ liệu
     List<CartItem> findByCartId(Long cartId);
+
+
+    List<CartItem> findByCombo_ComboId(Long comboId);
 }

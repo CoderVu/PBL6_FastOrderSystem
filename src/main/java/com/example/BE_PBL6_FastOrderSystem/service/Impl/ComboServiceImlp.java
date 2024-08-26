@@ -37,6 +37,11 @@ public class ComboServiceImlp implements IComboService {
         return ResponseEntity.ok(new APIRespone(true, "Success", convertToComboResponse(combo)));
     }
 
+    @Override
+    public Combo findBycomboId(Long comboId) {
+        return comboRepository.findById(comboId).get();
+    }
+
     public ComboResponse convertToComboResponse(Combo combo) {
         return new ComboResponse(
                 combo.getComboId(),

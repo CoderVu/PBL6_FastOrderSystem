@@ -18,8 +18,9 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
-
-
+    @ManyToOne
+    @JoinColumn(name = "combo_id")
+    private Combo combo;
     private int quantity;
     private double unitPrice;
     private double totalPrice;
@@ -61,6 +62,12 @@ public class CartItem {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+    public Combo getCombo() {
+        return combo;
+    }
+    public void setCombo(Combo combo) {
+        this.combo = combo;
     }
 
 

@@ -55,17 +55,17 @@ public class JwtUtils {
                 .setAudience("FastOrderSystem")
                 .setNotBefore(new Date(System.currentTimeMillis()))
                 .setHeaderParam("typ", "JWT")
-                .setHeaderParam("alg", "HS512") // Sử dụng HS512 thay vì HS256
-                .setHeaderParam("kid", "fastorder")
+                .setHeaderParam("alg", "HS512") // Sử dụng HS512
+                .setHeaderParam("kid", "fastorder") // Key ID để xác định key
                 .setId(UUID.randomUUID().toString())
                 .signWith(key(), SignatureAlgorithm.HS512) // Sử dụng HS512
                 .compact();
-    }
+    } // Tạo token từ thông tin user
 
     private SecretKey key() {
         byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyBytes);
-    }
+    } // Tạo key từ secret lấy từ application.yaml
 
 
     public String generateTokenFromRefreshToken(String refreshToken) {
@@ -76,25 +76,25 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(username) // Sử dụng username đã lấy
                 .claim("roles", roles)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs * 1000L))
+                .setIssuedAt(new Date()) // Thời gian tạo token
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs * 1000L)) // Thời gian hết hạn của token
                 .setIssuer("FastOrderSystem")
                 .setAudience("FastOrderSystem")
                 .setNotBefore(new Date())
                 .setHeaderParam("typ", "JWT")
                 .setHeaderParam("alg", "HS512")
-                .setHeaderParam("kid", "fastorder")
+                .setHeaderParam("kid", "fastorder") // Key ID để xác định key
                 .setId(UUID.randomUUID().toString())
                 .signWith(key(), SignatureAlgorithm.HS512)
                 .compact();
-    }
+    } // Tạo token từ refreshToken
 
     public String getUserNameFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key())
                 .build()
                 .parseClaimsJws(token).getBody().getSubject();
-    }
+    } // Lấy username từ token
 
     public boolean validateToken(String token) {
         if (authService.isTokenInvalid(token)) {

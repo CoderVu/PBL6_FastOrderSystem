@@ -15,7 +15,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-@Service
+@Service // đánh dấu đây là một service để spring boot có thể quản lý và inject vào các bean khác trong ứng dụng của bạn
+// bean là một đối tượng mà spring framework quản lý và tạo ra nó, nó được quản lý trong container của spring và được sử dụng bởi các class khác trong ứng dụng của bạn thông qua dependency injection
 @RequiredArgsConstructor
 public class OrderServiceImpl implements IOrderService {
     private final OrderRepository orderRepository;
@@ -139,7 +140,7 @@ public class OrderServiceImpl implements IOrderService {
         Order order = orderOptional.get();
         order.setStatus(status);
         orderRepository.save(order);
-        return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully", new OrderResponse(order)));
+        return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully",""));
     }
 
     @Override
@@ -170,6 +171,66 @@ public class OrderServiceImpl implements IOrderService {
         List<OrderResponse> orderResponses = ownerOrders.stream().map(OrderResponse::new).collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
     }
+    @Override
+    public ResponseEntity<APIRespone> processComboOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
+        List<CartItem> cartItems = cartIds.stream()
+                .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
+                .collect(Collectors.toList());
+
+        if (cartItems.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
+        }
+
+        Long storeId = cartItems.get(0).getStoreId();
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        Store store = storeOptional.get();
+
+        Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
+        if (paymentMethodOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
+        }
+        PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
+
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+        }
+        User user = userOptional.get();
+
+        Order order = new Order();
+        order.setOrderDate(LocalDateTime.now());
+        order.setStatus(cartItems.get(0).getStatus());
+        order.setOrderCode(orderCode);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+        order.setStore(store);
+        order.setUser(user);
+        order.setPaymentMethod(paymentMethodEntity);
+        order.setDeliveryAddress(deliveryAddress);
+
+        List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrder(order);
+            orderDetail.setCombo(cartItem.getCombo());
+            orderDetail.setQuantity(cartItem.getQuantity());
+            orderDetail.setUnitPrice(cartItem.getUnitPrice());
+            orderDetail.setTotalPrice(cartItem.getTotalPrice());
+            return orderDetail;
+        }).collect(Collectors.toList());
+
+
+        order.setOrderDetails(orderDetails);
+        order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
+        orderRepository.save(order);
+        cartItemRepository.deleteAll(cartItems);
+
+        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
+    }
+
+
     @Override
     public ResponseEntity<APIRespone> getAllOrdersByAdmin() {
       if (orderRepository.findAll().isEmpty()) {

@@ -37,7 +37,8 @@ public class Product {
     private LocalDateTime updatedAt;
     private Boolean bestSale;
     @ManyToMany(mappedBy = "products")
-    private Set<Combo> combos;
+    private Set<Combo> combos = new HashSet<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

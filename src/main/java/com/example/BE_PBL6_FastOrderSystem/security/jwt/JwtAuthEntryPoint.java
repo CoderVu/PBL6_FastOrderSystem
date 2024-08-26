@@ -30,18 +30,16 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
         } else {
             // Handle 401 Unauthorized error
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
             ResponseEntity<APIRespone> responseEntity = buildResponseEntity(
                     HttpServletResponse.SC_UNAUTHORIZED,
                     "Unauthorized",
                     authException.getMessage(),
                     request.getServletPath()
             );
-
             final ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(response.getOutputStream(), responseEntity.getBody());
         }
-    }
+    } // xử lý các exception trong quá trình xác thực token
 
     private void handleNotFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -55,7 +53,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
 
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), responseEntity.getBody());
-    }
+    } // xử lý exception 404
     private ResponseEntity<APIRespone> buildResponseEntity(int status, String error, String message, String path) {
         APIRespone apiResponse = APIRespone.builder()
                 .status(false)
@@ -68,5 +66,5 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                 ))
                 .build();
         return ResponseEntity.status(status).body(apiResponse);
-    }
+    } // xây dựng response entity
 }

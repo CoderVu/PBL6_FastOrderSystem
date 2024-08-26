@@ -133,7 +133,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String numberPhone) {
+    public UserDetails loadUserByNumberPhone(String numberPhone) {
         return userDetailsService.loadUserByUsername(numberPhone);
     }
 }

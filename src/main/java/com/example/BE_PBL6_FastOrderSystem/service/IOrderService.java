@@ -12,26 +12,17 @@ public interface IOrderService {
     String generateUniqueOrderCode();
 
     ResponseEntity<APIRespone> processOrder(Long UserId ,String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
-
+    ResponseEntity<APIRespone> processComboOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
     ResponseEntity<APIRespone> updateQuantityProduct(Long productId, int quantity);
-
     ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status);
-
     ResponseEntity<APIRespone> updateOrderStatus(String orderCode, String status);
-
     ResponseEntity<APIRespone> getOrderByIdAndUserId(Long orderId, Long userId);
     ResponseEntity<APIRespone> getAllOrdersByUser(Long userId);
-
     ResponseEntity<APIRespone> getAllOrdersByAdmin();
-
     List<CartItem> getCartItemsByCartId(Long cartId);
-
     ResponseEntity<APIRespone> getStatusOrder(Long orderId, Long userId);
-
-
     Order findOrderByOrderCode(String orderCode);
-
     Order findOrderByOrderIdAndOwnerId(String orderCode, Long ownerId);
-
     ResponseEntity<APIRespone> getAllOrdersByOwner(Long ownerId);
+
 }

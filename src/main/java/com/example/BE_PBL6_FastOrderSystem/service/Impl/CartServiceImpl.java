@@ -1,13 +1,8 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.CartItem;
-import com.example.BE_PBL6_FastOrderSystem.model.Product;
-import com.example.BE_PBL6_FastOrderSystem.model.Store;
-import com.example.BE_PBL6_FastOrderSystem.model.User;
-import com.example.BE_PBL6_FastOrderSystem.repository.CartItemRepository;
-import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
-import com.example.BE_PBL6_FastOrderSystem.repository.StoreRepository;
-import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
+import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.repository.*;
+import com.example.BE_PBL6_FastOrderSystem.request.CartComboRequest;
 import com.example.BE_PBL6_FastOrderSystem.request.CartRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.CartItemsResponse;
@@ -29,6 +24,7 @@ public class CartServiceImpl implements ICartService {
 
     final private CartItemRepository cartItemRepository;
     final private StoreRepository storeRepository;
+    final private ComboRepository comboRepository;
 
     @Override
     public ResponseEntity<APIRespone> addToCart(Long userId, CartRequest cartRequest) {
@@ -60,6 +56,46 @@ public class CartServiceImpl implements ICartService {
         cartItem.setStatus(cartRequest.getStatus());
         cartItemRepository.save(cartItem);;
         return ResponseEntity.ok(new APIRespone(true, "Add to cart successfully", ""));
+    }
+    @Override
+    public ResponseEntity<APIRespone> addComboToCart(Long userId, CartComboRequest cartComboRequest) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+        }
+        // Lay combo tu combo id
+        Combo combo = comboRepository.findById(cartComboRequest.getComboId()).orElse(null);
+        if (combo == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
+        }
+        // Kiem tra so luong cua tung product trong combo
+        for (Product product : combo.getProducts()) {
+            if (product.getStockQuantity() < cartComboRequest.getQuantity()) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Product " + product.getProductName() + " not enough", ""));
+            }
+        }
+        // Kiem tra store cua tung product trong combo
+        for (Product product : combo.getProducts()) {
+            Store store = storeRepository.findById(cartComboRequest.getStoreId()).orElse(null);
+            if (store == null) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+            }
+            if (!product.getStores().contains(store)) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Product " + product.getProductName() + " does not belong to the specified store", ""));
+            }
+        }
+        // Them combo vao cart
+        CartItem cartItem = new CartItem();
+        cartItem.setUser(user);
+        cartItem.setCombo(combo); // Set combo
+        cartItem.setQuantity(cartComboRequest.getQuantity());
+        cartItem.setUnitPrice(combo.getComboPrice());
+        cartItem.setTotalPrice(combo.getComboPrice() * cartComboRequest.getQuantity());
+        cartItem.setStoreId(cartComboRequest.getStoreId());
+        cartItem.setStatus(cartComboRequest.getStatus());
+        cartItemRepository.save(cartItem);
+
+        return ResponseEntity.ok(new APIRespone(true, "Add combo to cart successfully", ""));
     }
     @Override
     public ResponseEntity<APIRespone> getHistoryCart(Long userId) {

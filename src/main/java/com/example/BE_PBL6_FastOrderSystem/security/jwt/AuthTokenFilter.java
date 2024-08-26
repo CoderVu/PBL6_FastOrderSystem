@@ -51,7 +51,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             logger.error("Cannot set user authentication : {} ", e.getMessage());
         }
         filterChain.doFilter(request, response);
-    }
+    } // kiểm tra token, nếu token hợp lệ thì sẽ set thông tin user vào SecurityContext
 
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
@@ -60,4 +60,5 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
         return null;
     }
+    // lấy token từ header của request
 }

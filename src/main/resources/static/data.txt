@@ -44,3 +44,73 @@
                     |  phoneNumber   |         +----------------+
                     |  address       |
                     +----------------+
+
+@Override
+public ResponseEntity<APIRespone> processComboOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
+    List<CartItem> cartItems = cartIds.stream()
+            .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
+            .collect(Collectors.toList());
+
+    if (cartItems.isEmpty()) {
+        return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
+    }
+
+    Long storeId = cartItems.get(0).getStoreId();
+    Optional<Store> storeOptional = storeRepository.findById(storeId);
+    if (storeOptional.isEmpty()) {
+        return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+    }
+    Store store = storeOptional.get();
+
+    Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
+    if (paymentMethodOptional.isEmpty()) {
+        return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
+    }
+    PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
+
+    Optional<User> userOptional = userRepository.findById(userId);
+    if (userOptional.isEmpty()) {
+        return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+    }
+    User user = userOptional.get();
+
+    Order order = new Order();
+    order.setOrderDate(LocalDateTime.now());
+    order.setStatus(cartItems.get(0).getStatus());
+    order.setOrderCode(orderCode);
+    order.setCreatedAt(LocalDateTime.now());
+    order.setUpdatedAt(LocalDateTime.now());
+    order.setStore(store);
+    order.setUser(user);
+    order.setPaymentMethod(paymentMethodEntity);
+    order.setDeliveryAddress(deliveryAddress);
+
+    List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
+        OrderDetail orderDetail = new OrderDetail();
+        orderDetail.setOrder(order);
+        orderDetail.setProduct(cartItem.getProduct());
+        orderDetail.setCombo(cartItem.getCombo()); // Set combo
+        orderDetail.setQuantity(cartItem.getQuantity());
+        orderDetail.setUnitPrice(cartItem.getUnitPrice());
+        orderDetail.setTotalPrice(cartItem.getTotalPrice());
+        return orderDetail;
+    }).collect(Collectors.toList());
+
+    for (OrderDetail orderDetail : orderDetails) {
+        Product product = orderDetail.getProduct();
+        if (product.getStockQuantity() < orderDetail.getQuantity()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Insufficient stock for product: " + product.getProductId(), ""));
+        }
+    }
+
+    for (OrderDetail orderDetail : orderDetails) {
+        updateQuantityProduct(orderDetail.getProduct().getProductId(), orderDetail.getQuantity());
+    }
+
+    order.setOrderDetails(orderDetails);
+    order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
+    orderRepository.save(order);
+    cartItemRepository.deleteAll(cartItems);
+
+    return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
+}

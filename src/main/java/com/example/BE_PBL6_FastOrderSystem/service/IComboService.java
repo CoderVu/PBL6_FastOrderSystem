@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service;
 
+import com.example.BE_PBL6_FastOrderSystem.model.Combo;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.ComboResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
@@ -10,4 +11,6 @@ import java.util.List;
 public interface IComboService {
     ResponseEntity<APIRespone> getAllCombos();
     ResponseEntity<APIRespone> getProductsByComboId(Long comboId);
+
+    Combo findBycomboId(Long comboId);
 }

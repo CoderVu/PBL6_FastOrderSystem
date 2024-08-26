@@ -14,13 +14,14 @@ public class Combo {
 
 
 
-    @ManyToMany
+    @ManyToMany //
     @JoinTable(
             name = "combo_product",
-            joinColumns = @JoinColumn(name = "combo_id"),
+            joinColumns = @JoinColumn(name = "combo_id"), //
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private Set<Product> products; // Products included in the combo
+    private Set<Product> products;
+    // Set là một tập hợp không chứa các phần tử trùng lặp
 
     // Getters and setters
 

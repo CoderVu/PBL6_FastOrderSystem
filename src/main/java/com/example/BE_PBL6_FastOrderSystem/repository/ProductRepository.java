@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.repository;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,4 +21,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsByProductName(String productName);
 
+    @Query("SELECT p FROM Product p JOIN p.combos c WHERE c.comboId = :comboId")
+    List<Product> findByComboId(@Param("comboId") Long comboId);
 }

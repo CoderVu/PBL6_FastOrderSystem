@@ -145,7 +145,7 @@ public class AuthServiceImpl implements IAuthService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid token", null));
         }
     }
-    private final Set<String> invalidTokens = new HashSet<>();
+    private final Set<String> invalidTokens = new HashSet<>(); // Là nơi lưu trữ token đã logout
 
     @Override
     public void logout(String token) {

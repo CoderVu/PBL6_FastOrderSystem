@@ -44,17 +44,17 @@ public class FoodUserDetails implements UserDetails {
                 user.getUpdatedAt(),
                 user.isAccountLocked(),
                 List.of(authority));
-    }
+    } // Tạo ra một đối tượng FoodUserDetails từ một đối tượng User
 
     public static Long getCurrentUserId() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return ((FoodUserDetails) userDetails).getId();
-    }
+    } // SrcurityContextHolder lưu trữ thông tin người dùng hiện tại, lấy ra id của người dùng hiện tại
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
-    }
+    }// Trả về danh sách các quyền của người dùng
 
     @Override
     public String getPassword() {
@@ -79,7 +79,7 @@ public class FoodUserDetails implements UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
-    }
+    } // Trả về trạng thái hết hạn của thông tin đăng nhập
 
     @Override
     public boolean isEnabled() {
