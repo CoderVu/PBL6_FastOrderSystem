@@ -19,6 +19,7 @@ public class Product {
     private String image;
     private String description;
     private Double price;
+    private Double discountedPrice;
     @ManyToMany(mappedBy = "products") // để tránh việc tạo bảng trung gian
     private Set<Promotion> promotions = new HashSet<>();
 
@@ -85,6 +86,12 @@ public class Product {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+    public Double getDiscountedPrice() {
+        return discountedPrice;
+    }
+    public void setDiscountedPrice(Double discountedPrice) {
+        this.discountedPrice = discountedPrice;
     }
     public Set<Promotion> getPromotions() {
         return promotions;

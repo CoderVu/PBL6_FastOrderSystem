@@ -1,10 +1,10 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
-import com.example.BE_PBL6_FastOrderSystem.response.ComboResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.*;
 import com.example.BE_PBL6_FastOrderSystem.model.Combo;
 import com.example.BE_PBL6_FastOrderSystem.repository.ComboRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IComboService;
+import com.example.BE_PBL6_FastOrderSystem.utils.ResponseConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,11 +30,14 @@ public class ComboServiceImlp implements IComboService {
 
     @Override
     public ResponseEntity<APIRespone> getProductsByComboId(Long comboId) {
-      if (comboRepository.findById(comboId).isEmpty()) {
-          return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
-      }
+        if (comboRepository.findById(comboId).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
+        }
         Combo combo = comboRepository.findById(comboId).get();
-        return ResponseEntity.ok(new APIRespone(true, "Success", convertToComboResponse(combo)));
+        List<ProductResponse> productResponses = combo.getProducts().stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", productResponses));
     }
 
     @Override

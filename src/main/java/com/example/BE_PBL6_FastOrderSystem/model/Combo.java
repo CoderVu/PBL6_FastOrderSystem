@@ -9,6 +9,7 @@ public class Combo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long comboId;
     private String comboName;
+    @Column(name = "image", columnDefinition = "LONGTEXT")
     private String image;
     private Double comboPrice;
 
