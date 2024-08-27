@@ -12,9 +12,6 @@ public class Combo {
     @Column(name = "image", columnDefinition = "LONGTEXT")
     private String image;
     private Double comboPrice;
-
-
-
     @ManyToMany //
     @JoinTable(
             name = "combo_product",
@@ -22,9 +19,6 @@ public class Combo {
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private Set<Product> products;
-    // Set là một tập hợp không chứa các phần tử trùng lặp
-
-    // Getters and setters
 
     public Long getComboId() {
         return comboId;
