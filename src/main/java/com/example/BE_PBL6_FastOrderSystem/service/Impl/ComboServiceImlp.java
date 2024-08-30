@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
+import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.ComboRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.*;
 import com.example.BE_PBL6_FastOrderSystem.model.Combo;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.function.EntityResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ComboServiceImlp implements IComboService {
     private final ComboRepository comboRepository;
+    private final ProductRepository productRepository;
 
     @Override
     public ResponseEntity<APIRespone> getAllCombos() {
@@ -44,11 +45,6 @@ public class ComboServiceImlp implements IComboService {
                 .map(ResponseConverter::convertToProductResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", productResponses));
-    }
-
-    @Override
-    public Combo findBycomboId(Long comboId) {
-        return comboRepository.findById(comboId).get();
     }
 
     @Override
@@ -98,12 +94,27 @@ public class ComboServiceImlp implements IComboService {
         return ResponseEntity.ok(new APIRespone(true, "Combo deleted successfully", ""));
     }
 
+    @Override
+    public ResponseEntity<APIRespone> addProduct(Long comboId, Long productId) {
+        if (comboRepository.findById(comboId).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
+        }
+        Combo combo = comboRepository.findById(comboId).get();
+        if (combo.getProducts().stream().anyMatch(product -> product.getProductId().equals(productId))) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Product already exists in combo", ""));
+        }
+        combo.getProducts().add(productRepository.findById(productId).get());
+        comboRepository.save(combo);
+        return ResponseEntity.ok(new APIRespone(true, "Product added to combo successfully", ""));
+    }
+
     public ComboResponse convertToComboResponse(Combo combo) {
         return new ComboResponse(
                 combo.getComboId(),
                 combo.getComboName(),
                 combo.getComboPrice(),
-                combo.getImage()
+                combo.getImage(),
+                combo.getDescription()
         );
     }
 }

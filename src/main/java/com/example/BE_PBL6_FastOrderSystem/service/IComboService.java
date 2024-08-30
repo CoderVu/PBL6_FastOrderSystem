@@ -14,11 +14,11 @@ public interface IComboService {
     ResponseEntity<APIRespone> getAllCombos();
     ResponseEntity<APIRespone> getProductsByComboId(Long comboId);
 
-    Combo findBycomboId(Long comboId);
-
     ResponseEntity<APIRespone> addCombo(ComboRequest comboRequest);
 
     ResponseEntity<APIRespone> updateCombo(Long comboId, ComboRequest comboRequest);
 
     ResponseEntity<APIRespone> deleteCombo(Long comboId);
+
+    ResponseEntity<APIRespone> addProduct(Long comboId, Long productId);
 }

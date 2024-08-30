@@ -12,6 +12,7 @@ public class Combo {
     @Column(name = "image", columnDefinition = "LONGTEXT")
     private String image;
     private Double comboPrice;
+    private String description;
     @ManyToMany //
     @JoinTable(
             name = "combo_product",
@@ -49,6 +50,12 @@ public class Combo {
         this.comboPrice = comboPrice;
     }
 
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
     public Set<Product> getProducts() {
         return products;
     }

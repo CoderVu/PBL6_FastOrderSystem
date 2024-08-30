@@ -18,8 +18,9 @@ public class AdminComboController {
     ResponseEntity<APIRespone> addCombo(
             @RequestParam("comboName") String comboName,
             @RequestParam("price") Double price,
-            @RequestParam("image") MultipartFile image){
-        ComboRequest comboRequest = new ComboRequest(comboName, price, image);
+            @RequestParam("image") MultipartFile image,
+            @RequestParam("description") String description){
+        ComboRequest comboRequest = new ComboRequest(comboName, price, image, description);
         return comboService.addCombo(comboRequest);
     }
     @PutMapping("/update/{comboId}")
@@ -27,15 +28,19 @@ public class AdminComboController {
             @PathVariable Long comboId,
             @RequestParam("comboName") String comboName,
             @RequestParam("price") Double price,
-            @RequestParam("image") MultipartFile image){
-        ComboRequest comboRequest = new ComboRequest(comboName, price, image);
+            @RequestParam("image") MultipartFile image,
+            @RequestParam("description") String description){
+        ComboRequest comboRequest = new ComboRequest(comboName, price, image, description);
         return comboService.updateCombo(comboId, comboRequest);
     }
     @DeleteMapping("/delete/{comboId}")
     ResponseEntity<APIRespone> deleteCombo(@PathVariable Long comboId){
         return comboService.deleteCombo(comboId);
     }
-
+    @PostMapping("/addProduct/{comboId}/{productId}")
+    ResponseEntity<APIRespone> addProduct(@PathVariable Long comboId, @PathVariable Long productId){
+        return comboService.addProduct(comboId, productId);
+    }
 
 
 }

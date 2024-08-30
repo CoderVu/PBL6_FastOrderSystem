@@ -56,12 +56,12 @@ public class PaymentMomoCallbackController {
                         .body(new APIRespone(false, "Order information not found", null));
             }
         } else {
-            // Thanh toán thất bại
+            // thanh toán thất bại
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new APIRespone(false, "Payment failed: " + message, null));
         }
     }
-    // Lưu thông tin đơn hàng vào cache
+    // lưu thông tin đơn hàng vào cache
     public void cacheOrderRequest(PaymentRequest orderRequest) {
         orderRequestCache.put(orderRequest.getOrderCode(), orderRequest);
     }

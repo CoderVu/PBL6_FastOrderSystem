@@ -27,7 +27,7 @@ public class CartServiceImpl implements ICartService {
     final private ComboRepository comboRepository;
 
     @Override
-    public ResponseEntity<APIRespone> addToCart(Long userId, CartRequest cartRequest) {
+    public ResponseEntity<APIRespone> addProductToCart(Long userId, CartRequest cartRequest) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
@@ -46,7 +46,7 @@ public class CartServiceImpl implements ICartService {
         if (store == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product does not belong to the specified store", ""));
         }
-        CartItem cartItem = new CartItem();
+        Cart cartItem = new Cart();
         cartItem.setUser(user);
         cartItem.setProduct(product);
         cartItem.setQuantity(cartRequest.getQuantity());
@@ -85,7 +85,7 @@ public class CartServiceImpl implements ICartService {
             }
         }
         // Them combo vao cart
-        CartItem cartItem = new CartItem();
+        Cart cartItem = new Cart();
         cartItem.setUser(user);
         cartItem.setCombo(combo); // Set combo
         cartItem.setQuantity(cartComboRequest.getQuantity());
@@ -99,7 +99,7 @@ public class CartServiceImpl implements ICartService {
     }
     @Override
     public ResponseEntity<APIRespone> getHistoryCart(Long userId) {
-        List<CartItem> cartItems = cartItemRepository.findByUserId(userId);
+        List<Cart> cartItems = cartItemRepository.findByUserId(userId);
         if (cartItems.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No cart items found for the user", ""));
         }

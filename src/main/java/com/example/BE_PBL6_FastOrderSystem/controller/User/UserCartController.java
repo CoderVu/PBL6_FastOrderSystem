@@ -5,7 +5,6 @@ import com.example.BE_PBL6_FastOrderSystem.request.CartRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.ICartService;
-import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user/cart")
-public class CartController {
+public class UserCartController {
 
     private final ICartService cartService;
 
@@ -28,7 +27,7 @@ public class CartController {
             @RequestParam Long storeId) {
         Long userId = getCurrentUserId();
         CartRequest cartRequest = new CartRequest(productId, quantity, storeId, "PENDING");
-        return cartService.addToCart(userId, cartRequest);
+        return cartService.addProductToCart(userId, cartRequest);
     }
     @PostMapping("/add/combo")
     public ResponseEntity<APIRespone> addToCartCombo(

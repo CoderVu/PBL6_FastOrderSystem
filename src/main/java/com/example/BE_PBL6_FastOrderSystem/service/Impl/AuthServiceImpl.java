@@ -4,7 +4,6 @@ import com.example.BE_PBL6_FastOrderSystem.model.Role;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.RoleRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
-import com.example.BE_PBL6_FastOrderSystem.request.RefreshRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
@@ -37,6 +36,8 @@ public class AuthServiceImpl implements IAuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final EmailServiceImpl emailService;
+    private final OTPServiceImpl otpService;
 
     @Override
     public ResponseEntity<APIRespone> authenticateUser(String numberPhone, String password) {
@@ -134,17 +135,6 @@ public class AuthServiceImpl implements IAuthService {
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
-
-    @Override
-    public ResponseEntity<APIRespone> refreshToken(RefreshRequest request) {
-        String refreshToken = request.getRefreshToken();
-        if (jwtUtils.validateToken(refreshToken)) {
-            String newAccessToken = jwtUtils.generateTokenFromRefreshToken(refreshToken);
-            return ResponseEntity.ok(new APIRespone(true, "Token refreshed successfully", newAccessToken));
-        } else {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid token", null));
-        }
-    }
     private final Set<String> invalidTokens = new HashSet<>(); // Là nơi lưu trữ token đã logout
 
     @Override
@@ -160,6 +150,31 @@ public class AuthServiceImpl implements IAuthService {
     public void invalidateToken(String refreshToken) {
         invalidTokens.add(refreshToken);
     }
+
+    @Override
+    public ResponseEntity<APIRespone> SendOTP(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Email not found", ""));
+        }
+        user.setId(user.getId());
+        String otp = otpService.generateOTP(email, user.getId());
+        emailService.sendEmail(email, "Password Reset Request", "OTP for password reset is: " + otp);
+        return ResponseEntity.ok(new APIRespone(true, "Success", ""));
+    }
+    @Override
+    public ResponseEntity<APIRespone> confirmOTP(String email, String otp, String newPassword) {
+       if (otpService.verifyOTP(email, otp)) {
+           User user = userRepository.findByEmail(email);
+           user.setPassword(passwordEncoder.encode(newPassword));
+           userRepository.save(user);
+           return ResponseEntity.ok(new APIRespone(true, "Password reset successfully", ""));
+       }
+       else {
+           return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid OTP", ""));
+       }
+    }
+
 
 
 }

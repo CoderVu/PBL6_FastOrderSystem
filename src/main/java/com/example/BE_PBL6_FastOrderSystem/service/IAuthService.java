@@ -13,11 +13,14 @@ public interface IAuthService {
 
     ResponseEntity<APIRespone> registerAdmin(User user);
 
-    ResponseEntity<APIRespone> refreshToken(RefreshRequest request);
 
     void logout(String token);
 
     boolean isTokenInvalid(String token);
 
     void invalidateToken(String refreshToken);
+
+    ResponseEntity<APIRespone> SendOTP(String email);
+
+    ResponseEntity<APIRespone> confirmOTP(String email, String otp, String newPassword);
 }

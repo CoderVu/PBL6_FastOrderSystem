@@ -55,4 +55,12 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid token", null));
         }
     }
+    @PostMapping("/send-otp")
+    public ResponseEntity<APIRespone> resetPassword(@RequestParam String email) {
+        return authService.SendOTP(email);
+    }
+    @PostMapping("/confirm-otp")
+    public ResponseEntity<APIRespone> verifyOTP(@RequestParam String email, @RequestParam String otp, @RequestParam String newPassword) {
+        return authService.confirmOTP(email, otp, newPassword);
+    }
 }

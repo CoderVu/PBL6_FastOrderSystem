@@ -5,6 +5,7 @@ import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,12 +37,17 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     public ResponseEntity<APIRespone> processOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
-        List<CartItem> cartItems = cartIds.stream()
+        List<Cart> cartItems = cartIds.stream()
                 .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
-                .collect(Collectors.toList());
+                .filter(cartItem -> cartItem.getUser().getId().equals(userId))
+                .collect(Collectors.toList()); // get all cart items by cartId and userId
 
         if (cartItems.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
+        }
+
+        if (cartItems.stream().anyMatch(cartItem -> !cartItem.getUser().getId().equals(userId))) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts does not belong to the specified you! ", ""));
         }
 
         Long storeId = cartItems.get(0).getStoreId();
@@ -119,10 +125,11 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status) {
-        if (orderRepository.findByOrderCode(orderCode).isEmpty()) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
+        if (orderOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
         }
-        Order order = orderRepository.findByOrderCode(orderCode).get();
+        Order order = orderOptional.get();
         Store store = order.getStore();
         if (!store.getManager().getId().equals(ownerId)) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "You are not authorized to update this order", ""));
@@ -173,8 +180,9 @@ public class OrderServiceImpl implements IOrderService {
     }
     @Override
     public ResponseEntity<APIRespone> processComboOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
-        List<CartItem> cartItems = cartIds.stream()
+        List<Cart> cartItems = cartIds.stream()
                 .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
+                .filter(cartItem -> cartItem.getUser().getId().equals(userId))
                 .collect(Collectors.toList());
 
         if (cartItems.isEmpty()) {
@@ -242,7 +250,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public List<CartItem> getCartItemsByCartId(Long cartId) {
+    public List<Cart> getCartItemsByCartId(Long cartId) {
         return cartItemRepository.findByCartId(cartId);
     }
 
@@ -258,8 +266,8 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public Order findOrderByOrderCode(String orderCode) {
-        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
-        return orderOptional.orElse(null);
+        return orderRepository.findByOrderCode(orderCode)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with code: " + orderCode));
     }
 
     @Override

@@ -11,4 +11,5 @@ public class ComboRequest {
     private String comboName;
     private Double price;
     private MultipartFile image;
+    private String description;
 }
