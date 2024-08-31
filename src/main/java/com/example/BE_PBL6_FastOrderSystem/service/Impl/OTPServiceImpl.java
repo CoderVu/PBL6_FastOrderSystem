@@ -6,6 +6,8 @@ import com.example.BE_PBL6_FastOrderSystem.service.IOTPService;
 import com.example.BE_PBL6_FastOrderSystem.utils.OTPGenerator;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
 
 @Service
@@ -40,11 +42,17 @@ public class OTPServiceImpl implements IOTPService {
         Optional<OTP> otpOptional = otpRepository.findByEmail(email);
         if (otpOptional.isPresent()) {
             OTP otpEntity = otpOptional.get();
-            if (otpEntity.getOtp().equals(otp)) {
-                otpRepository.delete(otpEntity);
-                return true;
+            long currentTime = System.currentTimeMillis();
+            Instant otpCreatedInstant = otpEntity.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant();
+            long otpCreatedTime = otpCreatedInstant.toEpochMilli();
+            long timeElapsed = currentTime - otpCreatedTime;
+            if (timeElapsed <= 120000) { // 2 phút
+                if (otpEntity.getOtp().equals(otp)) {
+                    return true;
+                }
             }
         }
         return false;
     }
+
 }

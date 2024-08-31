@@ -31,9 +31,6 @@ public class Cart {
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-
-
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
