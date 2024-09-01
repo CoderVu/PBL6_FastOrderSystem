@@ -25,6 +25,6 @@ public class OwnerOrderController {
     public  ResponseEntity<APIRespone> getAllOrders() {
         Long ownerId = FoodUserDetails.getCurrentUserId();
         return orderService.getAllOrdersByOwner(ownerId);
-
     }
+
 }

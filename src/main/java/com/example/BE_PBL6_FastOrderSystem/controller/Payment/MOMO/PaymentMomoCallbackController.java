@@ -36,14 +36,12 @@ public class PaymentMomoCallbackController {
             PaymentRequest orderRequest = orderRequestCache.get(orderId);
             if (orderRequest != null) {
                 // Xử lý đặt hàng
-                ResponseEntity<APIRespone> response = orderService.processOrder(orderRequest.getUserId(), "MOMO", orderRequest.getCartIds(), orderRequest.getDeliveryAddress(), orderRequest.getOrderCode());
+                ResponseEntity<APIRespone> response = orderService.processProductOrder(orderRequest.getUserId(), "MOMO", orderRequest.getCartIds(), orderRequest.getDeliveryAddress(), orderRequest.getOrderCode());
                 if (response.getStatusCode() == HttpStatus.OK) {
                     // Cập nhật trạng thái đơn hàng
-                    orderService.updateOrderStatus(orderRequest.getOrderCode(), "Chưa giao hàng");
-
+                    orderService.updateOrderStatus(orderRequest.getOrderCode(), "Đơn hàng đã được xác nhận");
                     // Nhận thông tin đơn hàng
                     Order order = orderService.findOrderByOrderCode(orderRequest.getOrderCode());
-
                     // Lưu Payment entity bằng payment service với trạng thái "Đã thanh toán"
                     return paymentService.savePayment(orderRequest, order, orderRequest.getUserId(), orderRequest.getDeliveryAddress());
                 } else {

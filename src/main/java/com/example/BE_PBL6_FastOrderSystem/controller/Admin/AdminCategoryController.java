@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/admin/categories")
@@ -16,12 +17,14 @@ import org.springframework.web.bind.annotation.*;
 public class AdminCategoryController {
     private final ICategoryService categoryService;
     @PostMapping("/add")
-    public ResponseEntity<APIRespone> addCategory(@RequestBody CategoryRequest categoryRequest) {
-       return categoryService.addCategory(categoryRequest);
+    public ResponseEntity<APIRespone> addCategory(@RequestParam String categoryName, @RequestParam MultipartFile image, @RequestParam String description) {
+        CategoryRequest categoryRequest = new CategoryRequest(categoryName, image, description);
+        return categoryService.addCategory(categoryRequest);
     }
 
     @PutMapping("update/{id}")
-    public ResponseEntity<APIRespone> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest categoryRequest) {
+    public ResponseEntity<APIRespone> updateCategory(@PathVariable Long id, @RequestParam String categoryName, @RequestParam MultipartFile image, @RequestParam String description) {
+        CategoryRequest categoryRequest = new CategoryRequest(categoryName, image, description);
       return categoryService.updateCategory(id, categoryRequest);
     }
 

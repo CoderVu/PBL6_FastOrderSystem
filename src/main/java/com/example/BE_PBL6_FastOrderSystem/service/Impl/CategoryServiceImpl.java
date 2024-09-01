@@ -28,7 +28,7 @@ public class CategoryServiceImpl  implements ICategoryService {
           return ResponseEntity.badRequest().body(new APIRespone(false, "No categories found", ""));
       }
         List<CategoryResponse> categories = categoryRepository.findAll().stream()
-                .map(category -> new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription()))
+                .map(category -> new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getImage() ,category.getDescription()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", categories));
     }
@@ -39,7 +39,7 @@ public class CategoryServiceImpl  implements ICategoryService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Category not found", ""));
         }
         Category category = categoryRepository.findById(categoryId).get();
-        return ResponseEntity.ok(new APIRespone(true, "Success", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription())));
+        return ResponseEntity.ok(new APIRespone(true, "Success", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getImage(), category.getDescription())));
     }
 
 
@@ -60,7 +60,7 @@ public class CategoryServiceImpl  implements ICategoryService {
         }
         category.setDescription(categoryRequest.getDescription());
         category = categoryRepository.save(category);
-        return ResponseEntity.ok(new APIRespone(true, "Add category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription())));
+        return ResponseEntity.ok(new APIRespone(true, "Add category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getImage(), category.getDescription())));
     }
 
     @Override
@@ -83,9 +83,8 @@ public class CategoryServiceImpl  implements ICategoryService {
         }
         category.setDescription(categoryRequest.getDescription());
         category = categoryRepository.save(category);
-        return ResponseEntity.ok(new APIRespone(true, "Update category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription())));
+        return ResponseEntity.ok(new APIRespone(true, "Update category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(),category.getImage(),  category.getDescription())));
     }
-
     @Override
     public ResponseEntity<APIRespone>  deleteCategory(Long id) {
         Optional<Category> category = categoryRepository.findById(id);

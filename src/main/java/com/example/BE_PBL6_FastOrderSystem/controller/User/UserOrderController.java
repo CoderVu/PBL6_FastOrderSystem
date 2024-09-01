@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -89,10 +90,10 @@ public class UserOrderController {
             orderRequest.setOrderInfo("Payment CASH for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-            ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
+            ResponseEntity<APIRespone> response = orderService.processProductOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
             if (response.getStatusCode() == HttpStatus.OK) {
                 // update order status to "Pending"
-                orderService.updateOrderStatus(orderCode, "Chưa giao hàng");
+                orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                 // retrieve the Order object
                 Order order = orderService.findOrderByOrderCode(orderCode);
                 // create and save Payment entityD
@@ -178,8 +179,11 @@ public class UserOrderController {
         }
         return totalAmount;
     }
-
-
+    @PostMapping("/cancel/{orderCode}")
+    public ResponseEntity<APIRespone> cancelOrder(@PathVariable String orderCode) {
+        Long userId = FoodUserDetails.getCurrentUserId();
+        return orderService.cancelOrder(orderCode, userId);
+    }
     @GetMapping("/history/all")
     public ResponseEntity<APIRespone> getAllOrdersByUser() {
         Long userId = FoodUserDetails.getCurrentUserId();
@@ -195,4 +199,10 @@ public class UserOrderController {
         Long userId = FoodUserDetails.getCurrentUserId();
         return orderService.getStatusOrder(orderId, userId);
     }
+    @GetMapping("/history/status")
+    public ResponseEntity<APIRespone> getOrdersByStatus(@RequestParam String status) {
+        Long userId = FoodUserDetails.getCurrentUserId();
+        return orderService.getOrdersByStatusAndUserId(status, userId);
+    }
+
 }

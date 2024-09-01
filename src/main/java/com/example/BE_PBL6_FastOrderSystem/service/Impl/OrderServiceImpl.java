@@ -36,7 +36,7 @@ public class OrderServiceImpl implements IOrderService {
         return orderCode;
     }
 
-    public ResponseEntity<APIRespone> processOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
+    public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
         List<Cart> cartItems = cartIds.stream()
                 .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
                 .filter(cartItem -> cartItem.getUser().getId().equals(userId))
@@ -149,6 +149,23 @@ public class OrderServiceImpl implements IOrderService {
         orderRepository.save(order);
         return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully",""));
     }
+    @Override
+    public ResponseEntity<APIRespone> cancelOrder(String orderCode, Long userId) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
+        }
+        Order order = orderOptional.get();
+        if (!order.getUser().getId().equals(userId)) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
+        }
+        if (order.getStatus().equals("Đơn hàng đã được xác nhận")) { // đây là k
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order cannot be canceled", ""));
+        }
+        order.setStatus("Đã hủy");
+        orderRepository.save(order);
+        return ResponseEntity.ok(new APIRespone(true, "Order canceled successfully", ""));
+    }
 
     @Override
     public ResponseEntity<APIRespone> getOrderByIdAndUserId(Long orderId, Long userId) {
@@ -178,6 +195,30 @@ public class OrderServiceImpl implements IOrderService {
         List<OrderResponse> orderResponses = ownerOrders.stream().map(OrderResponse::new).collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
     }
+
+    @Override
+    public ResponseEntity<APIRespone> getOrdersByStatusAndUserId(String status, Long userId) {
+        List<Order> orders = orderRepository.findAllByStatusAndUserId(status, userId);
+        if (orders.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
+        }
+        List<OrderResponse> orderResponses = orders.stream().map(OrderResponse::new).collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> findOrderByOrderIdAndUserId(String orderCode, Long userId) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
+        }
+        Order order = orderOptional.get();
+        if (!order.getUser().getId().equals(userId)) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
+        }
+        return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
+    }
+
     @Override
     public ResponseEntity<APIRespone> processComboOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
         List<Cart> cartItems = cartIds.stream()
