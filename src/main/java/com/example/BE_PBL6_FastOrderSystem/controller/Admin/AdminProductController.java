@@ -58,5 +58,6 @@ public class AdminProductController {
     public ResponseEntity<APIRespone> applyProductToAllStores(
             @RequestParam("productId") Long productId) {
         return productService.applyProductToAllStores(productId);
+        //
     }
 }
