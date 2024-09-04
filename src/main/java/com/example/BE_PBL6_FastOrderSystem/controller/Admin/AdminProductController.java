@@ -43,11 +43,20 @@ public class AdminProductController {
             @RequestParam("bestSale") Boolean bestSale) {
         ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, storeId, stockQuantity, bestSale);
         return productService.updateProduct(id, productRequest);
-
     }
-
     @DeleteMapping("delete/{id}")
     public ResponseEntity<APIRespone>  deleteProduct(@PathVariable Long id) {
         return productService.deleteProduct(id);
+    }
+    @PostMapping("/apply-to-store")
+    public ResponseEntity<APIRespone> applyProductToStore(
+            @RequestParam("productId") Long productId,
+            @RequestParam("storeId") Long storeId) {
+        return productService.applyProductToStore(productId, storeId);
+    }
+    @PostMapping("/apply-to-all-stores")
+    public ResponseEntity<APIRespone> applyProductToAllStores(
+            @RequestParam("productId") Long productId) {
+        return productService.applyProductToAllStores(productId);
     }
 }

@@ -49,7 +49,9 @@ public class ProductServiceImpl implements IProductService {
         if (product.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
         }
-        ProductResponse productResponse = ResponseConverter.convertToProductResponse(product.get());
+        List<ProductResponse> productResponse = productRepository.findById(productId).stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponse), HttpStatus.OK);
     }
 
@@ -59,7 +61,7 @@ public class ProductServiceImpl implements IProductService {
         if (store.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
         }
-        List<ProductResponse> productResponses = productRepository.findByStores_StoreId(storeId).stream()
+        List<ProductResponse> productResponses = productRepository.findByStoreId(storeId).stream()
                 .map(ResponseConverter::convertToProductResponse)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
@@ -196,6 +198,22 @@ public ResponseEntity<APIRespone> deleteProduct(Long id) {
         productRepository.save(product); // luu vao bang trung gian
 
         return new ResponseEntity<>(new APIRespone(true, "Product applied to store successfully", ""), HttpStatus.OK);
+    }
+    @Override
+    public ResponseEntity<APIRespone> applyProductToAllStores(Long productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+        Product product = productOptional.get();
+        List<Store> stores = storeRepository.findAll();
+        for (Store store : stores) {
+            store.getProducts().add(product);
+            product.getStores().add(store);
+            storeRepository.save(store);
+            productRepository.save(product);
+        }
+        return new ResponseEntity<>(new APIRespone(true, "Product applied to all stores successfully", ""), HttpStatus.OK);
     }
     @Override
     public ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId) {

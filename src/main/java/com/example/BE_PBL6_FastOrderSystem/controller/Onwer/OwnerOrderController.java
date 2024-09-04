@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class OwnerOrderController {
     private final IOrderService orderService;
-
     @PutMapping("/update-status")
     public ResponseEntity<APIRespone> updateOrderStatus(
             @RequestParam String orderCode,
@@ -25,6 +24,11 @@ public class OwnerOrderController {
     public  ResponseEntity<APIRespone> getAllOrders() {
         Long ownerId = FoodUserDetails.getCurrentUserId();
         return orderService.getAllOrdersByOwner(ownerId);
+    }
+    @GetMapping("/get-by-status")
+    public ResponseEntity<APIRespone> getOrdersByStatus(@RequestParam String status) {
+        Long ownerId = FoodUserDetails.getCurrentUserId();
+        return orderService.getOrdersByStatusAndOwnerId(status, ownerId);
     }
 
 }

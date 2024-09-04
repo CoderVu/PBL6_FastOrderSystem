@@ -104,9 +104,9 @@ public class OrderServiceImpl implements IOrderService {
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
         orderRepository.save(order);
-        System.out.println("Đã lưu order: " + order.toString());
+        System.out.println("Đã lưu order");
         cartItemRepository.deleteAll(cartItems);
-        System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng"+ cartItems.toString());
+        System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
 
@@ -217,6 +217,17 @@ public class OrderServiceImpl implements IOrderService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
         }
         return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> getOrdersByStatusAndOwnerId(String status, Long ownerId) {
+        List<Order> orders = orderRepository.findAll();
+        List<Order> ownerOrders = orders.stream()
+                .filter(order -> order.getStore().getManager().getId().equals(ownerId))
+                .filter(order -> order.getStatus().equals(status))
+                .collect(Collectors.toList());
+        List<OrderResponse> orderResponses = ownerOrders.stream().map(OrderResponse::new).collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
     }
 
     @Override

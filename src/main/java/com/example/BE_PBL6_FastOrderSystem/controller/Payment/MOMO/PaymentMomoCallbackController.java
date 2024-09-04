@@ -23,7 +23,6 @@ public class PaymentMomoCallbackController {
 
     private final IOrderService orderService;
     private final IPaymentService paymentService;
-    private final PaymentRepository paymentRepository;
     private final Map<String, PaymentRequest> orderRequestCache = new HashMap<>();
 
     @GetMapping("/callback")

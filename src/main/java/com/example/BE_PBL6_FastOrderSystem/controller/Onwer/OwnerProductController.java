@@ -7,21 +7,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/owner/product")
+@RequestMapping("/api/v1/owner/products")
 @RequiredArgsConstructor
 public class OwnerProductController {
     @Autowired
     private final IProductService productService;
     @GetMapping("/get-all-products")
-    public String getAllProducts(@RequestParam String storeId) {
-        return productService.getProductsByStoreId(Long.parseLong(storeId)).toString();
+    public ResponseEntity<APIRespone> getAllProducts(@RequestParam Long storeId) {
+        return productService.getProductsByStoreId(storeId);
     }
 
-    @PostMapping("/apply-product-to-store")
+    @PostMapping("/apply-to-store")
     public ResponseEntity<APIRespone> applyProductToStore(@RequestParam Long storeId, @RequestParam Long productId) {
         return productService.applyProductToStore(storeId, productId);
     }
-    @DeleteMapping("/remove-product-from-store")
+    @DeleteMapping("/remove-from-store")
     public ResponseEntity<APIRespone> removeProductFromStore(@RequestParam Long storeId, @RequestParam Long productId) {
         return productService.removeProductFromStore(storeId, productId);
     }

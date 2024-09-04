@@ -126,7 +126,7 @@ public class AuthServiceImpl implements IAuthService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Address is required", ""));
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        Optional<Role> optionalRole = roleRepository.findByName("ROLE_ADMIN");
+        Optional<Role> optionalRole = roleRepository.findByName("ROLE_OWNER");
         if (optionalRole.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "ROLE_ADMIN not found", ""));
         }
@@ -135,7 +135,7 @@ public class AuthServiceImpl implements IAuthService {
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
-    private final Set<String> invalidTokens = new HashSet<>(); // Là nơi lưu trữ token đã logout
+    private final Set<String> invalidTokens = new HashSet<>();
 
     @Override
     public void logout(String token) {

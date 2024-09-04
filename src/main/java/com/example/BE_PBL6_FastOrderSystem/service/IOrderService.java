@@ -27,4 +27,5 @@ public interface IOrderService {
     ResponseEntity<APIRespone> getAllOrdersByOwner(Long ownerId);
     ResponseEntity<APIRespone> getOrdersByStatusAndUserId(String status, Long userId);
     ResponseEntity<APIRespone> findOrderByOrderIdAndUserId(String orderCode, Long userId);
+    ResponseEntity<APIRespone> getOrdersByStatusAndOwnerId(String status, Long ownerId);
 }
