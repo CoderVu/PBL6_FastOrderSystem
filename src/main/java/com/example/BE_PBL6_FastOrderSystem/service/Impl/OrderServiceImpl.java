@@ -104,7 +104,7 @@ public class OrderServiceImpl implements IOrderService {
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
         orderRepository.save(order);
-        System.out.println("Đã lưu order");
+        System.out.println("Đã lưur order");
         cartItemRepository.deleteAll(cartItems);
         System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
