@@ -43,9 +43,9 @@ public class PaymentServiceImpl implements IPaymentService {
         json.put("accessKey", MoMoConstant.ACCESS_KEY);
         json.put("requestId", String.valueOf(System.currentTimeMillis()));
         json.put("amount", orderRequest.getAmount().toString());
-        json.put("orderId", orderRequest.getOrderCode());
+        json.put("orderId", orderRequest.getOrderId());
         json.put("cartId", orderRequest.getCartIds());
-        json.put("orderInfo", "Thanh toan don hang " + orderRequest.getOrderCode());
+        json.put("orderInfo", "Thanh toan don hang " + orderRequest.getOrderId());
         json.put("returnUrl", MoMoConstant.REDIRECT_URL);
         json.put("notifyUrl", MoMoConstant.NOTIFY_URL);
         json.put("requestType", MoMoConstant.REQUEST_TYPE);
@@ -94,7 +94,7 @@ public class PaymentServiceImpl implements IPaymentService {
         json.put("partnerCode", MoMoConstant.PARTNER_CODE);
         json.put("accessKey", MoMoConstant.ACCESS_KEY);
         json.put("requestId", String.valueOf(System.currentTimeMillis()));
-        json.put("orderId", requestDTO.getOrderCode());
+        json.put("orderId", requestDTO.getOrderId());
         //json.put("cardId", requestDTO.getCartIds());
         json.put("requestType", MoMoConstant.CHECK_STATUS_TYPE);
 
@@ -144,7 +144,7 @@ public class PaymentServiceImpl implements IPaymentService {
         payment.setPaymentMethod(findPaymentMethodByName(orderRequest.getPaymentMethod()));
         payment.setStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("MOMO") ? "Đã thanh toán" : "Chưa thanh toán");
         payment.setCreatedAt(LocalDateTime.now());
-        payment.setOrderCode(orderRequest.getOrderCode());
+        payment.setOrderCode(orderRequest.getOrderId());
         payment.setUserId(userId);
         payment.setDeliveryAddress(deliveryAddress);
         payment.setOrderInfo(orderRequest.getOrderInfo());

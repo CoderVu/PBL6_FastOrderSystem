@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class PaymentRequest {
     private Long amount;
-    private String orderCode;
+    private String orderId;
     private List<Long> cartIds;
     private Long userId;
     private String deliveryAddress;
