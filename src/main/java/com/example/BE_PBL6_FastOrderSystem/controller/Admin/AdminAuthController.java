@@ -1,7 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
-import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;

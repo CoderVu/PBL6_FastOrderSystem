@@ -23,7 +23,6 @@ public class PaymentMomoCallbackController {
 
     private final IOrderService orderService;
     private final IPaymentService paymentService;
-    private final PaymentRepository paymentRepository;
     private final Map<String, PaymentRequest> orderRequestCache = new HashMap<>();
 
     @GetMapping("/callback")
@@ -36,45 +35,30 @@ public class PaymentMomoCallbackController {
             PaymentRequest orderRequest = orderRequestCache.get(orderId);
             if (orderRequest != null) {
                 // Xử lý đặt hàng
-                ResponseEntity<APIRespone> response = orderService.placeOrder(orderRequest.getUserId(), "MOMO", orderRequest.getCartIds(), orderRequest.getDeliveryAddress(), orderRequest.getOrderCode());
+                ResponseEntity<APIRespone> response = orderService.processProductOrder(orderRequest.getUserId(), "MOMO", orderRequest.getCartIds(), orderRequest.getDeliveryAddress(), orderRequest.getOrderCode());
                 if (response.getStatusCode() == HttpStatus.OK) {
-                    // Update order status to "Chưa giao hàng"
-                    orderService.updateOrderStatus(orderRequest.getOrderCode(), "Chưa giao hàng");
-
-                    // Retrieve the Order object
+                    // Cập nhật trạng thái đơn hàng
+                    orderService.updateOrderStatus(orderRequest.getOrderCode(), "Đơn hàng đã được xác nhận");
+                    // Nhận thông tin đơn hàng
                     Order order = orderService.findOrderByOrderCode(orderRequest.getOrderCode());
-
-                    // Tạo và lưu Payment entity
-                    Payment payment = new Payment();
-                    payment.setOrder(order);
-                    payment.setPaymentDate(LocalDateTime.now());
-                    payment.setAmountPaid(orderRequest.getAmount().doubleValue());
-                    payment.setPaymentMethod(paymentService.findPaymentMethodByName("MOMO"));
-                    payment.setStatus("Đã thanh toán trong bảng Payment");
-                    payment.setCreatedAt(LocalDateTime.now());
-                    payment.setOrderCode(orderRequest.getOrderCode());
-                    payment.setUserId(orderRequest.getUserId());
-                    payment.setDeliveryAddress(orderRequest.getDeliveryAddress());
-                    payment.setOrderInfo(orderRequest.getOrderInfo());
-                    payment.setLang(orderRequest.getLang());
-                    payment.setExtraData(orderRequest.getExtraData());
-
-                    paymentRepository.save(payment);
+                    // Lưu Payment entity bằng payment service với trạng thái "Đã thanh toán"
+                    return paymentService.savePayment(orderRequest, order, orderRequest.getUserId(), orderRequest.getDeliveryAddress());
+                } else {
+                    // Đặt hàng thất bại
+                    return response;
                 }
-                return response;
             } else {
                 // Không tìm thấy thông tin đơn hàng
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new APIRespone(false, "Order information not found", null));
             }
         } else {
-            // Thanh toán thất bại
+            // thanh toán thất bại
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new APIRespone(false, "Payment failed: " + message, null));
         }
     }
-
-    // Method to cache order request
+    // lưu thông tin đơn hàng vào cache
     public void cacheOrderRequest(PaymentRequest orderRequest) {
         orderRequestCache.put(orderRequest.getOrderCode(), orderRequest);
     }

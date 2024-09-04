@@ -1,15 +1,27 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
+import com.example.BE_PBL6_FastOrderSystem.model.Combo;
+
 public class ComboResponse {
     private Long comboId;
     private String comboName;
     private double price;
     private String image;
-    public ComboResponse(Long comboId, String comboName, double price, String image) {
+    private String description;
+    public ComboResponse(Long comboId, String comboName, double price, String image, String description) {
         this.comboId = comboId;
         this.comboName = comboName;
         this.price = price;
         this.image = image;
+        this.description = description;
+
+    }
+
+    public ComboResponse(Combo combo) {
+        this.comboId = combo.getComboId();
+        this.comboName = combo.getComboName();
+        this.price = combo.getComboPrice();
+        this.image = combo.getImage();
     }
 
     public Long getComboId() {
@@ -42,5 +54,11 @@ public class ComboResponse {
 
     public void setImage(String image) {
         this.image = image;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

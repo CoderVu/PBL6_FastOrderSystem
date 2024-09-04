@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO;
 
 import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.IPaymentService;
 import com.example.BE_PBL6_FastOrderSystem.service.Impl.PaymentServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,10 @@ import java.util.Map;
 public class PaymentMomoCreateOrderController {
     private final IPaymentService paymentService;
     @PostMapping("/momo-payment")
-    public ResponseEntity<Map<String, Object>> momoPayment(@RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public ResponseEntity<APIRespone> momoPayment(@RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
 
         Map<String, Object> result = this.paymentService.createOrder(orderRequest);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return new ResponseEntity<>(new APIRespone(true, "Create order successfully", result), HttpStatus.OK);
 
     }
 

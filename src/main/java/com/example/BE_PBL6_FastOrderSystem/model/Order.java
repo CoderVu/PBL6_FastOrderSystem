@@ -11,8 +11,6 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
-    // Mã đơn hàng gồm 6 số random nhưng không trùng với mã đơn hàng khác
-    // Mã đơn hàng được tạo ngẫu nhiên khi khách hàng đặt hàng
     private String orderCode;
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -39,8 +37,6 @@ public class Order {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<CartItem> cartItems;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
@@ -65,13 +61,6 @@ public class Order {
     }
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
-    }
-    public List<CartItem> getCartItems() {
-        return cartItems;
-    }
-
-    public void setCartItems(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
     }
 
     public User getUser() {
@@ -143,5 +132,23 @@ public class Order {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "orderId=" + orderId +
+                ", orderCode='" + orderCode + '\'' +
+                ", user=" + user +
+                ", store=" + store +
+                ", orderDate=" + orderDate +
+                ", totalAmount=" + totalAmount +
+                ", status='" + status + '\'' +
+                ", paymentMethod=" + paymentMethod +
+                ", deliveryAddress='" + deliveryAddress + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", orderDetails=" + orderDetails +
+                '}';
     }
 }

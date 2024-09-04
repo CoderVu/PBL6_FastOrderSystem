@@ -7,10 +7,12 @@ import com.example.BE_PBL6_FastOrderSystem.model.Category;
 import com.example.BE_PBL6_FastOrderSystem.repository.CategoryRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.CategoryRequest;
 import com.example.BE_PBL6_FastOrderSystem.service.ICategoryService;
+import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,7 +28,7 @@ public class CategoryServiceImpl  implements ICategoryService {
           return ResponseEntity.badRequest().body(new APIRespone(false, "No categories found", ""));
       }
         List<CategoryResponse> categories = categoryRepository.findAll().stream()
-                .map(category -> new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription()))
+                .map(category -> new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getImage() ,category.getDescription()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", categories));
     }
@@ -37,7 +39,7 @@ public class CategoryServiceImpl  implements ICategoryService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Category not found", ""));
         }
         Category category = categoryRepository.findById(categoryId).get();
-        return ResponseEntity.ok(new APIRespone(true, "Success", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription())));
+        return ResponseEntity.ok(new APIRespone(true, "Success", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getImage(), category.getDescription())));
     }
 
 
@@ -48,9 +50,17 @@ public class CategoryServiceImpl  implements ICategoryService {
          }
         Category category = new Category();
         category.setCategoryName(categoryRequest.getCategoryName());
+        try {
+            InputStream inputStream = categoryRequest.getImage().getInputStream();
+            String base64Image = ImageGeneral.fileToBase64(inputStream);
+            category.setImage(base64Image);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Error when upload image", ""));
+        }
         category.setDescription(categoryRequest.getDescription());
         category = categoryRepository.save(category);
-        return ResponseEntity.ok(new APIRespone(true, "Add category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription())));
+        return ResponseEntity.ok(new APIRespone(true, "Add category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getImage(), category.getDescription())));
     }
 
     @Override
@@ -63,11 +73,18 @@ public class CategoryServiceImpl  implements ICategoryService {
          }
         Category category = categoryRepository.findById(id).get();
         category.setCategoryName(categoryRequest.getCategoryName());
+        try {
+            InputStream inputStream = categoryRequest.getImage().getInputStream();
+            String base64Image = ImageGeneral.fileToBase64(inputStream);
+            category.setImage(base64Image);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Error when upload image", ""));
+        }
         category.setDescription(categoryRequest.getDescription());
         category = categoryRepository.save(category);
-        return ResponseEntity.ok(new APIRespone(true, "Update category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getDescription())));
+        return ResponseEntity.ok(new APIRespone(true, "Update category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(),category.getImage(),  category.getDescription())));
     }
-
     @Override
     public ResponseEntity<APIRespone>  deleteCategory(Long id) {
         Optional<Category> category = categoryRepository.findById(id);

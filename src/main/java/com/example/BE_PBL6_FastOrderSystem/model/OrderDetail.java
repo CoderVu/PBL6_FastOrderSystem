@@ -13,6 +13,9 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
+    @ManyToOne
+    @JoinColumn(name = "combo_id")
+    private Combo combo;
     private Integer quantity;
     private Double unitPrice;
     private Double totalPrice;
@@ -39,6 +42,12 @@ public class OrderDetail {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+    public Combo getCombo() {
+        return combo;
+    }
+    public void setCombo(Combo combo) {
+        this.combo = combo;
     }
 
     public Integer getQuantity() {

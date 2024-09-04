@@ -8,6 +8,8 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long categoryId;
     private String categoryName;
+    @Column(name = "image", columnDefinition = "LONGTEXT")
+    private String image;
     private String description;
 
     public Long getCategoryId() {
@@ -24,6 +26,12 @@ public class Category {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+    public String getImage() {
+        return image;
+    }
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public String getDescription() {

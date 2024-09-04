@@ -43,14 +43,15 @@ public class ProductServiceImpl implements IProductService {
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
     }
-
     @Override
     public ResponseEntity<APIRespone>  getProductById(Long productId) {
         Optional<Product> product = productRepository.findById(productId);
         if (product.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
         }
-        ProductResponse productResponse = ResponseConverter.convertToProductResponse(product.get());
+        List<ProductResponse> productResponse = productRepository.findById(productId).stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponse), HttpStatus.OK);
     }
 
@@ -60,7 +61,7 @@ public class ProductServiceImpl implements IProductService {
         if (store.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
         }
-        List<ProductResponse> productResponses = productRepository.findByStores_StoreId(storeId).stream()
+        List<ProductResponse> productResponses = productRepository.findByStoreId(storeId).stream()
                 .map(ResponseConverter::convertToProductResponse)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
@@ -113,7 +114,7 @@ public class ProductServiceImpl implements IProductService {
             String base64Image = ImageGeneral.fileToBase64(imageInputStream);
             product.setImage(base64Image);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return new ResponseEntity<>(new APIRespone(false, "Error when upload image", ""), HttpStatus.BAD_REQUEST);
         }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
@@ -177,5 +178,65 @@ public ResponseEntity<APIRespone> deleteProduct(Long id) {
     return new ResponseEntity<>(new APIRespone(true, "Product deleted successfully", ""), HttpStatus.OK);
 
    }
+
+    @Override
+    public ResponseEntity<APIRespone> applyProductToStore(Long storeId, Long productId) {
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+        Store store = storeOptional.get();
+        Product product = productOptional.get();
+        store.getProducts().add(product);
+        product.getStores().add(store); // luu vao bang trung gian
+        storeRepository.save(store);
+        productRepository.save(product); // luu vao bang trung gian
+
+        return new ResponseEntity<>(new APIRespone(true, "Product applied to store successfully", ""), HttpStatus.OK);
+    }
+    @Override
+    public ResponseEntity<APIRespone> applyProductToAllStores(Long productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+        Product product = productOptional.get();
+        List<Store> stores = storeRepository.findAll();
+        for (Store store : stores) {
+            store.getProducts().add(product);
+            product.getStores().add(store);
+            storeRepository.save(store);
+            productRepository.save(product);
+        }
+        return new ResponseEntity<>(new APIRespone(true, "Product applied to all stores successfully", ""), HttpStatus.OK);
+    }
+    @Override
+    public ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId) {
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Store store = storeOptional.get();
+        Product product = productOptional.get();
+
+        store.getProducts().remove(product);
+        product.getStores().remove(store); // Ensure bidirectional relationship is maintained
+
+        storeRepository.save(store); // Save store to update join table
+        productRepository.save(product); // Save product to update join table
+
+        return new ResponseEntity<>(new APIRespone(true, "Product removed from store successfully", ""), HttpStatus.OK);
+    }
 
 }

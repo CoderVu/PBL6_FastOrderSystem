@@ -13,16 +13,22 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class OwnerOrderController {
     private final IOrderService orderService;
-
-    @PutMapping("/update-status/{orderId}")
-    public ResponseEntity<APIRespone> updateOrderStatus(@PathVariable Long orderId, @RequestParam String status) {
+    @PutMapping("/update-status")
+    public ResponseEntity<APIRespone> updateOrderStatus(
+            @RequestParam String orderCode,
+            @RequestParam String status) {
             Long ownerId = FoodUserDetails.getCurrentUserId();
-            return orderService.updateOrderStatusOfOwner(orderId, ownerId, status);
+            return orderService.updateOrderStatusOfOwner(orderCode, ownerId, status);
     }
     @GetMapping("/get-all")
     public  ResponseEntity<APIRespone> getAllOrders() {
         Long ownerId = FoodUserDetails.getCurrentUserId();
         return orderService.getAllOrdersByOwner(ownerId);
-
     }
+    @GetMapping("/get-by-status")
+    public ResponseEntity<APIRespone> getOrdersByStatus(@RequestParam String status) {
+        Long ownerId = FoodUserDetails.getCurrentUserId();
+        return orderService.getOrdersByStatusAndOwnerId(status, ownerId);
+    }
+
 }

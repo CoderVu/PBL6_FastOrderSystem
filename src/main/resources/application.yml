@@ -9,14 +9,15 @@ spring:
     username: root
     password: 123456789
     url: jdbc:mysql://localhost:3306/db_pbl6
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     security:
-      jwt:
-        secret-key: xTKk7Ald/su3sDOWzUozdd8E/7X5q6HYKUKZfl+4qrQ=
-        expire-length: 3600000
+     jwt:
+       signerKey: "W31fqJQUxdNSy/Y+F+RFsa/Zi4hx3sX2tfRH/dAk/0342mbKCFpdljSyUkeE59vxGYdSPYIAW2UW+pExDCD+1Q=="
+       valid-duration: 86400 # 1 day
+       refreshable-duration: 86400 # 1 day
   jackson:
     serialization:
-     fail-on-empty-beans: false
+      fail-on-empty-beans: false
   jpa:
     show-sql: true
     hibernate:

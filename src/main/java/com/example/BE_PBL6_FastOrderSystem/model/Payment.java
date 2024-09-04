@@ -136,4 +136,23 @@ public class Payment {
     public void setExtraData(String extraData) {
         this.extraData = extraData;
     }
+
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "paymentId=" + paymentId +
+                ", order=" + order +
+                ", paymentDate=" + paymentDate +
+                ", amountPaid=" + amountPaid +
+                ", paymentMethod=" + paymentMethod +
+                ", status='" + status + '\'' +
+                ", createdAt=" + createdAt +
+                ", orderCode='" + orderCode + '\'' +
+                ", userId=" + userId +
+                ", deliveryAddress='" + deliveryAddress + '\'' +
+                ", orderInfo='" + orderInfo + '\'' +
+                ", lang='" + lang + '\'' +
+                ", extraData='" + extraData + '\'' +
+                '}';
+    }
 }

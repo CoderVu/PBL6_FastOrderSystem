@@ -9,20 +9,17 @@ public class Combo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long comboId;
     private String comboName;
+    @Column(name = "image", columnDefinition = "LONGTEXT")
     private String image;
     private Double comboPrice;
-
-
-
-    @ManyToMany
+    private String description;
+    @ManyToMany //
     @JoinTable(
             name = "combo_product",
-            joinColumns = @JoinColumn(name = "combo_id"),
+            joinColumns = @JoinColumn(name = "combo_id"), //
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private Set<Product> products; // Products included in the combo
-
-    // Getters and setters
+    private Set<Product> products;
 
     public Long getComboId() {
         return comboId;
@@ -53,6 +50,12 @@ public class Combo {
         this.comboPrice = comboPrice;
     }
 
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
     public Set<Product> getProducts() {
         return products;
     }
