@@ -12,17 +12,26 @@ import org.springframework.web.bind.annotation.*;
 public class OwnerProductController {
     @Autowired
     private final IProductService productService;
+
     @GetMapping("/get-all-products")
     public ResponseEntity<APIRespone> getAllProducts(@RequestParam Long storeId) {
         return productService.getProductsByStoreId(storeId);
     }
 
+    // Lấy tất cả sản phẩm của cửa hàng đã bán
+//    @GetMapping("/get-all-sold-products")
+//    public ResponseEntity<APIRespone> getAllSoldProducts(@RequestParam Long storeId) {
+//        return productService.getAllSoldProducts(storeId);
+//    }
+
     @PostMapping("/apply-to-store")
     public ResponseEntity<APIRespone> applyProductToStore(@RequestParam Long storeId, @RequestParam Long productId) {
         return productService.applyProductToStore(storeId, productId);
     }
+
     @DeleteMapping("/remove-from-store")
     public ResponseEntity<APIRespone> removeProductFromStore(@RequestParam Long storeId, @RequestParam Long productId) {
         return productService.removeProductFromStore(storeId, productId);
     }
 }
+

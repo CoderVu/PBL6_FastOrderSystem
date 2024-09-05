@@ -2,6 +2,8 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Category {
     @Id
@@ -11,7 +13,11 @@ public class Category {
     @Column(name = "image", columnDefinition = "LONGTEXT")
     private String image;
     private String description;
-
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products;
+    public List<Product> getProducts() {
+        return products;
+    }
     public Long getCategoryId() {
         return categoryId;
     }

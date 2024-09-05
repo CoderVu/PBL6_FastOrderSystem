@@ -4,6 +4,7 @@ import com.example.BE_PBL6_FastOrderSystem.model.Category;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.model.Store;
 import com.example.BE_PBL6_FastOrderSystem.repository.CategoryRepository;
+import com.example.BE_PBL6_FastOrderSystem.repository.OrderDetailRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.StoreRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.ProductRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
@@ -32,10 +33,11 @@ public class ProductServiceImpl implements IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final StoreRepository storeRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Override
-    public ResponseEntity<APIRespone>  getAllProduct() {
-       if (productRepository.findAll().isEmpty()) {
+    public ResponseEntity<APIRespone> getAllProduct() {
+        if (productRepository.findAll().isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "No product found", ""), HttpStatus.NOT_FOUND);
         }
         List<ProductResponse> productResponses = productRepository.findAll().stream()
@@ -43,8 +45,9 @@ public class ProductServiceImpl implements IProductService {
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
     }
+
     @Override
-    public ResponseEntity<APIRespone>  getProductById(Long productId) {
+    public ResponseEntity<APIRespone> getProductById(Long productId) {
         Optional<Product> product = productRepository.findById(productId);
         if (product.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
@@ -91,7 +94,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public  ResponseEntity<APIRespone> getBestSaleProduct() {
+    public ResponseEntity<APIRespone> getBestSaleProduct() {
         if (productRepository.findByBestSale(true).isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "No best sale product found", ""), HttpStatus.NOT_FOUND);
         }
@@ -103,7 +106,7 @@ public class ProductServiceImpl implements IProductService {
 
 
     @Override
-    public  ResponseEntity<APIRespone> addProduct(ProductRequest productRequest) {
+    public ResponseEntity<APIRespone> addProduct(ProductRequest productRequest) {
         if (productRepository.existsByProductName(productRequest.getProductName())) {
             return new ResponseEntity<>(new APIRespone(false, "Product already exists", ""), HttpStatus.BAD_REQUEST);
         }
@@ -120,7 +123,7 @@ public class ProductServiceImpl implements IProductService {
         product.setPrice(productRequest.getPrice());
         Optional<Category> category = categoryRepository.findById(productRequest.getCategoryId()); // Optional laf 1 kieu du lieu giup kiem tra xem co ton tai hay khong
         if (category.isEmpty()) {
-           return new ResponseEntity<>(new APIRespone(false, "Category not found", ""), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new APIRespone(false, "Category not found", ""), HttpStatus.NOT_FOUND);
         }
         product.setCategory(category.get());
         Optional<Store> store = storeRepository.findById(productRequest.getStoreId());
@@ -151,7 +154,7 @@ public class ProductServiceImpl implements IProductService {
         }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
-          Optional<Category> category = categoryRepository.findById(productRequest.getCategoryId());
+        Optional<Category> category = categoryRepository.findById(productRequest.getCategoryId());
         if (category.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Category not found", ""), HttpStatus.NOT_FOUND);
         }
@@ -168,16 +171,16 @@ public class ProductServiceImpl implements IProductService {
         return new ResponseEntity<>(new APIRespone(true, "Product updated successfully", ResponseConverter.convertToProductResponse(product)), HttpStatus.OK);
     }
 
-@Override
-public ResponseEntity<APIRespone> deleteProduct(Long id) {
-    Optional<Product> product = productRepository.findById(id);
-    if (product.isEmpty()) {
-        return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
-    }
-    productRepository.deleteById(id);
-    return new ResponseEntity<>(new APIRespone(true, "Product deleted successfully", ""), HttpStatus.OK);
+    @Override
+    public ResponseEntity<APIRespone> deleteProduct(Long id) {
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+        productRepository.deleteById(id);
+        return new ResponseEntity<>(new APIRespone(true, "Product deleted successfully", ""), HttpStatus.OK);
 
-   }
+    }
 
     @Override
     public ResponseEntity<APIRespone> applyProductToStore(Long storeId, Long productId) {
@@ -199,6 +202,7 @@ public ResponseEntity<APIRespone> deleteProduct(Long id) {
 
         return new ResponseEntity<>(new APIRespone(true, "Product applied to store successfully", ""), HttpStatus.OK);
     }
+
     @Override
     public ResponseEntity<APIRespone> applyProductToAllStores(Long productId) {
         Optional<Product> productOptional = productRepository.findById(productId);
@@ -215,6 +219,7 @@ public ResponseEntity<APIRespone> deleteProduct(Long id) {
         }
         return new ResponseEntity<>(new APIRespone(true, "Product applied to all stores successfully", ""), HttpStatus.OK);
     }
+
     @Override
     public ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId) {
         Optional<Store> storeOptional = storeRepository.findById(storeId);
@@ -239,4 +244,17 @@ public ResponseEntity<APIRespone> deleteProduct(Long id) {
         return new ResponseEntity<>(new APIRespone(true, "Product removed from store successfully", ""), HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<APIRespone> getAllSoldProducts(Long storeId) {
+//        Optional<Store> store = storeRepository.findById(storeId);
+//        if (store.isEmpty()) {
+//            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+//        }
+//        // Fix the type of the product parameter in the lambda expression
+//        List<ProductResponse> productResponses = orderDetailRepository.findSoldProductsByStoreId(storeId).stream()
+//                .map((Product product) -> ResponseConverter.convertToProductResponse(product))
+//                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(new APIRespone(true, "Success", ""), HttpStatus.OK);
+    }
 }

@@ -12,6 +12,8 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long storeId;
     private String storeName;
+    @Column(name = "image", columnDefinition = "LONGTEXT")
+    private String image;
     private String phoneNumber;
     private String location;
     private Double longitude;
@@ -54,6 +56,12 @@ public class Store {
 
     public String getStoreName() {
         return storeName;
+    }
+    public String getImage() {
+        return image;
+    }
+    public void setImage(String image) {
+        this.image = image;
     }
     public String getPhoneNumber() {
         return phoneNumber;

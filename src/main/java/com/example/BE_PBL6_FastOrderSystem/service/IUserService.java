@@ -24,4 +24,6 @@ public interface IUserService {
     ResponseEntity<APIRespone> unlockUserAccount(Long userId) throws UserNotFoundException;
 
     UserDetails loadUserByNumberPhone(String numberPhone);
+
+    ResponseEntity<APIRespone> getAllUsers();
 }

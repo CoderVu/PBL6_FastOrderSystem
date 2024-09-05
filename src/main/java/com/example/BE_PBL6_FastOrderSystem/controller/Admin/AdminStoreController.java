@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 
@@ -18,6 +19,7 @@ public class AdminStoreController {
     @PostMapping("/add")
     public ResponseEntity<APIRespone> addStore(
             @RequestParam("storeName") String storeName,
+            @RequestParam("image") MultipartFile image,
             @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("location") String location,
             @RequestParam("latitude") Double latitude,
@@ -25,13 +27,14 @@ public class AdminStoreController {
             @RequestParam("openingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date openingTime,
             @RequestParam("closingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date closingTime,
             @RequestParam("managerId") Long managerId) {
-        StoreRequest storeRequest = new StoreRequest(storeName, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
+        StoreRequest storeRequest = new StoreRequest(storeName, image, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
         return storeService.addStore(storeRequest);
     }
     @PutMapping("update/{id}")
     public  ResponseEntity<APIRespone> updateStore(
             @PathVariable Long id,
             @RequestParam("storeName") String storeName,
+            @RequestParam("image") MultipartFile image,
             @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("location") String location,
             @RequestParam("latitude") Double latitude,
@@ -39,7 +42,7 @@ public class AdminStoreController {
             @RequestParam("openingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date openingTime,
             @RequestParam("closingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date closingTime,
             @RequestParam("managerId") Long managerId) {
-        StoreRequest storeRequest = new StoreRequest(storeName, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
+        StoreRequest storeRequest = new StoreRequest(storeName, image ,phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
         return storeService.updateStore(id, storeRequest);
     }
     @DeleteMapping("delete/{id}")

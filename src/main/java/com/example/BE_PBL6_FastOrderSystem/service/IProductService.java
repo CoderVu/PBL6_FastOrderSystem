@@ -24,5 +24,7 @@ public interface IProductService {
     ResponseEntity<APIRespone> applyProductToAllStores(Long productId);
 
     ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId);
+
+    ResponseEntity<APIRespone> getAllSoldProducts(Long storeId);
 }
 

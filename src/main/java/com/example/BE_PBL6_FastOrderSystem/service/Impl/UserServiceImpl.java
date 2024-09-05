@@ -136,4 +136,16 @@ public class UserServiceImpl implements IUserService {
     public UserDetails loadUserByNumberPhone(String numberPhone) {
         return userDetailsService.loadUserByUsername(numberPhone);
     }
+
+    @Override
+    public ResponseEntity<APIRespone> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            return ResponseEntity.ok(new APIRespone(false, "No user found", ""));
+        }
+        List<UserResponse> userResponses = users.stream()
+                .map(UserResponse::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", userResponses));
+    }
 }

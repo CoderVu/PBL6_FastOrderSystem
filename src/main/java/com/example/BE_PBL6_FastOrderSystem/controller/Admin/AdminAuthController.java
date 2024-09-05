@@ -32,6 +32,10 @@ public class AdminAuthController {
     public ResponseEntity<APIRespone> getUsers(@RequestParam String role) {
         return userService.getUsers(role);
     }
+    @GetMapping("/all")
+    public ResponseEntity<APIRespone> getAllUsers() {
+        return userService.getAllUsers();
+    }
     @PostMapping("/lock-account/{userId}")
     public ResponseEntity<APIRespone> lockUserAccount(@PathVariable Long userId) {
       return userService.lockUserAccount(userId);

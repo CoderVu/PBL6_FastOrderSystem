@@ -1,10 +1,13 @@
 package com.example.BE_PBL6_FastOrderSystem.request;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.time.LocalDateTime;
 import java.util.Date;
 
 public class StoreRequest {
     private String storeName;
+    private MultipartFile image;
     private String phoneNumber;
     private String location;
     private Double longitude;
@@ -12,8 +15,9 @@ public class StoreRequest {
     private Date openingTime;
     private Date closingTime;
     private Long managerId;
-    public StoreRequest(String storeName, String phoneNumber, String location, Double longitude, Double latitude, Date openingTime, Date closingTime, Long managerId) {
+    public StoreRequest(String storeName, MultipartFile image, String phoneNumber, String location, Double longitude, Double latitude, Date openingTime, Date closingTime, Long managerId) {
         this.storeName = storeName;
+        this.image = image;
         this.phoneNumber = phoneNumber;
         this.location = location;
         this.longitude = longitude;
@@ -29,6 +33,12 @@ public class StoreRequest {
 
     public void setStoreName(String storeName) {
         this.storeName = storeName;
+    }
+    public MultipartFile getImage() {
+        return image;
+    }
+    public void setImage(MultipartFile image) {
+        this.image = image;
     }
 
     public String getPhoneNumber() {

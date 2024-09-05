@@ -8,10 +8,14 @@ import com.example.BE_PBL6_FastOrderSystem.request.StoreRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.StoreResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IStoreService;
+import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +35,7 @@ public class StoreServiceImlp implements IStoreService {
         return ResponseEntity.ok(new APIRespone(true, "Success", new StoreResponse(
                 store.getStoreId(),
                 store.getStoreName(),
+                store.getImage(),
                 store.getLocation(),
                 store.getLatitude(),
                 store.getLongitude(),
@@ -52,6 +57,7 @@ public class StoreServiceImlp implements IStoreService {
                 .map(store -> new StoreResponse(
                         store.getStoreId(),
                         store.getStoreName(),
+                        store.getImage(),
                         store.getLocation(),
                         store.getLatitude(),
                         store.getLongitude(),
@@ -73,6 +79,13 @@ public class StoreServiceImlp implements IStoreService {
         }
         Store store = new Store();
         store.setStoreName(storeRequest.getStoreName());
+        try {
+            InputStream imageInputStream = storeRequest.getImage().getInputStream();
+            String base64Image = ImageGeneral.fileToBase64(imageInputStream);
+            store.setImage(base64Image);
+        } catch (IOException e) {
+            return new ResponseEntity<>(new APIRespone(false, "Error when upload image", ""), HttpStatus.BAD_REQUEST);
+        }
         store.setPhoneNumber(storeRequest.getPhoneNumber());
         store.setLocation(storeRequest.getLocation());
         store.setLongitude(storeRequest.getLongitude());
@@ -88,6 +101,7 @@ public class StoreServiceImlp implements IStoreService {
         return ResponseEntity.ok(new APIRespone(true, "Add store successfully", new StoreResponse(
                 store.getStoreId(),
                 store.getStoreName(),
+                store.getImage(),
                 store.getLocation(),
                 store.getLatitude(),
                 store.getLongitude(),
@@ -113,6 +127,13 @@ public class StoreServiceImlp implements IStoreService {
             }
         }
         store.setStoreName(storeRequest.getStoreName());
+        try {
+            InputStream imageInputStream = storeRequest.getImage().getInputStream();
+            String base64Image = ImageGeneral.fileToBase64(imageInputStream);
+            store.setImage(base64Image);
+        } catch (IOException e) {
+            return new ResponseEntity<>(new APIRespone(false, "Error when upload image", ""), HttpStatus.BAD_REQUEST);
+        }
         store.setPhoneNumber(storeRequest.getPhoneNumber());
         store.setLocation(storeRequest.getLocation());
         store.setLongitude(storeRequest.getLongitude());
@@ -128,6 +149,7 @@ public class StoreServiceImlp implements IStoreService {
         return ResponseEntity.ok(new APIRespone(true, "Update store successfully", new StoreResponse(
                 store.getStoreId(),
                 store.getStoreName(),
+                store.getImage(),
                 store.getLocation(),
                 store.getLatitude(),
                 store.getLongitude(),

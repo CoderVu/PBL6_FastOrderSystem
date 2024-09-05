@@ -5,7 +5,7 @@ import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.request.CartComboRequest;
 import com.example.BE_PBL6_FastOrderSystem.request.CartRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
-import com.example.BE_PBL6_FastOrderSystem.response.CartItemsResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.CartResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.ICartService;
 
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -54,9 +55,11 @@ public class CartServiceImpl implements ICartService {
         cartItem.setTotalPrice(product.getPrice() * cartRequest.getQuantity());
         cartItem.setStoreId(cartRequest.getStoreId());
         cartItem.setStatus(cartRequest.getStatus());
-        cartItemRepository.save(cartItem);;
+        cartItemRepository.save(cartItem);
+        ;
         return ResponseEntity.ok(new APIRespone(true, "Add to cart successfully", ""));
     }
+
     @Override
     public ResponseEntity<APIRespone> addComboToCart(Long userId, CartComboRequest cartComboRequest) {
         User user = userRepository.findById(userId).orElse(null);
@@ -97,29 +100,14 @@ public class CartServiceImpl implements ICartService {
 
         return ResponseEntity.ok(new APIRespone(true, "Add combo to cart successfully", ""));
     }
+
     @Override
     public ResponseEntity<APIRespone> getHistoryCart(Long userId) {
         List<Cart> cartItems = cartItemRepository.findByUserId(userId);
         if (cartItems.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No cart items found for the user", ""));
         }
-        List<CartItemsResponse> cartItemResponses = cartItems.stream()
-                .map(cartItem -> new CartItemsResponse(
-                        cartItem.getCartId(),
-                        cartItem.getUser().getId(),
-                        cartItem.getProduct().getProductId(),
-                        cartItem.getProduct().getProductName(),
-                        cartItem.getProduct().getImage(),
-                        cartItem.getQuantity(),
-                        cartItem.getUnitPrice(),
-                        cartItem.getTotalPrice(),
-                        cartItem.getStoreId(),
-                        cartItem.getStatus(),
-                        cartItem.getCreatedAt(),
-                        cartItem.getUpdatedAt()
-                ))
-                .toList();
-        return ResponseEntity.ok(new APIRespone(true, "Cart items retrieved successfully", cartItemResponses));
+        List<CartResponse> cartResponses = CartResponse.convertListCartToCartResponse(cartItems);
+        return ResponseEntity.ok(new APIRespone(true, "Get history cart successfully", cartResponses));
     }
-
 }

@@ -21,6 +21,7 @@ public class ResponseConverter {
                 .map(store -> new StoreResponse(
                         store.getStoreId(),
                         store.getStoreName(),
+                        store.getImage(),
                         store.getLocation(),
                         store.getLongitude(),
                         store.getLatitude(),

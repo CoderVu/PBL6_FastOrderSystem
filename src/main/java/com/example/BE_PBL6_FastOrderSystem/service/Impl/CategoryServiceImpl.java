@@ -1,10 +1,10 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
+import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
-import com.example.BE_PBL6_FastOrderSystem.model.Category;
-import com.example.BE_PBL6_FastOrderSystem.repository.CategoryRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.CategoryRequest;
 import com.example.BE_PBL6_FastOrderSystem.service.ICategoryService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
@@ -15,12 +15,17 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl  implements ICategoryService {
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
+    private final CartItemRepository cartRepository;
+    private final PromotionRepository promotionRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     @Override
     public ResponseEntity<APIRespone> getAllCategories() {
@@ -86,12 +91,46 @@ public class CategoryServiceImpl  implements ICategoryService {
         return ResponseEntity.ok(new APIRespone(true, "Update category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(),category.getImage(),  category.getDescription())));
     }
     @Override
-    public ResponseEntity<APIRespone>  deleteCategory(Long id) {
+    public ResponseEntity<APIRespone> deleteCategory(Long id) {
         Optional<Category> category = categoryRepository.findById(id);
         if (category.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Category not found", ""));
         }
+
+        // Get the list of products in the category
+        List<Product> products = category.get().getProducts();
+
+        // Delete products and handle combos associated with each product
+        for (Product product : products) {
+            // Delete each product
+            productRepository.delete(product);
+
+            // Collect combos associated with this product and remove products from combos
+            Set<Combo> combos = product.getCombos();
+            for (Combo combo : combos) {
+                combo.getProducts().remove(product);
+            }
+        }
+
+        // Delete any associated carts
+        List<Cart> carts = cartRepository.findByProductIn(products);
+        for (Cart cart : carts) {
+            cartRepository.delete(cart);
+        }
+        // Delete any associated promotions
+        List<Promotion> promotions = promotionRepository.findPromotionsByProductsIn(products);
+        for (Promotion promotion : promotions) {
+            promotion.getProducts().removeAll(products);
+        }
+        // Delete any associated orderdetails
+        List<OrderDetail> orderDetails = orderDetailRepository.findOrderDetailsByProductIn(products);
+        for (OrderDetail orderDetail : orderDetails) {
+            orderDetailRepository.delete(orderDetail);
+        }
+        // Finally, delete the category itself
         categoryRepository.deleteById(id);
+
         return ResponseEntity.ok(new APIRespone(true, "Delete category successfully", ""));
     }
+
 }
