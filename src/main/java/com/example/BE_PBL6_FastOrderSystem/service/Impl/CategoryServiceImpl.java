@@ -96,38 +96,27 @@ public class CategoryServiceImpl  implements ICategoryService {
         if (category.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Category not found", ""));
         }
-
-        // Get the list of products in the category
         List<Product> products = category.get().getProducts();
-
-        // Delete products and handle combos associated with each product
         for (Product product : products) {
-            // Delete each product
             productRepository.delete(product);
-
-            // Collect combos associated with this product and remove products from combos
             Set<Combo> combos = product.getCombos();
             for (Combo combo : combos) {
                 combo.getProducts().remove(product);
             }
         }
-
-        // Delete any associated carts
         List<Cart> carts = cartRepository.findByProductIn(products);
         for (Cart cart : carts) {
             cartRepository.delete(cart);
         }
-        // Delete any associated promotions
         List<Promotion> promotions = promotionRepository.findPromotionsByProductsIn(products);
         for (Promotion promotion : promotions) {
             promotion.getProducts().removeAll(products);
         }
-        // Delete any associated orderdetails
         List<OrderDetail> orderDetails = orderDetailRepository.findOrderDetailsByProductIn(products);
         for (OrderDetail orderDetail : orderDetails) {
             orderDetailRepository.delete(orderDetail);
         }
-        // Finally, delete the category itself
+
         categoryRepository.deleteById(id);
 
         return ResponseEntity.ok(new APIRespone(true, "Delete category successfully", ""));

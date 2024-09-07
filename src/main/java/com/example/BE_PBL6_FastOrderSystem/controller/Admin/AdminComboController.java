@@ -37,10 +37,11 @@ public class AdminComboController {
     ResponseEntity<APIRespone> deleteCombo(@PathVariable Long comboId){
         return comboService.deleteCombo(comboId);
     }
-    @PostMapping("/addProduct/{comboId}/{productId}")
-    ResponseEntity<APIRespone> addProduct(@PathVariable Long comboId, @PathVariable Long productId){
+    @PostMapping("/addProduct/{comboId}")
+    ResponseEntity<APIRespone> addProduct(@PathVariable Long comboId, @RequestParam Long productId){
         return comboService.addProduct(comboId, productId);
     }
+
 
 
 }

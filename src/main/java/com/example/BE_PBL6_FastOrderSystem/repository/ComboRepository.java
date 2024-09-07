@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.repository;
 import com.example.BE_PBL6_FastOrderSystem.model.Combo;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ComboRepository extends JpaRepository <Combo, Long> {
@@ -10,4 +11,6 @@ public interface ComboRepository extends JpaRepository <Combo, Long> {
     Optional<Object> findByComboName(String comboName);
 
     boolean existsByComboName(String comboName);
+
+    List<Combo> findByProductsProductId(Long productId);
 }

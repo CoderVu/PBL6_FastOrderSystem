@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
+import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.ComboRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.*;
@@ -102,6 +103,9 @@ public class ComboServiceImlp implements IComboService {
         Combo combo = comboRepository.findById(comboId).get();
         if (combo.getProducts().stream().anyMatch(product -> product.getProductId().equals(productId))) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product already exists in combo", ""));
+        }
+        if (productRepository.findById(productId).isEmpty()){
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
         }
         combo.getProducts().add(productRepository.findById(productId).get());
         comboRepository.save(combo);

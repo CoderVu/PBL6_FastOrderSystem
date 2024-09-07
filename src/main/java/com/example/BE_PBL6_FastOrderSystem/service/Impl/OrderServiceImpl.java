@@ -26,7 +26,7 @@ public class OrderServiceImpl implements IOrderService {
     private final ProductRepository productRepository;
     private final StoreRepository storeRepository;
     private final PaymentMethodRepository paymentMethodRepository;
-
+    private final ComboRepository comboRepository;
     public String generateUniqueOrderCode() {
         Random random = new Random();
         String orderCode;
@@ -89,18 +89,6 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setTotalPrice(cartItem.getTotalPrice());
             return orderDetail;
         }).collect(Collectors.toList());
-        // Kiểm tra số lượng tồn kho và cập nhật số lượng sản phẩm
-        for (OrderDetail orderDetail : orderDetails) {
-            Product product = orderDetail.getProduct();
-            if (product.getStockQuantity() < orderDetail.getQuantity()) {
-                return ResponseEntity.badRequest().body(new APIRespone(false, "Insufficient stock for product: " + product.getProductId(), ""));
-            }
-        }
-
-        for (OrderDetail orderDetail : orderDetails) {
-            updateQuantityProduct(orderDetail.getProduct().getProductId(), orderDetail.getQuantity());
-        }
-
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
         orderRepository.save(order);
@@ -111,17 +99,42 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ResponseEntity<APIRespone> updateQuantityProduct(Long productId, int quantity) {
+    public ResponseEntity<APIRespone> updateQuantityProductOrderByProduct(Long productId, int quantity) {
+        System.out.println("Đã vào updateQuantityProductOrderByProduct");
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
+            System.out.println("Không tìm thấy sản phẩm");
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
         }
         Product product = productOptional.get();
+        System.out.println("Số lượng sản phẩm: " + product.getStockQuantity());
         product.setStockQuantity(product.getStockQuantity() - quantity);
+        System.out.println("Số lượng sản phẩm sau khi cập nhật: " + product.getStockQuantity());
         productRepository.save(product);
         return ResponseEntity.ok(new APIRespone(true, "Product quantity updated successfully", ""));
     }
-
+    @Override
+    public ResponseEntity<APIRespone> updateQuantityProductOrderByCombo(Long comboId, int quantity) {
+        System.out.println("Đã vào updateQuantityProductOrderByCombo");
+        Optional<Combo> comboOptional = comboRepository.findById(comboId);
+        if (comboOptional.isEmpty()) {
+            System.out.println("Không tìm thấy combo");
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
+        }
+        Combo combo = comboOptional.get();
+        if (combo.getProducts().isEmpty()) {
+            System.out.println("Không tìm thấy sản phẩm trong combo");
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No products found in combo", ""));
+        }
+        for (Product product : combo.getProducts()) {
+            System.out.println("Số lượng sản phẩm trong combo: " + product.getStockQuantity());
+            product.setStockQuantity(product.getStockQuantity() - quantity);
+            System.out.println("Số lượng sản phẩm sau khi cập nhật: " + product.getStockQuantity());
+            productRepository.save(product);
+            System.out.println("Đã cập nhật số lượng sản phẩm trong combo: " + product.getProductId());
+        }
+        return ResponseEntity.ok(new APIRespone(true, "Combo quantity updated successfully", ""));
+    }
 
     @Override
     public ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status) {
@@ -235,10 +248,14 @@ public class OrderServiceImpl implements IOrderService {
         List<Cart> cartItems = cartIds.stream()
                 .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
                 .filter(cartItem -> cartItem.getUser().getId().equals(userId))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); // get all cart items by cartId and userId
 
         if (cartItems.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
+        }
+
+        if (cartItems.stream().anyMatch(cartItem -> !cartItem.getUser().getId().equals(userId))) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts does not belong to the specified you! ", ""));
         }
 
         Long storeId = cartItems.get(0).getStoreId();
@@ -280,16 +297,14 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setTotalPrice(cartItem.getTotalPrice());
             return orderDetail;
         }).collect(Collectors.toList());
-
-
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
         orderRepository.save(order);
+        System.out.println("Đã lưu order");
         cartItemRepository.deleteAll(cartItems);
-
+        System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
-
 
     @Override
     public ResponseEntity<APIRespone> getAllOrdersByAdmin() {
