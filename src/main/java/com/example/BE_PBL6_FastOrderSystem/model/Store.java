@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -28,12 +29,16 @@ public class Store {
     private LocalDateTime updatedAt;
     @ManyToMany(mappedBy = "stores")
     private Set<Promotion> promotions;
-    @ManyToMany(mappedBy = "stores")
-    private Set<Product> products;
+    @OneToMany(mappedBy = "store")
+    private Set<ProductStore> productStores = new HashSet<>();
 
+    // Getters and Setters for productStores
+    public Set<ProductStore> getProductStores() {
+        return productStores;
+    }
 
-    public Set<Product> getProducts() {
-        return products;
+    public void setProductStores(Set<ProductStore> productStores) {
+        this.productStores = productStores;
     }
     @PrePersist
     protected void onCreate() {

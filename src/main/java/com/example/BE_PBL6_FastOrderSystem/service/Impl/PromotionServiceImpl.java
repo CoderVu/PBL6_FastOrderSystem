@@ -167,8 +167,8 @@ public class PromotionServiceImpl implements IPromotionService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found with id " + productId, ""));
         }
         Product product = productOptional.get();
-        boolean isPromotionInProductStores = product.getStores().stream()
-                .anyMatch(store -> promotion.getStores().contains(store));
+        boolean isPromotionInProductStores = product.getProductStores().stream()
+                .anyMatch(productStore -> promotion.getStores().contains(productStore.getStore()));
         if (isPromotionInProductStores) {
             product.getPromotions().add(promotion);
             promotion.getProducts().add(product);

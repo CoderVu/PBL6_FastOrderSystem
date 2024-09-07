@@ -2,6 +2,7 @@ package com.example.BE_PBL6_FastOrderSystem.utils;
 
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.model.Promotion;
+import com.example.BE_PBL6_FastOrderSystem.model.Store;
 import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.StoreResponse;
@@ -17,22 +18,24 @@ public class ResponseConverter {
                 product.getCategory().getImage(),
                 product.getCategory().getDescription()
         );
-        List<StoreResponse> storeResponses = product.getStores().stream()
-                .map(store -> new StoreResponse(
-                        store.getStoreId(),
-                        store.getStoreName(),
-                        store.getImage(),
-                        store.getLocation(),
-                        store.getLongitude(),
-                        store.getLatitude(),
-                        store.getPhoneNumber(),
-                        store.getOpeningTime(),
-                        store.getClosingTime(),
-                        store.getCreatedAt(),
-                        store.getUpdatedAt()
-                ))
+        List<StoreResponse> storeResponses = product.getProductStores().stream()
+                .map(productStore -> {
+                    Store store = productStore.getStore();
+                    return new StoreResponse(
+                            store.getStoreId(),
+                            store.getStoreName(),
+                            store.getImage(),
+                            store.getLocation(),
+                            store.getLongitude(),
+                            store.getLatitude(),
+                            store.getPhoneNumber(),
+                            store.getOpeningTime(),
+                            store.getClosingTime(),
+                            store.getCreatedAt(),
+                            store.getUpdatedAt()
+                    );
+                })
                 .collect(Collectors.toList());
-
         // Calculate discounted price if a promotion exists
         Double discountedPrice = product.getPrice();
         if (product.getPromotions() != null && !product.getPromotions().isEmpty()) {

@@ -40,10 +40,14 @@ public class CartServiceImpl implements ICartService {
         if (cartRequest.getQuantity() <= 0) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Quantity must be greater than 0", ""));
         }
-        Store store = product.getStores().stream()
-                .filter(s -> s.getStoreId().equals(cartRequest.getStoreId()))
+        if (product.getStockQuantity() < cartRequest.getQuantity()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Product not enough", ""));
+        }
+        ProductStore productStore = product.getProductStores().stream()
+                .filter(ps -> Objects.equals(ps.getStore().getStoreId(), cartRequest.getStoreId()))
                 .findFirst()
                 .orElse(null);
+        Store store = (productStore != null) ? productStore.getStore() : null;
         if (store == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product does not belong to the specified store", ""));
         }
@@ -83,7 +87,7 @@ public class CartServiceImpl implements ICartService {
             if (store == null) {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
             }
-            if (!product.getStores().contains(store)) {
+            if (product.getProductStores().stream().noneMatch(ps -> ps.getStore().equals(store))) {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Product " + product.getProductName() + " does not belong to the specified store", ""));
             }
         }
