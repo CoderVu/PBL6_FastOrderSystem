@@ -110,6 +110,12 @@ public class OrderServiceImpl implements IOrderService {
         Product product = productOptional.get();
         for (ProductStore productStore : product.getProductStores()) {
             if (productStore.getStore().getStoreId().equals(storeId)) {
+               if (productStore.getStockQuantity() < quantity) {
+                   return ResponseEntity.badRequest().body(new APIRespone(false, "Product not enough", ""));
+               }
+               if (productStore.getStockQuantity() == 0) {
+                   return ResponseEntity.badRequest().body(new APIRespone(false, "Product out of stock", ""));
+                }
                 productStore.setStockQuantity(productStore.getStockQuantity() - quantity);
                 productStoreRepository.save(productStore);
                 return ResponseEntity.ok(new APIRespone(true, "Product quantity updated successfully", ""));
@@ -128,6 +134,12 @@ public class OrderServiceImpl implements IOrderService {
         for (Product product : combo.getProducts()) {
             for (ProductStore productStore : product.getProductStores()) {
                 if (productStore.getStore().getStoreId().equals(storeId)) {
+                    if (productStore.getStockQuantity() < quantity) {
+                        return ResponseEntity.badRequest().body(new APIRespone(false, "Product not enough", ""));
+                    }
+                    if (productStore.getStockQuantity() == 0) {
+                        return ResponseEntity.badRequest().body(new APIRespone(false, "Product out of stock", ""));
+                    }
                     productStore.setStockQuantity(productStore.getStockQuantity() - quantity);
                     productStoreRepository.save(productStore);
                 }
