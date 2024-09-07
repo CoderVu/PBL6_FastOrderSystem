@@ -12,11 +12,12 @@ public class CartProductResponse {
     private int quantity;
     private double unitPrice;
     private double totalPrice;
+    private String size;
     private Long storeId;
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    public CartProductResponse(Long userId, Long productId, String productName, String image, int quantity, double unitPrice, double totalPrice, Long storeId, String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public CartProductResponse(Long userId, Long productId, String productName, String image, int quantity, double unitPrice, double totalPrice, String size, Long storeId, String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.userId = userId;
         this.productId = productId;
         this.productName = productName;
@@ -24,6 +25,7 @@ public class CartProductResponse {
         this.quantity = quantity;
         this.unitPrice = unitPrice;
         this.totalPrice = totalPrice;
+        this.size = size;
         this.storeId = storeId;
         this.status = status;
         this.createdAt = createdAt;

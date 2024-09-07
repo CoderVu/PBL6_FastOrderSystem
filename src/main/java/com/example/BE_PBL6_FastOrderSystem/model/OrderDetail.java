@@ -1,7 +1,9 @@
 package com.example.BE_PBL6_FastOrderSystem.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 public class OrderDetail {
     @Id
@@ -19,58 +21,7 @@ public class OrderDetail {
     private Integer quantity;
     private Double unitPrice;
     private Double totalPrice;
-
-    public Long getOrderDetailId() {
-        return orderDetailId;
-    }
-
-    public void setOrderDetailId(Long orderDetailId) {
-        this.orderDetailId = orderDetailId;
-    }
-
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-    public Combo getCombo() {
-        return combo;
-    }
-    public void setCombo(Combo combo) {
-        this.combo = combo;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public Double getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(Double unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
-    public Double getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(Double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
+    @ManyToOne
+    @JoinColumn(name = "size_id")
+    private Size size;
 }

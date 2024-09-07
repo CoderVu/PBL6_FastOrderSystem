@@ -1,10 +1,11 @@
 package com.example.BE_PBL6_FastOrderSystem.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Data
 @Entity
 @Table(name = "orders")
 public class Order {

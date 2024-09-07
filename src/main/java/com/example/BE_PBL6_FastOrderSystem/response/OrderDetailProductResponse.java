@@ -15,6 +15,7 @@ public class OrderDetailProductResponse {
     private Integer quantity;
     private Double unitPrice;
     private Double totalPrice;
+    private String size;
 
     public OrderDetailProductResponse(OrderDetail orderDetail) {
         this.orderDetailId = orderDetail.getOrderDetailId();
@@ -27,5 +28,6 @@ public class OrderDetailProductResponse {
         this.quantity = orderDetail.getQuantity();
         this.unitPrice = orderDetail.getUnitPrice();
         this.totalPrice = orderDetail.getTotalPrice();
+        this.size = orderDetail.getSize().getName();
     }
 }

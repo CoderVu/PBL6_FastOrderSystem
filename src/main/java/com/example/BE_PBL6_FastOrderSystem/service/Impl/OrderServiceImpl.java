@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
 import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.model.ProductStore;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
@@ -27,6 +28,7 @@ public class OrderServiceImpl implements IOrderService {
     private final StoreRepository storeRepository;
     private final PaymentMethodRepository paymentMethodRepository;
     private final ComboRepository comboRepository;
+    private final ProductStoreRepository productStoreRepository;
     public String generateUniqueOrderCode() {
         Random random = new Random();
         String orderCode;
@@ -87,6 +89,7 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setQuantity(cartItem.getQuantity());
             orderDetail.setUnitPrice(cartItem.getUnitPrice());
             orderDetail.setTotalPrice(cartItem.getTotalPrice());
+            orderDetail.setSize(cartItem.getSize());
             return orderDetail;
         }).collect(Collectors.toList());
         order.setOrderDetails(orderDetails);
@@ -99,43 +102,39 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ResponseEntity<APIRespone> updateQuantityProductOrderByProduct(Long productId, int quantity) {
-        System.out.println("Đã vào updateQuantityProductOrderByProduct");
+    public ResponseEntity<APIRespone> updateQuantityProductOrderByProduct(Long productId, Long storeId ,int quantity) {
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
-            System.out.println("Không tìm thấy sản phẩm");
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
         }
         Product product = productOptional.get();
-        System.out.println("Số lượng sản phẩm: " + product.getStockQuantity());
-        product.setStockQuantity(product.getStockQuantity() - quantity);
-        System.out.println("Số lượng sản phẩm sau khi cập nhật: " + product.getStockQuantity());
-        productRepository.save(product);
-        return ResponseEntity.ok(new APIRespone(true, "Product quantity updated successfully", ""));
+        for (ProductStore productStore : product.getProductStores()) {
+            if (productStore.getStore().getStoreId().equals(storeId)) {
+                productStore.setStockQuantity(productStore.getStockQuantity() - quantity);
+                productStoreRepository.save(productStore);
+                return ResponseEntity.ok(new APIRespone(true, "Product quantity updated successfully", ""));
+            }
+        }
+        return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found in store", ""));
     }
+
     @Override
-    public ResponseEntity<APIRespone> updateQuantityProductOrderByCombo(Long comboId, int quantity) {
-        System.out.println("Đã vào updateQuantityProductOrderByCombo");
+    public ResponseEntity<APIRespone> updateQuantityProductOrderByCombo(Long comboId, Long storeId, int quantity) {
         Optional<Combo> comboOptional = comboRepository.findById(comboId);
         if (comboOptional.isEmpty()) {
-            System.out.println("Không tìm thấy combo");
             return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
         }
         Combo combo = comboOptional.get();
-        if (combo.getProducts().isEmpty()) {
-            System.out.println("Không tìm thấy sản phẩm trong combo");
-            return ResponseEntity.badRequest().body(new APIRespone(false, "No products found in combo", ""));
-        }
         for (Product product : combo.getProducts()) {
-            System.out.println("Số lượng sản phẩm trong combo: " + product.getStockQuantity());
-            product.setStockQuantity(product.getStockQuantity() - quantity);
-            System.out.println("Số lượng sản phẩm sau khi cập nhật: " + product.getStockQuantity());
-            productRepository.save(product);
-            System.out.println("Đã cập nhật số lượng sản phẩm trong combo: " + product.getProductId());
+            for (ProductStore productStore : product.getProductStores()) {
+                if (productStore.getStore().getStoreId().equals(storeId)) {
+                    productStore.setStockQuantity(productStore.getStockQuantity() - quantity);
+                    productStoreRepository.save(productStore);
+                }
+            }
         }
         return ResponseEntity.ok(new APIRespone(true, "Combo quantity updated successfully", ""));
     }
-
     @Override
     public ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status) {
         Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
@@ -295,6 +294,7 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setQuantity(cartItem.getQuantity());
             orderDetail.setUnitPrice(cartItem.getUnitPrice());
             orderDetail.setTotalPrice(cartItem.getTotalPrice());
+            orderDetail.setSize(cartItem.getSize());
             return orderDetail;
         }).collect(Collectors.toList());
         order.setOrderDetails(orderDetails);

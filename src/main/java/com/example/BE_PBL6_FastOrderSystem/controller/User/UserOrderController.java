@@ -127,7 +127,7 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
                                     int quantity = cart.getQuantity();
                                     System.out.println("Updating productId: " + productId + " with quantity: " + quantity);
                                     // update product quantities based on product
-                                    orderService.updateQuantityProductOrderByProduct(productId, quantity);
+                                    orderService.updateQuantityProductOrderByProduct(productId, cart.getStoreId(), quantity);
                                 } else {
                                     System.err.println("Product or ProductId is null for cartId: " + cart.getCartId());
                                 }
@@ -167,7 +167,7 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
                         int quantity = cart.getQuantity();
                         System.out.println("Updating productId: " + productId + " with quantity: " + quantity);
                         // Update product quantities based on product
-                        orderService.updateQuantityProductOrderByProduct(productId, quantity);
+                        orderService.updateQuantityProductOrderByProduct(productId, cart.getStoreId(), quantity);
                     } else {
                         System.err.println("Product or ProductId is null for cartId: " + cart.getCartId());
                     }
@@ -239,7 +239,7 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
                                     int quantity = cart.getQuantity();
                                     System.out.println("Updating comboId: " + comboId + " with quantity: " + quantity);
                                     // update product quantities based on combo
-                                    orderService.updateQuantityProductOrderByCombo(comboId, quantity);
+                                    orderService.updateQuantityProductOrderByCombo(comboId, cart.getStoreId() ,quantity);
                                 } else {
                                     System.err.println("Combo or ComboId is null for cartId: " + cart.getCartId());
                                 }
@@ -280,7 +280,7 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
                         int quantity = cart.getQuantity();
                         System.out.println("Updating comboId: " + comboId + " with quantity: " + quantity);
                         // Update product quantities based on combo
-                        orderService.updateQuantityProductOrderByCombo(comboId, quantity);
+                        orderService.updateQuantityProductOrderByCombo(comboId, cart.getStoreId() ,quantity);
                     } else {
                         System.err.println("Combo or ComboId is null for cartId: " + cart.getCartId());
                     }

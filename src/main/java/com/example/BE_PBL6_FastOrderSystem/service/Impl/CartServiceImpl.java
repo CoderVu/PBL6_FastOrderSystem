@@ -20,12 +20,11 @@ import java.util.Objects;
 public class CartServiceImpl implements ICartService {
 
     final private UserRepository userRepository;
-
     final private ProductRepository productRepository;
-
     final private CartItemRepository cartItemRepository;
     final private StoreRepository storeRepository;
     final private ComboRepository comboRepository;
+    final private SizeRepository sizeRepository;
 
     @Override
     public ResponseEntity<APIRespone> addProductToCart(Long userId, CartRequest cartRequest) {
@@ -57,6 +56,12 @@ public class CartServiceImpl implements ICartService {
         cartItem.setQuantity(cartRequest.getQuantity());
         cartItem.setUnitPrice(product.getPrice());
         cartItem.setTotalPrice(product.getPrice() * cartRequest.getQuantity());
+
+        Size size = sizeRepository.findByName(cartRequest.getSize());
+        if (size == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found", ""));
+        }
+        cartItem.setSize(size);
         cartItem.setStoreId(cartRequest.getStoreId());
         cartItem.setStatus(cartRequest.getStatus());
         cartItemRepository.save(cartItem);
@@ -98,6 +103,11 @@ public class CartServiceImpl implements ICartService {
         cartItem.setQuantity(cartComboRequest.getQuantity());
         cartItem.setUnitPrice(combo.getComboPrice());
         cartItem.setTotalPrice(combo.getComboPrice() * cartComboRequest.getQuantity());
+        Size size = sizeRepository.findByName(cartComboRequest.getSize());
+        if (size == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found", ""));
+        }
+        cartItem.setSize(size);
         cartItem.setStoreId(cartComboRequest.getStoreId());
         cartItem.setStatus(cartComboRequest.getStatus());
         cartItemRepository.save(cartItem);

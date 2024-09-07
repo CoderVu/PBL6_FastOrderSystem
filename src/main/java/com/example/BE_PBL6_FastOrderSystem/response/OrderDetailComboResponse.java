@@ -10,6 +10,7 @@ public class OrderDetailComboResponse {
     private Integer quantity;
     private Double unitPrice;
     private Double totalPrice;
+    private String size;
 
     public OrderDetailComboResponse(OrderDetail orderDetail) {
         this.orderDetailId = orderDetail.getOrderDetailId();
@@ -17,5 +18,6 @@ public class OrderDetailComboResponse {
         this.quantity = orderDetail.getQuantity();
         this.unitPrice = orderDetail.getUnitPrice();
         this.totalPrice = orderDetail.getTotalPrice();
+        this.size = orderDetail.getSize().getName();
     }
 }
