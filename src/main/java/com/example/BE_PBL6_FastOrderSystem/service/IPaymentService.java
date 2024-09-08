@@ -19,4 +19,5 @@ public interface IPaymentService {
     Map<String, Object> getStatusZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException;
     PaymentMethod findPaymentMethodByNameMomo(String momo);
     ResponseEntity<APIRespone> savePaymentMomo(PaymentRequest orderRequest, Order order, Long userId, String deliveryAddress);
+    ResponseEntity<APIRespone> savePaymentZaloPay(PaymentRequest orderRequest, Order order, Long userId, String deliveryAddress);
 }

@@ -39,6 +39,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
+        System.out.println("vao processProductOrder");
         List<Cart> cartItems = cartIds.stream()
                 .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
                 .filter(cartItem -> cartItem.getUser().getId().equals(userId))

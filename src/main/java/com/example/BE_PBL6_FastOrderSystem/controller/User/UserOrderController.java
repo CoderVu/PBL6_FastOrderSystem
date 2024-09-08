@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -48,18 +49,27 @@ public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderReq
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new APIRespone(false, "Internal server error", ""));
     }
 }
-public ResponseEntity<APIRespone> checkPaymentZaloPayStatus(PaymentRequest orderRequest) {
-    ResponseEntity<APIRespone> response =  paymentZaloPayCheckStatusController.getStatus(orderRequest.getApptransid());
-    System.out.println("Order Request "+ orderRequest);
-    Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
-    System.out.println("reponse Status đã thanh toán hãy chưa:" + responseData);
-    if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("message"))) {
-        return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
-       
-    } else {
-        return ResponseEntity.badRequest().body(new APIRespone(false, "Payment Zalo status check failed", ""));
+    public ResponseEntity<APIRespone> checkPaymentZaloPayStatus(String apptransid) {
+        try {
+            // Perform the HTTP request to check payment status
+            ResponseEntity<APIRespone> response = paymentZaloPayCheckStatusController.getStatus(apptransid);
+            System.out.println("apptransid: " + apptransid);
+            System.out.println("Response Status đã thanh toán hãy chưa(zalo): " + response);
+
+            Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
+            System.out.println("Message response data: " + responseData.get("status"));
+            System.out.println("Response get statuscode: " + response.getStatusCode());
+            if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("status"))) {
+
+                return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
+            } else {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Payment status check failed", ""));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new APIRespone(false, "Internal server error", ""));
+        }
     }
-}
+
     @PostMapping("/create/product")
     public ResponseEntity<APIRespone> placeProductOrder(
             @RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
@@ -77,11 +87,11 @@ public ResponseEntity<APIRespone> checkPaymentZaloPayStatus(PaymentRequest order
         Long userId = FoodUserDetails.getCurrentUserId();
         String orderCode = orderService.generateUniqueOrderCode();
         orderRequest.setOrderId(orderCode);
-        System.out.println("Order code: " + orderCode);
+        orderRequest.setUserId(userId);
         Long totalAmount = calculateOrderAmount(cartIds);
         orderRequest.setAmount(totalAmount);
-        System.out.println("Amount: " + orderRequest.getAmount());
-        if(("ZALOPAY".equalsIgnoreCase(paymentMethod))){
+        System.out.println("Order code: " + orderCode);
+        if ("ZALOPAY".equalsIgnoreCase(paymentMethod)) {
             orderRequest.setOrderId(orderCode);
             orderRequest.setUserId(userId);
             for (Long cartId : cartIds) {
@@ -89,22 +99,25 @@ public ResponseEntity<APIRespone> checkPaymentZaloPayStatus(PaymentRequest order
                     return ResponseEntity.badRequest().body(new APIRespone(false, "One or more carts do not belong to current user", ""));
                 }
             }
-
             System.out.println("Cart IDs: " + orderRequest.getCartIds());
             System.out.println("User ID: " + orderRequest.getUserId());
-            orderRequest.setOrderInfo("Payment ZALOPAY for order " + orderCode);
+            orderRequest.setOrderInfo("Payment ZaloPay for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-            // initiate MoMo payment
+            // Initiate ZaloPay payment
             Map<String, Object> zalopayResponse = paymentService.createOrderZaloPay(orderRequest);
-            System.out.println("MoMo response khi product: " + zalopayResponse);
-            if ("1".equals(zalopayResponse.get("returncode"))) {
-                // schedule a task to check payment status every 10 seconds
+            System.out.println("ZaloPay response: " + zalopayResponse);
+            System.out.println();
+            if (Integer.parseInt(zalopayResponse.get("returncode").toString()) == 1) {
+                System.out.println("ZaloPay payment initiation successful");
+                // Schedule a task to check payment status every 10 seconds
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 scheduler.scheduleAtFixedRate(() -> {
-                    ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(orderRequest);
+                    ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
+                    System.out.println("Vaso: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        // proceed with normal order placement
+                        // Proceed with normal order placement
+                        System.out.println("Proceed with normal order placement");
                         ResponseEntity<APIRespone> response = orderService.processProductOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
                         System.out.println("Response khi product: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
@@ -120,24 +133,22 @@ public ResponseEntity<APIRespone> checkPaymentZaloPayStatus(PaymentRequest order
                                     System.err.println("Product or ProductId is null for cartId: " + cart.getCartId());
                                 }
                             }
-                            // update order status to "Pending"
-                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Retrieve the Order object
                             Order order = orderService.findOrderByOrderCode(orderCode);
+                            // update order
+                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // create and save Payment entity
                             paymentService.savePaymentMomo(orderRequest, order, userId, deliveryAddress);
                             // cancel the scheduled task
                             scheduler.shutdown();
                         }
-                    } else {
-                        System.out.println("Payment status check is no pay.");
                     }
                 }, 0, 10, TimeUnit.SECONDS);
-                // return response with payment URL
-                APIRespone apiResponse = new APIRespone(true, "Zalo payment initiated", zalopayResponse);
+                // Return response with payment URL
+                APIRespone apiResponse = new APIRespone(true, "ZaloPay payment initiated", zalopayResponse);
                 return ResponseEntity.ok(apiResponse);
             } else {
-                return ResponseEntity.badRequest().body(new APIRespone(false, "Zalo payment initiation failed", ""));
+                return ResponseEntity.badRequest().body(new APIRespone(false, "ZaloPay payment initiation failed", ""));
             }
         }
         if ("MOMO".equalsIgnoreCase(paymentMethod)) {
@@ -179,7 +190,7 @@ public ResponseEntity<APIRespone> checkPaymentZaloPayStatus(PaymentRequest order
                                     System.err.println("Product or ProductId is null for cartId: " + cart.getCartId());
                                 }
                             }
-                            // update order status to "Pending"
+                            // update order
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Retrieve the Order object
                             Order order = orderService.findOrderByOrderCode(orderCode);
@@ -232,6 +243,8 @@ public ResponseEntity<APIRespone> checkPaymentZaloPayStatus(PaymentRequest order
         } else {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Unsupported payment method", ""));
         }
+
+
     }
     @PostMapping("/create/combo")
     public ResponseEntity<APIRespone> placeComboOrder(

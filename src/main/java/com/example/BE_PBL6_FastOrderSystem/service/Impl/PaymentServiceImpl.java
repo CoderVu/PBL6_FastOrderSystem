@@ -164,63 +164,147 @@ public class PaymentServiceImpl implements IPaymentService {
         return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
     }
     @Override
+    public ResponseEntity<APIRespone> savePaymentZaloPay(PaymentRequest orderRequest, Order order, Long userId, String deliveryAddress) {
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setPaymentDate(LocalDateTime.now());
+        payment.setAmountPaid(orderRequest.getAmount().doubleValue());
+        payment.setPaymentMethod(findPaymentMethodByNameMomo(orderRequest.getPaymentMethod()));
+        payment.setStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("ZALOPAY") ? "Đã thanh toán" : "Chưa thanh toán");
+        payment.setCreatedAt(LocalDateTime.now());
+        payment.setOrderCode(orderRequest.getOrderId());
+        payment.setUserId(userId);
+        payment.setDeliveryAddress(deliveryAddress);
+        payment.setOrderInfo(orderRequest.getOrderInfo());
+        payment.setLang(orderRequest.getLang());
+        payment.setExtraData(orderRequest.getExtraData());
+        paymentRepository.save(payment);
+        return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
+    }
+    @Override
     public Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException {
-    String appuser = orderRequest.getAppuser();
-	Long amount = orderRequest.getAmount();
-	Long order_id = orderRequest.getOrder_id();
-	String apptransid = getCurrentTimeString("yyMMdd") + "_" + new Date().getTime();
+        Long amount = orderRequest.getAmount();
+        String order_id = orderRequest.getOrderId();
+        String apptransid = getCurrentTimeString("yyMMdd") + "_" + new Date().getTime();
 
-	Map<String, Object> zalopay_Params = new HashMap<>();
-	zalopay_Params.put("appid", ZaloPayConstant.APP_ID);
-	zalopay_Params.put("apptransid", apptransid);
-	zalopay_Params.put("apptime", System.currentTimeMillis());
+        Map<String, Object> zalopay_Params = new HashMap<>();
+        zalopay_Params.put("appid", ZaloPayConstant.APP_ID);
+        zalopay_Params.put("apptransid", apptransid);
+        zalopay_Params.put("apptime", System.currentTimeMillis());
+        zalopay_Params.put("appuser", orderRequest.getUserId());
+        zalopay_Params.put("amount", amount);
+        zalopay_Params.put("description", "Thanh toan don hang #" + order_id);
+        zalopay_Params.put("bankcode", "");
+        String item = "Thanh toan don hang #" + order_id;
+        zalopay_Params.put("item", item);
+        Map<String, String> embeddata = new HashMap<>();
+        embeddata.put("merchantinfo", "eshop123");
+        embeddata.put("promotioninfo", "");
+        embeddata.put("redirecturl", ZaloPayConstant.REDIRECT_URL);
 
-	zalopay_Params.put("appuser", appuser);
-	zalopay_Params.put("amount", amount);
-	zalopay_Params.put("description", "Thanh toan don hang #" + order_id);
-	zalopay_Params.put("bankcode", "");
-	String item = "Thanh toan don hang #" + order_id;
-	zalopay_Params.put("item", item);
-	Map<String, String> embeddata = new HashMap<>();
-	embeddata.put("merchantinfo", "eshop123");
-	embeddata.put("promotioninfo", "");
-	embeddata.put("redirecturl", ZaloPayConstant.REDIRECT_URL);
+        Map<String, String> columninfo = new HashMap<>();
+        columninfo.put("store_name", "E-Shop");
+        embeddata.put("columninfo", new JSONObject(columninfo).toString());
+        zalopay_Params.put("embeddata", new JSONObject(embeddata).toString());
 
-	Map<String, String> columninfo = new HashMap<>();
-	columninfo.put("store_name", "E-Shop");
-	embeddata.put("columninfo", new JSONObject(columninfo).toString());
-	zalopay_Params.put("embeddata", new JSONObject(embeddata).toString());
+        String data = zalopay_Params.get("appid") + "|" + zalopay_Params.get("apptransid") + "|"
+                + zalopay_Params.get("appuser") + "|" + zalopay_Params.get("amount") + "|"
+                + zalopay_Params.get("apptime") + "|" + zalopay_Params.get("embeddata") + "|"
+                + zalopay_Params.get("item");
+        zalopay_Params.put("mac", HelperHmacSHA256.computeHmacSha256(data, ZaloPayConstant.KEY1));
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost post = new HttpPost(ZaloPayConstant.CREATE_ORDER_URL);
 
-	String data = zalopay_Params.get("appid") + "|" + zalopay_Params.get("apptransid") + "|"
-			+ zalopay_Params.get("appuser") + "|" + zalopay_Params.get("amount") + "|"
-			+ zalopay_Params.get("apptime") + "|" + zalopay_Params.get("embeddata") + "|"
-			+ zalopay_Params.get("item");
-	zalopay_Params.put("mac", HelperHmacSHA256.computeHmacSha256(data, ZaloPayConstant.KEY1));
-	CloseableHttpClient client = HttpClients.createDefault();
-	HttpPost post = new HttpPost(ZaloPayConstant.CREATE_ORDER_URL);
+        List<NameValuePair> params = new ArrayList<>();
+        for (Map.Entry<String, Object> e : zalopay_Params.entrySet()) {
+            if (e.getValue() != null) {
+                params.add(new BasicNameValuePair(e.getKey(), e.getValue().toString()));
+            } else {
+                System.err.println("Null value for key: " + e.getKey());
+            }
+        }
+        post.setEntity(new UrlEncodedFormEntity(params));
+        CloseableHttpResponse res = client.execute(post);
+        BufferedReader rd = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
+        StringBuilder resultJsonStr = new StringBuilder();
+        String line;
+        while ((line = rd.readLine()) != null) {
+            resultJsonStr.append(line);
+        }
+        JSONObject result = new JSONObject(resultJsonStr.toString());
+        Map<String, Object> kq = new HashMap<>();
+        kq.put("returnmessage", result.get("returnmessage"));
+        kq.put("orderurl", result.get("orderurl"));
+        kq.put("returncode", result.get("returncode"));
+        kq.put("zptranstoken", result.get("zptranstoken"));
+        kq.put("order_id", order_id); // Ensure order_id is included in the response
+        kq.put("apptransid", apptransid); // Ensure apptransid is included in the response
+        return kq;
+    }
 
-	List<NameValuePair> params = new ArrayList<>();
-	for (Map.Entry<String, Object> e : zalopay_Params.entrySet()) {
-		params.add(new BasicNameValuePair(e.getKey(), e.getValue().toString()));
-	}
-	post.setEntity(new UrlEncodedFormEntity(params));
-	CloseableHttpResponse res = client.execute(post);
-	BufferedReader rd = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
-	StringBuilder resultJsonStr = new StringBuilder();
-	String line;
-	while ((line = rd.readLine()) != null) {
-		resultJsonStr.append(line);
-	}
-	JSONObject result = new JSONObject(resultJsonStr.toString());
-	Map<String, Object> kq = new HashMap<>();
-	kq.put("returnmessage", result.get("returnmessage"));
-	kq.put("orderurl", result.get("orderurl"));
-	kq.put("returncode", result.get("returncode"));
-	kq.put("zptranstoken", result.get("zptranstoken"));
-	kq.put("order_id", order_id); // Include order_id in the response
-	kq.put("apptransid", apptransid); // Include apptransid in the response
-	return kq;
-}
+//    @Override
+//    public Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException {
+//	Long amount = orderRequest.getAmount();
+//	Long order_id = orderRequest.getOrder_id();
+//	String apptransid = getCurrentTimeString("yyMMdd") + "_" + new Date().getTime();
+//
+//	Map<String, Object> zalopay_Params = new HashMap<>();
+//	zalopay_Params.put("appid", ZaloPayConstant.APP_ID);
+//	zalopay_Params.put("apptransid", apptransid);
+//	zalopay_Params.put("apptime", System.currentTimeMillis());
+//	zalopay_Params.put("appuser", orderRequest.getUserId());
+//	zalopay_Params.put("amount", amount);
+//	zalopay_Params.put("description", "Thanh toan don hang #" + order_id);
+//	zalopay_Params.put("bankcode", "");
+//	String item = "Thanh toan don hang #" + order_id;
+//	zalopay_Params.put("item", item);
+//	Map<String, String> embeddata = new HashMap<>();
+//	embeddata.put("merchantinfo", "eshop123");
+//	embeddata.put("promotioninfo", "");
+//	embeddata.put("redirecturl", ZaloPayConstant.REDIRECT_URL);
+//
+//	Map<String, String> columninfo = new HashMap<>();
+//	columninfo.put("store_name", "E-Shop");
+//	embeddata.put("columninfo", new JSONObject(columninfo).toString());
+//	zalopay_Params.put("embeddata", new JSONObject(embeddata).toString());
+//
+//	String data = zalopay_Params.get("appid") + "|" + zalopay_Params.get("apptransid") + "|"
+//			+ zalopay_Params.get("appuser") + "|" + zalopay_Params.get("amount") + "|"
+//			+ zalopay_Params.get("apptime") + "|" + zalopay_Params.get("embeddata") + "|"
+//			+ zalopay_Params.get("item");
+//	zalopay_Params.put("mac", HelperHmacSHA256.computeHmacSha256(data, ZaloPayConstant.KEY1));
+//	CloseableHttpClient client = HttpClients.createDefault();
+//	HttpPost post = new HttpPost(ZaloPayConstant.CREATE_ORDER_URL);
+//
+//	List<NameValuePair> params = new ArrayList<>();
+////	for (Map.Entry<String, Object> e : zalopay_Params.entrySet()) {
+////		params.add(new BasicNameValuePair(e.getKey(), e.getValue().toString()));
+////	}
+//    for (Map.Entry<String, Object> e : zalopay_Params.entrySet()) {
+//        if (e.getValue() != null) {
+//            params.add(new BasicNameValuePair(e.getKey(), e.getValue().toString()));
+//        } else {
+//            System.err.println("Null value for key: " + e.getKey());
+//        }
+//    }
+//	post.setEntity(new UrlEncodedFormEntity(params));
+//	CloseableHttpResponse res = client.execute(post);
+//	BufferedReader rd = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
+//	StringBuilder resultJsonStr = new StringBuilder();
+//	String line;
+//	while ((line = rd.readLine()) != null) {
+//		resultJsonStr.append(line);
+//	}
+//	JSONObject result = new JSONObject(resultJsonStr.toString());
+//	Map<String, Object> kq = new HashMap<>();
+//	kq.put("returnmessage", result.get("returnmessage"));
+//	kq.put("orderurl", result.get("orderurl"));
+//	kq.put("returncode", result.get("returncode"));
+//	kq.put("zptranstoken", result.get("zptranstoken"));
+//	kq.put("order_id", orderRequest.getOrder_id()); // Include order_id in the response
+//	kq.put("apptransid", apptransid); // Include apptransid in the response
+//	return kq;
+//}
     @Override
     public Map<String, Object> getStatusZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException {
       String appid = ZaloPayConstant.APP_ID;
