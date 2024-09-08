@@ -10,19 +10,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.Map;
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/v1/momo")
 public class PaymentMomoCheckStatusController {
 
     private final IPaymentService paymentService;
 
-    @PostMapping("/api/v1/momo/get-status")
+    @PostMapping("/get-status")
     public ResponseEntity<APIRespone> getStatus(@RequestBody PaymentRequest requestDTO) throws IOException {
-        Map<String, Object> result = this.paymentService.getStatus(requestDTO);
+        Map<String, Object> result = this.paymentService.getStatusMomo(requestDTO);
         return new ResponseEntity<>(new APIRespone(true, "Get status successfully", result), HttpStatus.OK);
 
     }

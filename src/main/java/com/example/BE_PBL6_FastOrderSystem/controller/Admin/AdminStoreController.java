@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime; 
+
 import java.util.Date;
 
 @RestController
@@ -24,8 +26,8 @@ public class AdminStoreController {
             @RequestParam("location") String location,
             @RequestParam("latitude") Double latitude,
             @RequestParam("longitude") Double longitude,
-            @RequestParam("openingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date openingTime,
-            @RequestParam("closingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date closingTime,
+            @RequestParam("openingTime") LocalDateTime openingTime,
+            @RequestParam("closingTime") LocalDateTime closingTime,
             @RequestParam("managerId") Long managerId) {
         StoreRequest storeRequest = new StoreRequest(storeName, image, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
         return storeService.addStore(storeRequest);
@@ -39,8 +41,8 @@ public class AdminStoreController {
             @RequestParam("location") String location,
             @RequestParam("latitude") Double latitude,
             @RequestParam("longitude") Double longitude,
-            @RequestParam("openingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date openingTime,
-            @RequestParam("closingTime") @DateTimeFormat(pattern = "HH:mm:ss") Date closingTime,
+            @RequestParam("openingTime") LocalDateTime openingTime,
+            @RequestParam("closingTime") LocalDateTime closingTime,
             @RequestParam("managerId") Long managerId) {
         StoreRequest storeRequest = new StoreRequest(storeName, image ,phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
         return storeService.updateStore(id, storeRequest);

@@ -15,15 +15,15 @@ public class StoreResponse {
     private Double longitude;
     private Double latitude;
     private String numberPhone;
-    private Date openingTime;
-    private  Date closingTime;
+    private LocalDateTime openingTime;
+    private LocalDateTime closingTime;
     @JsonIgnore
     private UserResponse user;
     private String managerName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     // Constructor cũ
-    public StoreResponse(Long storeId, String storeName,String image ,String location, Double longitude, Double latitude, String numberPhone, Date openingTime, Date closingTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public StoreResponse(Long storeId, String storeName,String image ,String location, Double longitude, Double latitude, String numberPhone, LocalDateTime openingTime, LocalDateTime closingTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.storeId = storeId;
         this.storeName = storeName;
         this.image = image;
@@ -37,7 +37,7 @@ public class StoreResponse {
         this.updatedAt = updatedAt;
     }
     // Constructor mới
-    public StoreResponse(Long storeId, String storeName, String image, String location, Double longitude, Double latitude,String numberPhone, Date openingTime, Date closingTime, String managerName, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public StoreResponse(Long storeId, String storeName, String image, String location, Double longitude, Double latitude,String numberPhone,LocalDateTime openingTime,LocalDateTime closingTime, String managerName, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.storeId = storeId;
         this.storeName = storeName;
         this.image = image;

@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.User;
 import com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO.PaymentMomoCheckStatusController;
+import com.example.BE_PBL6_FastOrderSystem.controller.Payment.ZALOPAY.PaymentZaloPayCheckStatusController;
 import com.example.BE_PBL6_FastOrderSystem.model.Cart;
 import com.example.BE_PBL6_FastOrderSystem.model.Order;
 import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
@@ -30,45 +31,33 @@ public class UserOrderController {
     private final IPaymentService paymentService;
     private final IComboService comboService;
     private final PaymentMomoCheckStatusController paymentMomoCheckStatusController;
-//    public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest) {
-//        String url = "http://192.168.1.33:8080/api/v1/momo/get-status";
-//        RestTemplate restTemplate = new RestTemplate();
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//        // create request body
-//        Map<String, Object> requestBody = new HashMap<>();
-//        requestBody.put("orderId", orderRequest.getOrderId());
-//        requestBody.put("orderInfo", "Payment for order " + orderRequest.getOrderId());
-//        requestBody.put("lang", "en");
-//        requestBody.put("extraData", "additional data");
-//
-//        System.out.println("Request checkPaymentStatus: " + requestBody);
-//        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-//        ResponseEntity<APIRespone> response = restTemplate.postForEntity(url, request, APIRespone.class); // call MoMo API
-//
-//        System.out.println("Response checkPaymentStatus: " + response);
-//
-//        Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
-//        if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("message"))) {
-//            return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
-//        } else {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment status check failed", ""));
-//        }
-//    }
-public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest) {
+    private final PaymentZaloPayCheckStatusController paymentZaloPayCheckStatusController;
+
+public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderRequest) {
     try {
         ResponseEntity<APIRespone> response = paymentMomoCheckStatusController.getStatus(orderRequest);
         System.out.println("Order Request "+ orderRequest);
         Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
         System.out.println("reponse Status đã thanh toán hãy chưa:" + responseData);
         if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("message"))) {
-            return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", response.getBody().getData()));
+            return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
         } else {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Payment status is no pay", ""));
         }
     } catch (IOException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new APIRespone(false, "Internal server error", ""));
+    }
+}
+public ResponseEntity<APIRespone> checkPaymentZaloPayStatus(PaymentRequest orderRequest) {
+    ResponseEntity<APIRespone> response =  paymentZaloPayCheckStatusController.getStatus(orderRequest.getApptransid());
+    System.out.println("Order Request "+ orderRequest);
+    Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
+    System.out.println("reponse Status đã thanh toán hãy chưa:" + responseData);
+    if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("message"))) {
+        return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
+       
+    } else {
+        return ResponseEntity.badRequest().body(new APIRespone(false, "Payment Zalo status check failed", ""));
     }
 }
     @PostMapping("/create/product")
@@ -92,8 +81,7 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
         Long totalAmount = calculateOrderAmount(cartIds);
         orderRequest.setAmount(totalAmount);
         System.out.println("Amount: " + orderRequest.getAmount());
-
-        if ("MOMO".equalsIgnoreCase(paymentMethod)) {
+        if(("ZALOPAY".equalsIgnoreCase(paymentMethod))){
             orderRequest.setOrderId(orderCode);
             orderRequest.setUserId(userId);
             for (Long cartId : cartIds) {
@@ -104,17 +92,17 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
 
             System.out.println("Cart IDs: " + orderRequest.getCartIds());
             System.out.println("User ID: " + orderRequest.getUserId());
-            orderRequest.setOrderInfo("Payment MOMO for order " + orderCode);
+            orderRequest.setOrderInfo("Payment ZALOPAY for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
             // initiate MoMo payment
-            Map<String, Object> momoResponse = paymentService.createOrder(orderRequest);
-            System.out.println("MoMo response khi product: " + momoResponse);
-            if ("Success".equals(momoResponse.get("message"))) {
+            Map<String, Object> zalopayResponse = paymentService.createOrderZaloPay(orderRequest);
+            System.out.println("MoMo response khi product: " + zalopayResponse);
+            if ("1".equals(zalopayResponse.get("returncode"))) {
                 // schedule a task to check payment status every 10 seconds
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 scheduler.scheduleAtFixedRate(() -> {
-                    ResponseEntity<APIRespone> statusResponse = checkPaymentStatus(orderRequest);
+                    ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
                         // proceed with normal order placement
                         ResponseEntity<APIRespone> response = orderService.processProductOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
@@ -137,7 +125,66 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
                             // Retrieve the Order object
                             Order order = orderService.findOrderByOrderCode(orderCode);
                             // create and save Payment entity
-                            paymentService.savePayment(orderRequest, order, userId, deliveryAddress);
+                            paymentService.savePaymentMomo(orderRequest, order, userId, deliveryAddress);
+                            // cancel the scheduled task
+                            scheduler.shutdown();
+                        }
+                    } else {
+                        System.out.println("Payment status check is no pay.");
+                    }
+                }, 0, 10, TimeUnit.SECONDS);
+                // return response with payment URL
+                APIRespone apiResponse = new APIRespone(true, "Zalo payment initiated", zalopayResponse);
+                return ResponseEntity.ok(apiResponse);
+            } else {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Zalo payment initiation failed", ""));
+            }
+        }
+        if ("MOMO".equalsIgnoreCase(paymentMethod)) {
+            orderRequest.setOrderId(orderCode);
+            orderRequest.setUserId(userId);
+            for (Long cartId : cartIds) {
+                if (!orderService.getCartItemsByCartId(cartId).get(0).getUser().getId().equals(userId)) {
+                    return ResponseEntity.badRequest().body(new APIRespone(false, "One or more carts do not belong to current user", ""));
+                }
+            }
+
+            System.out.println("Cart IDs: " + orderRequest.getCartIds());
+            System.out.println("User ID: " + orderRequest.getUserId());
+            orderRequest.setOrderInfo("Payment MOMO for order " + orderCode);
+            orderRequest.setLang("en");
+            orderRequest.setExtraData("additional data");
+            // initiate MoMo payment
+            Map<String, Object> momoResponse = paymentService.createOrderMomo(orderRequest);
+            System.out.println("MoMo response khi product: " + momoResponse);
+            if ("Success".equals(momoResponse.get("message"))) {
+                // schedule a task to check payment status every 10 seconds
+                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                scheduler.scheduleAtFixedRate(() -> {
+                    ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
+                    if (statusResponse.getStatusCode() == HttpStatus.OK) {
+                        // proceed with normal order placement
+                        ResponseEntity<APIRespone> response = orderService.processProductOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
+                        System.out.println("Response khi product: " + response);
+                        if (response.getStatusCode() == HttpStatus.OK) {
+                            // update product quantities in product for each cartId from orderRequest
+                            for (Cart cart : cartItems) {
+                                if (cart.getProduct() != null && cart.getProduct().getProductId() != null) {
+                                    Long productId = cart.getProduct().getProductId();
+                                    int quantity = cart.getQuantity();
+                                    System.out.println("Updating productId: " + productId + " with quantity: " + quantity);
+                                    // update product quantities based on product
+                                    orderService.updateQuantityProductOrderByProduct(productId, cart.getStoreId(), quantity);
+                                } else {
+                                    System.err.println("Product or ProductId is null for cartId: " + cart.getCartId());
+                                }
+                            }
+                            // update order status to "Pending"
+                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                            // Retrieve the Order object
+                            Order order = orderService.findOrderByOrderCode(orderCode);
+                            // create and save Payment entity
+                            paymentService.savePaymentMomo(orderRequest, order, userId, deliveryAddress);
                             // cancel the scheduled task
                             scheduler.shutdown();
                         }
@@ -151,7 +198,9 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
             } else {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "MoMo payment initiation failed", ""));
             }
-        } else if ("CASH".equalsIgnoreCase(paymentMethod)) {
+        } 
+        
+        else if ("CASH".equalsIgnoreCase(paymentMethod)) {
             // proceed with normal order placement
             orderRequest.setOrderId(orderCode);
             orderRequest.setUserId(userId);
@@ -177,7 +226,7 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
                 // retrieve the Order object
                 Order order = orderService.findOrderByOrderCode(orderCode);
                 // create and save Payment entity
-                return paymentService.savePayment(orderRequest, order, userId, deliveryAddress);
+                return paymentService.savePaymentMomo(orderRequest, order, userId, deliveryAddress);
             }
             return response;
         } else {
@@ -221,13 +270,13 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
             // initiate MoMo payment
-            Map<String, Object> momoResponse = paymentService.createOrder(orderRequest);
+            Map<String, Object> momoResponse = paymentService.createOrderMomo(orderRequest);
             System.out.println("MoMo response khi product: " + momoResponse);
             if ("Success".equals(momoResponse.get("message"))) {
                 // schedule a task to check payment status every 10 seconds
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 scheduler.scheduleAtFixedRate(() -> {
-                    ResponseEntity<APIRespone> statusResponse = checkPaymentStatus(orderRequest);
+                    ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
                         // proceed with normal order placement
                         ResponseEntity<APIRespone> response = orderService.processComboOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
@@ -249,7 +298,7 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
                             // Retrieve the Order object
                             Order order = orderService.findOrderByOrderCode(orderCode);
                             // create and save Payment entity
-                            paymentService.savePayment(orderRequest, order, userId, deliveryAddress);
+                            paymentService.savePaymentMomo(orderRequest, order, userId, deliveryAddress);
 
                             // cancel the scheduled task
                             scheduler.shutdown();
@@ -290,7 +339,7 @@ public ResponseEntity<APIRespone> checkPaymentStatus(PaymentRequest orderRequest
                 // retrieve the Order object
                 Order order = orderService.findOrderByOrderCode(orderCode);
                 // create and save Payment entity
-                return paymentService.savePayment(orderRequest, order, userId, deliveryAddress);
+                return paymentService.savePaymentMomo(orderRequest, order, userId, deliveryAddress);
             }
             return response;
         } else {

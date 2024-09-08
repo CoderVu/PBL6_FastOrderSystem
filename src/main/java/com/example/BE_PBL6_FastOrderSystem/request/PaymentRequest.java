@@ -13,6 +13,9 @@ public class PaymentRequest {
     private Long amount;
     private String orderId;
     private List<Long> cartIds;
+    private String appuser;
+    private String apptransid;
+    private Long order_id;
     private Long userId;
     private String deliveryAddress;
     private String orderInfo;

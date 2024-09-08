@@ -4,7 +4,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
-public class MoMoHelper {
+public class HelperHmacSHA256 {
 
     public static String computeHmacSha256(String message, String secretKey) {
 

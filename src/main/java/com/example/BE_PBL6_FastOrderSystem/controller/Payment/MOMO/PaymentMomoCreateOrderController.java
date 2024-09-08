@@ -22,8 +22,7 @@ public class PaymentMomoCreateOrderController {
     private final IPaymentService paymentService;
     @PostMapping("/momo-payment")
     public ResponseEntity<APIRespone> momoPayment(@RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
-
-        Map<String, Object> result = this.paymentService.createOrder(orderRequest);
+        Map<String, Object> result = this.paymentService.createOrderMomo(orderRequest);
         return new ResponseEntity<>(new APIRespone(true, "Create order successfully", result), HttpStatus.OK);
 
     }

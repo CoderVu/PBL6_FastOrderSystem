@@ -44,6 +44,9 @@ public class WebSecurityConfig {
     private static final String[] MOMO = {
              "/api/v1/momo/**"
     };
+    private static final String[] ZALO = {
+            "/api/v1/zalopay/**"
+    };
 
     @Bean
     public AuthTokenFilter authenticationTokenFilter(){
@@ -77,6 +80,7 @@ public class WebSecurityConfig {
                         .requestMatchers(AUTH).permitAll()
                         .requestMatchers(PUBLIC).permitAll()
                         .requestMatchers(MOMO).permitAll()
+                        .requestMatchers(ZALO).permitAll()
                         .requestMatchers(USER).hasAnyRole("ADMIN", "USER")
                         .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers(ADMIN).hasAnyRole("ADMIN")
