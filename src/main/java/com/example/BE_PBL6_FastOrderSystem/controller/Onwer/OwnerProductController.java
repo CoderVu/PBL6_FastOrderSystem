@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Onwer;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
+import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class OwnerProductController {
     @Autowired
     private final IProductService productService;
+    private final IOrderService orderService;
 
     @GetMapping("/get-all-products")
     public ResponseEntity<APIRespone> getAllProducts(@RequestParam Long storeId) {
@@ -33,5 +35,12 @@ public class OwnerProductController {
     public ResponseEntity<APIRespone> removeProductFromStore(@RequestParam Long storeId, @RequestParam Long productId) {
         return productService.removeProductFromStore(storeId, productId);
     }
+    @PostMapping("/update-product-quantity")
+    public ResponseEntity<APIRespone> updateProductQuantity( @RequestParam Long productId, @RequestParam Long storeId,Integer quantity) {
+        return orderService.updateQuantityProductOrderByProduct(productId, storeId, quantity);
+    }
+    @PostMapping("/update-product-combo-quantity")
+    public ResponseEntity<APIRespone> updateProductComboQuantity(@RequestParam Long comboId, @RequestParam Long storeId,Integer quantity) {
+        return orderService.updateQuantityProductOrderByCombo(comboId, storeId, quantity);
+    }
 }
-

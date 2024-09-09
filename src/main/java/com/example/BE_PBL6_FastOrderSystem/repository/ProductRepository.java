@@ -24,4 +24,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByComboId(@Param("comboId") Long comboId);
     @Query("SELECT p FROM Product p JOIN p.productStores ps JOIN ps.store s WHERE s.storeId = :storeId")
     List<Product> findByStoreId(@Param("storeId") Long storeId);
+
 }

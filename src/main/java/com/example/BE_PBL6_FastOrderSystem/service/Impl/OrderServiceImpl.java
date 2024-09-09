@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,8 +18,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-@Service // đánh dấu đây là một service để spring boot có thể quản lý và inject vào các bean khác trong ứng dụng của bạn
-// bean là một đối tượng mà spring framework quản lý và tạo ra nó, nó được quản lý trong container của spring và được sử dụng bởi các class khác trong ứng dụng của bạn thông qua dependency injection
+@Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements IOrderService {
     private final OrderRepository orderRepository;
@@ -96,57 +96,56 @@ public class OrderServiceImpl implements IOrderService {
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
         orderRepository.save(order);
-        System.out.println("Đã lưu order");
+        System.out.println("Đã lưu order processProductOrder");
         cartItemRepository.deleteAll(cartItems);
         System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
 
     @Override
-    public ResponseEntity<APIRespone> updateQuantityProductOrderByProduct(Long productId, Long storeId ,int quantity) {
-        Optional<Product> productOptional = productRepository.findById(productId);
+    public ResponseEntity<APIRespone> updateQuantityProductOrderByProduct(Long productId, Long storeId, int quantity) {
+        Optional<ProductStore> productOptional = productStoreRepository.findByProductIdAndStoreId(productId, storeId);
         if (productOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
         }
-        Product product = productOptional.get();
-        for (ProductStore productStore : product.getProductStores()) {
-            if (productStore.getStore().getStoreId().equals(storeId)) {
-               if (productStore.getStockQuantity() < quantity) {
-                   return ResponseEntity.badRequest().body(new APIRespone(false, "Product not enough", ""));
-               }
-               if (productStore.getStockQuantity() == 0) {
-                   return ResponseEntity.badRequest().body(new APIRespone(false, "Product out of stock", ""));
-                }
-                productStore.setStockQuantity(productStore.getStockQuantity() - quantity);
-                productStoreRepository.save(productStore);
-                return ResponseEntity.ok(new APIRespone(true, "Product quantity updated successfully", ""));
-            }
+        ProductStore productStore = productOptional.get();
+        if (productStore.getStockQuantity() < quantity) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Product not enough", ""));
         }
-        return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found in store", ""));
+        if (productStore.getStockQuantity() == 0) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Product out of stock", ""));
+        }
+        productStore.setStockQuantity(productStore.getStockQuantity() - quantity);
+        productStoreRepository.save(productStore);
+        return ResponseEntity.ok(new APIRespone(true, "Product quantity updated successfully", ""));
     }
 
     @Override
+    @Transactional
     public ResponseEntity<APIRespone> updateQuantityProductOrderByCombo(Long comboId, Long storeId, int quantity) {
+        System.out.println("vao updateQuantityProductOrderByCombo");
         Optional<Combo> comboOptional = comboRepository.findById(comboId);
         if (comboOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
         }
         Combo combo = comboOptional.get();
-        for (Product product : combo.getProducts()) {
-            for (ProductStore productStore : product.getProductStores()) {
-                if (productStore.getStore().getStoreId().equals(storeId)) {
-                    if (productStore.getStockQuantity() < quantity) {
-                        return ResponseEntity.badRequest().body(new APIRespone(false, "Product not enough", ""));
-                    }
-                    if (productStore.getStockQuantity() == 0) {
-                        return ResponseEntity.badRequest().body(new APIRespone(false, "Product out of stock", ""));
-                    }
-                    productStore.setStockQuantity(productStore.getStockQuantity() - quantity);
-                    productStoreRepository.save(productStore);
-                }
-            }
+        List<ProductStore> productStores = combo.getProducts().stream()
+                .map(product -> productStoreRepository.findByProductIdAndStoreId(product.getProductId(), storeId))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+        if (productStores.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
         }
-        return ResponseEntity.ok(new APIRespone(true, "Combo quantity updated successfully", ""));
+        if (productStores.stream().anyMatch(productStore -> productStore.getStockQuantity() < quantity)) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Product not enough", ""));
+        }
+        if (productStores.stream().anyMatch(productStore -> productStore.getStockQuantity() == 0)) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Product out of stock", ""));
+        }
+        productStores.forEach(productStore -> productStore.setStockQuantity(productStore.getStockQuantity() - quantity));
+        productStoreRepository.saveAll(productStores);
+        return ResponseEntity.ok(new APIRespone(true, "Product quantity updated successfully", ""));
     }
     @Override
     public ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status) {
@@ -165,6 +164,7 @@ public class OrderServiceImpl implements IOrderService {
     }
     @Override
     public ResponseEntity<APIRespone> updateOrderStatus(String orderCode, String status) {
+        System.out.println("vao updateOrderStatus");
         Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
         if (orderOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "OrderCode not found", ""));
@@ -313,7 +313,7 @@ public class OrderServiceImpl implements IOrderService {
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
         orderRepository.save(order);
-        System.out.println("Đã lưu order");
+        System.out.println("Đã lưu order processComboOrder");
         cartItemRepository.deleteAll(cartItems);
         System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
