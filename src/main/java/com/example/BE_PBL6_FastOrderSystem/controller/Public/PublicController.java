@@ -20,6 +20,7 @@ public class PublicController {
     private final ICategoryService categoryService;
     private final IPromotionService promotionService;
     private final IStoreService storeService;
+    private final ISizeService sizeService;
     @GetMapping("/categories/all")
     public  ResponseEntity<APIRespone> getAllCategories() {
      return categoryService.getAllCategories();
@@ -78,5 +79,12 @@ public class PublicController {
     public ResponseEntity<?> getPromotionById(@PathVariable("id") Long promotionId) {
          return promotionService.getPromotionById(promotionId);
     }
-
+    @GetMapping("/sizes/all")
+      public ResponseEntity<APIRespone> getSizes() {
+         return sizeService.getAllSizes();
+      }
+    @GetMapping("/sizes/{id}")
+      public ResponseEntity<APIRespone> getSizeById(@PathVariable("id") Long sizeId) {
+         return sizeService.getSizeById(sizeId);
+      }
 }
