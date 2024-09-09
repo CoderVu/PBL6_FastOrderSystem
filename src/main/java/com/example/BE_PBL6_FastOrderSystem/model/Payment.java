@@ -26,7 +26,6 @@ public class Payment {
     // Additional fields from PaymentRequest
     private String orderCode;
     private Long userId;
-    private String deliveryAddress;
     private String orderInfo;
     private String lang;
     private String extraData;
@@ -105,14 +104,6 @@ public class Payment {
         this.userId = userId;
     }
 
-    public String getDeliveryAddress() {
-        return deliveryAddress;
-    }
-
-    public void setDeliveryAddress(String deliveryAddress) {
-        this.deliveryAddress = deliveryAddress;
-    }
-
     public String getOrderInfo() {
         return orderInfo;
     }
@@ -149,7 +140,6 @@ public class Payment {
                 ", createdAt=" + createdAt +
                 ", orderCode='" + orderCode + '\'' +
                 ", userId=" + userId +
-                ", deliveryAddress='" + deliveryAddress + '\'' +
                 ", orderInfo='" + orderInfo + '\'' +
                 ", lang='" + lang + '\'' +
                 ", extraData='" + extraData + '\'' +

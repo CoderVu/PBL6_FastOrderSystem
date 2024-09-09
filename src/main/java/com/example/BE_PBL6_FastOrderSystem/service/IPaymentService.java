@@ -14,13 +14,11 @@ import java.util.Map;
 
 public interface IPaymentService {
     Map<String, Object> createOrderMomo(PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException;
-
-    ResponseEntity<APIRespone> savePaymentCash(PaymentRequest orderRequest, Order order, Long userId, String deliveryAddress);
-
+    ResponseEntity<APIRespone> savePaymentCash(PaymentRequest orderRequest, Order order, Long userId);
     Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException;
     Map<String, Object> getStatusMomo(PaymentRequest requestDTO) throws IOException;
     Map<String, Object> getStatusZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException;
     PaymentMethod findPaymentMethodByNameMomo(String momo);
-    ResponseEntity<APIRespone> savePaymentMomo(PaymentRequest orderRequest, Order order, Long userId, String deliveryAddress);
-    ResponseEntity<APIRespone> savePaymentZaloPay(PaymentRequest orderRequest, Order order, Long userId, String deliveryAddress);
+    ResponseEntity<APIRespone> savePaymentMomo(PaymentRequest orderRequest, Order order, Long userId);
+    ResponseEntity<APIRespone> savePaymentZaloPay(PaymentRequest orderRequest, Order order, Long userId);
 }

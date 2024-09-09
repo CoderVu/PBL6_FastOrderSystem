@@ -145,7 +145,7 @@ public class PaymentServiceImpl implements IPaymentService {
 
 
     @Override
-    public ResponseEntity<APIRespone> savePaymentMomo(PaymentRequest orderRequest, Order order, Long userId, String deliveryAddress) {
+    public ResponseEntity<APIRespone> savePaymentMomo(PaymentRequest orderRequest, Order order, Long userId) {
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentDate(LocalDateTime.now());
@@ -155,7 +155,6 @@ public class PaymentServiceImpl implements IPaymentService {
         payment.setCreatedAt(LocalDateTime.now());
         payment.setOrderCode(orderRequest.getOrderId());
         payment.setUserId(userId);
-        payment.setDeliveryAddress(deliveryAddress);
         payment.setOrderInfo(orderRequest.getOrderInfo());
         payment.setLang(orderRequest.getLang());
         payment.setExtraData(orderRequest.getExtraData());
@@ -163,7 +162,7 @@ public class PaymentServiceImpl implements IPaymentService {
         return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
     }
     @Override
-    public ResponseEntity<APIRespone> savePaymentZaloPay(PaymentRequest orderRequest, Order order, Long userId, String deliveryAddress) {
+    public ResponseEntity<APIRespone> savePaymentZaloPay(PaymentRequest orderRequest, Order order, Long userId) {
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentDate(LocalDateTime.now());
@@ -173,7 +172,6 @@ public class PaymentServiceImpl implements IPaymentService {
         payment.setCreatedAt(LocalDateTime.now());
         payment.setOrderCode(orderRequest.getOrderId());
         payment.setUserId(userId);
-        payment.setDeliveryAddress(deliveryAddress);
         payment.setOrderInfo(orderRequest.getOrderInfo());
         payment.setLang(orderRequest.getLang());
         payment.setExtraData(orderRequest.getExtraData());
@@ -181,7 +179,7 @@ public class PaymentServiceImpl implements IPaymentService {
         return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
     }
     @Override
-    public ResponseEntity<APIRespone> savePaymentCash(PaymentRequest orderRequest, Order order, Long userId, String deliveryAddress) {
+    public ResponseEntity<APIRespone> savePaymentCash(PaymentRequest orderRequest, Order order, Long userId) {
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentDate(LocalDateTime.now());
@@ -191,7 +189,6 @@ public class PaymentServiceImpl implements IPaymentService {
         payment.setCreatedAt(LocalDateTime.now());
         payment.setOrderCode(orderRequest.getOrderId());
         payment.setUserId(userId);
-        payment.setDeliveryAddress(deliveryAddress);
         payment.setOrderInfo(orderRequest.getOrderInfo());
         payment.setLang(orderRequest.getLang());
         payment.setExtraData(orderRequest.getExtraData());

@@ -158,7 +158,7 @@ public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderReq
                             // Update order status
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Create and save Payment entity
-                            paymentService.savePaymentZaloPay(orderRequest, order, userId, deliveryAddress);
+                            paymentService.savePaymentMomo(orderRequest, order, userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -237,7 +237,7 @@ public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderReq
                             // Update order status
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Create and save Payment entity
-                            paymentService.savePaymentZaloPay(orderRequest, order, userId, deliveryAddress);
+                            paymentService.savePaymentMomo(orderRequest, order, userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -294,7 +294,7 @@ public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderReq
                 // Update order status
                 orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                 // Create and save Payment entity
-                paymentService.savePaymentMomo(orderRequest, order, userId, deliveryAddress);
+                paymentService.savePaymentCash(orderRequest, order, userId);
             }
 
             return response;
@@ -389,7 +389,7 @@ public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderReq
                             // Update order status
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Create and save Payment entity
-                            paymentService.savePaymentZaloPay(orderRequest, order, userId, deliveryAddress);
+                            paymentService.savePaymentZaloPay(orderRequest, order, userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -462,7 +462,7 @@ public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderReq
                             // Update order status
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Create and save Payment entity
-                            paymentService.savePaymentMomo(orderRequest, order, userId, deliveryAddress);
+                            paymentService.savePaymentMomo(orderRequest, order, userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -518,7 +518,7 @@ public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderReq
                 // Update order status
                 orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                 // Create and save Payment entity
-                paymentService.savePaymentCash(orderRequest, order, userId, deliveryAddress);
+                paymentService.savePaymentCash(orderRequest, order, userId);
             }
 
             return response;
