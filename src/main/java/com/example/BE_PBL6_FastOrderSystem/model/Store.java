@@ -2,6 +2,7 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 @Entity
 @Data
+@EqualsAndHashCode(exclude = {"manager", "promotions", "productStores"}) // để tránh vòng lặp khi lấy dữ liệu
 public class Store {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

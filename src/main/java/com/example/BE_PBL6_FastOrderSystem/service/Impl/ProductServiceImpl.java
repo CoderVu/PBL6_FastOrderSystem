@@ -169,25 +169,30 @@ public class ProductServiceImpl implements IProductService {
 
 
     @Override
-    public ResponseEntity<APIRespone> applyProductToStore(Long storeId, Long productId) {
+    public ResponseEntity<APIRespone> applyProductToStore(Long productId,  Long storeId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+
         Optional<Store> storeOptional = storeRepository.findById(storeId);
         if (storeOptional.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
         }
 
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isEmpty()) {
-            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
-        }
-        Store store = storeOptional.get();
         Product product = productOptional.get();
+        Store store = storeOptional.get();
+
         ProductStore productStore = new ProductStore();
         productStore.setProduct(product);
         productStore.setStore(store);
-        store.getProductStores().add(productStore);
+        productStore.setStockQuantity(0);
         product.getProductStores().add(productStore);
-        storeRepository.save(store);
-        productRepository.save(product);
+        store.getProductStores().add(productStore);
+
+        productStoreRepository.save(productStore); // Save the ProductStore entity
+        productRepository.save(product); // Save the Product entity
+
         return new ResponseEntity<>(new APIRespone(true, "Product applied to store successfully", ""), HttpStatus.OK);
     }
 

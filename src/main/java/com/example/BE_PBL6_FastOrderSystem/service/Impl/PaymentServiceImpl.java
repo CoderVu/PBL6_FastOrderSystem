@@ -196,6 +196,23 @@ public class PaymentServiceImpl implements IPaymentService {
         return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
     }
     @Override
+    public ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Order order, Long userId) {
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setPaymentDate(LocalDateTime.now());
+        payment.setAmountPaid(orderRequest.getAmount().doubleValue());
+        payment.setPaymentMethod(findPaymentMethodByNameMomo(orderRequest.getPaymentMethod()));
+        payment.setStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("MOMO") || orderRequest.getPaymentMethod().equalsIgnoreCase("ZALOPAY") ? "Đã thanh toán" : "Chưa thanh toán");
+        payment.setCreatedAt(LocalDateTime.now());
+        payment.setOrderCode(orderRequest.getOrderId());
+        payment.setUserId(userId);
+        payment.setOrderInfo(orderRequest.getOrderInfo());
+        payment.setLang(orderRequest.getLang());
+        payment.setExtraData(orderRequest.getExtraData());
+        paymentRepository.save(payment);
+        return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
+    }
+    @Override
     public Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException {
         Long amount = orderRequest.getAmount();
         String order_id = orderRequest.getOrderId();
@@ -205,7 +222,7 @@ public class PaymentServiceImpl implements IPaymentService {
         zalopay_Params.put("appid", ZaloPayConstant.APP_ID);
         zalopay_Params.put("apptransid", apptransid);
         zalopay_Params.put("apptime", System.currentTimeMillis());
-        zalopay_Params.put("appuser", orderRequest.getUserId());
+        zalopay_Params.put("appuser", ZaloPayConstant.APP_ID);
         zalopay_Params.put("amount", amount);
         zalopay_Params.put("description", "Thanh toan don hang #" + order_id);
         zalopay_Params.put("bankcode", "");

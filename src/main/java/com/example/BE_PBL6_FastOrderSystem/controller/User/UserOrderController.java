@@ -34,21 +34,21 @@ public class UserOrderController {
     private final PaymentMomoCheckStatusController paymentMomoCheckStatusController;
     private final PaymentZaloPayCheckStatusController paymentZaloPayCheckStatusController;
 
-public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderRequest) {
-    try {
-        ResponseEntity<APIRespone> response = paymentMomoCheckStatusController.getStatus(orderRequest);
-        System.out.println("Order Request "+ orderRequest);
-        Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
-        System.out.println("reponse Status đã thanh toán hãy chưa:" + responseData);
-        if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("message"))) {
-            return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
-        } else {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment status is no pay", ""));
+    public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderRequest) {
+        try {
+            ResponseEntity<APIRespone> response = paymentMomoCheckStatusController.getStatus(orderRequest);
+            System.out.println("Order Request "+ orderRequest);
+            Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
+            System.out.println("reponse Status đã thanh toán hãy chưa:" + responseData);
+            if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("message"))) {
+                return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
+            } else {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Payment status is no pay", ""));
+            }
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new APIRespone(false, "Internal server error", ""));
         }
-    } catch (IOException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new APIRespone(false, "Internal server error", ""));
     }
-}
     public ResponseEntity<APIRespone> checkPaymentZaloPayStatus(String apptransid) {
         try {
             // Perform the HTTP request to check payment status
@@ -251,8 +251,8 @@ public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderReq
             } else {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "MoMo payment initiation failed", ""));
             }
-        } 
-        
+        }
+
         else if ("CASH".equalsIgnoreCase(paymentMethod)) {
             // proceed with normal order placement
             orderRequest.setOrderId(orderCode);

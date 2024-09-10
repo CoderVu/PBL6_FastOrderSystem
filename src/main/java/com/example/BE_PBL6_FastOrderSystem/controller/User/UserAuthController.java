@@ -30,15 +30,12 @@ public class UserAuthController {
 
     @PutMapping("/profile/update")
     public ResponseEntity<APIRespone> updateUser(
-            @RequestParam("phoneNumber") String phoneNumber,
-            @RequestParam("password") String password,
             @RequestParam("fullName") String fullName,
             @RequestParam("avatar") MultipartFile avatar,
             @RequestParam("email") String email,
             @RequestParam("address") String address) {
-
              Long userId = FoodUserDetails.getCurrentUserId();
-             UserRequest userResquest = new UserRequest(phoneNumber, password, fullName, avatar, email, address);
+             UserRequest userResquest = new UserRequest(fullName, avatar, email, address);
              return userService.updateUser(userId, userResquest);
 
     }

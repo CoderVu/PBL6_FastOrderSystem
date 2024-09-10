@@ -84,11 +84,11 @@ public class AuthServiceImpl implements IAuthService {
         if (user.getFullName() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Full name is required", ""));
         }
-        if (user.getEmail() == null || !user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (user.getEmail() == null || !user.getEmail().matches("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z0-9-]+\\.)+(com|net|org|edu|gov|mil|int)$")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Email is required", ""));
         }
-        if (user.getAddress() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Address is required", ""));
+        if (user.getAddress() == null || !user.getAddress().matches("^[\\p{L}0-9\\s,.-]+$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Address is required and must contain only letters, numbers, spaces, commas, periods, and hyphens", ""));
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Optional<Role> optionalRole = roleRepository.findByName("ROLE_USER");
@@ -112,18 +112,17 @@ public class AuthServiceImpl implements IAuthService {
         if (user.getPhoneNumber() == null || !user.getPhoneNumber().matches("\\d{10}") || user.getPhoneNumber().indexOf("0") != 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Phone number is required", ""));
         }
-
         if (user.getPassword() == null || user.getPassword().length() < 8) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Password must be at least 8 characters long", ""));
         }
         if (user.getFullName() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Full name is required", ""));
         }
-        if (user.getEmail() == null || !user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (user.getEmail() == null || !user.getEmail().matches("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z0-9-]+\\.)+(com|net|org|edu|gov|mil|int)$")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Email is required", ""));
         }
-        if (user.getAddress() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Address is required", ""));
+        if (user.getAddress() == null || !user.getAddress().matches("^[\\p{L}0-9\\s,.-]+$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Address is required and must contain only letters, numbers, spaces, commas, periods, and hyphens", ""));
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Optional<Role> optionalRole = roleRepository.findByName("ROLE_OWNER");
@@ -159,7 +158,7 @@ public class AuthServiceImpl implements IAuthService {
         }
         user.setId(user.getId());
         String otp = otpService.generateOTP(email, user.getId());
-        emailService.sendEmail(email, "Password Reset Request", "OTP for password reset is: " + otp);
+        emailService.sendEmail(email, "Password reset request", "OTP: " + otp);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
     @Override

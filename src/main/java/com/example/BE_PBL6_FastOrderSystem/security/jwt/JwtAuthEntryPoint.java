@@ -11,7 +11,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -39,7 +38,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
             final ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(response.getOutputStream(), responseEntity.getBody());
         }
-    } // xử lý các exception trong quá trình xác thực token
+    }
 
     private void handleNotFound(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -53,7 +52,8 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
 
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), responseEntity.getBody());
-    } // xử lý exception 404
+    }
+
     private ResponseEntity<APIRespone> buildResponseEntity(int status, String error, String message, String path) {
         APIRespone apiResponse = APIRespone.builder()
                 .status(false)
@@ -62,9 +62,8 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                         "status", status,
                         "error", error,
                         "path", path
-
                 ))
                 .build();
         return ResponseEntity.status(status).body(apiResponse);
-    } // xây dựng response entity
+    }
 }

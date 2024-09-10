@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
     private final FoodUserDetailsService userDetailsService;
 
     @Override
@@ -78,14 +77,7 @@ public class UserServiceImpl implements IUserService {
                     .body(new APIRespone(false, "User not found", ""));
         }
         User existingUser = optionalUser.get();
-        if (!existingUser.getPhoneNumber().equals(userRequest.getPhoneNumber()) &&
-                userRepository.existsByPhoneNumber(userRequest.getPhoneNumber())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new APIRespone(false, userRequest.getPhoneNumber() + " already exists", ""));
-        }
-        existingUser.setPhoneNumber(userRequest.getPhoneNumber());
         existingUser.setFullName(userRequest.getFullName());
-        existingUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         try {
             InputStream imageInputStream = userRequest.getAvatar().getInputStream();
             String base64Image = ImageGeneral.fileToBase64(imageInputStream);
@@ -101,20 +93,14 @@ public class UserServiceImpl implements IUserService {
     }
 
     private ResponseEntity<APIRespone> validateUserRequest(UserRequest userRequest) {
-        if (userRequest.getFullName() == null || userRequest.getFullName().isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Full name is required", ""));
+        if (userRequest.getFullName() == null || userRequest.getFullName().isEmpty() || !userRequest.getFullName().matches("^[\\p{L}\\s]+$")) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Full name is required and must contain only letters and spaces", ""));
         }
-        if (userRequest.getPassword() == null || userRequest.getPassword().length() < 8) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Password must be at least 8 characters long", ""));
-        }
-        if (userRequest.getPhoneNumber() == null || !userRequest.getPhoneNumber().matches("\\d{10}") || userRequest.getPhoneNumber().indexOf("0") != 0) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Phone number is invalid", ""));
-        }
-        if (userRequest.getEmail() == null || !userRequest.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (userRequest.getEmail() == null || !userRequest.getEmail().matches("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z0-9-]+\\.)+(com|net|org|edu|gov|mil|int)$")) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid email format", ""));
         }
-        if (userRequest.getAddress() == null || userRequest.getAddress().isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Address is required", ""));
+        if (userRequest.getAddress() == null || userRequest.getAddress().isEmpty() || !userRequest.getAddress().matches("^[\\p{L}0-9\\s,.-]+$")) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Address is required and must contain only letters, numbers, spaces, commas, periods, and hyphens", ""));
         }
         return null;
     }
