@@ -13,6 +13,11 @@ public class PaymentRequest {
     private Long amount;
     private String orderId;
     private List<Long> cartIds;
+    private Long productId;
+    private Long storeId;
+    private Integer quantity;
+    private Long comboId;
+    private String size;
     private String appuser;
     private String apptransid;
     private Long order_id;

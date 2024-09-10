@@ -1,7 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
 import com.example.BE_PBL6_FastOrderSystem.model.*;
-import com.example.BE_PBL6_FastOrderSystem.model.ProductStore;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -29,6 +29,7 @@ public class OrderServiceImpl implements IOrderService {
     private final PaymentMethodRepository paymentMethodRepository;
     private final ComboRepository comboRepository;
     private final ProductStoreRepository productStoreRepository;
+    private final SizeRepository sizeRepository;
     public String generateUniqueOrderCode() {
         Random random = new Random();
         String orderCode;
@@ -101,7 +102,68 @@ public class OrderServiceImpl implements IOrderService {
         System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
-    
+    public ResponseEntity<APIRespone> processProductOrderNow(Long userId, String paymentMethod, Long productId, Long storeId, Integer quantity, String size ,String deliveryAddress, String orderCode){
+        Optional<Product> productOptional = productRepository.findByProductId(productId);
+        if (productOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
+        }
+        Product product = productOptional.get();
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        Store store = storeOptional.get();
+        Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
+        if (paymentMethodOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
+        }
+        PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+        }
+        User user = userOptional.get();
+        Order order = new Order();
+        order.setOrderDate(LocalDateTime.now());
+        order.setStatus("Đơn hàng đã được xác nhận");
+        order.setOrderCode(orderCode);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
+        order.setStore(store);
+        order.setUser(user);
+        order.setPaymentMethod(paymentMethodEntity);
+        order.setDeliveryAddress(deliveryAddress);
+// Retrieve or create size
+Size s = sizeRepository.findByName(size);
+if (s == null) {
+    return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found zalo", ""));
+}
+
+OrderDetail orderDetail = new OrderDetail();
+orderDetail.setOrder(order);
+orderDetail.setProduct(product);
+orderDetail.setQuantity(quantity);
+orderDetail.setUnitPrice(product.getPrice());
+orderDetail.setTotalPrice(product.getPrice() * quantity);
+orderDetail.setSize(s);
+
+// Use a mutable list instead of List.of(...)
+List<OrderDetail> orderDetails = new ArrayList<>();
+orderDetails.add(orderDetail);
+
+order.setOrderDetails(orderDetails);
+order.setTotalAmount(orderDetail.getTotalPrice());
+orderRepository.save(order);
+
+return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
+}
+
+
+
+
+
+
+
     @Override
     public ResponseEntity<APIRespone> updateQuantityProductOrderByProduct(Long productId, Long storeId, int quantity) {
         Optional<ProductStore> productOptional = productStoreRepository.findByProductIdAndStoreId(productId, storeId);

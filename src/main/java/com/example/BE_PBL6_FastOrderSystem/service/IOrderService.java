@@ -2,6 +2,7 @@ package com.example.BE_PBL6_FastOrderSystem.service;
 
 import com.example.BE_PBL6_FastOrderSystem.model.Cart;
 import com.example.BE_PBL6_FastOrderSystem.model.Order;
+import com.example.BE_PBL6_FastOrderSystem.model.Size;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ public interface IOrderService {
     String generateUniqueOrderCode();
 
     ResponseEntity<APIRespone> processProductOrder(Long UserId ,String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
+    ResponseEntity<APIRespone> processProductOrderNow(Long userId, String paymentMethod, Long productId,Long storeId, Integer quantity, String size, String deliveryAddress, String orderCode);
     ResponseEntity<APIRespone> processComboOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
     ResponseEntity<APIRespone> updateQuantityProductOrderByProduct(Long productId, Long storeId, int quantity);
     ResponseEntity<APIRespone> updateQuantityProductOrderByCombo(Long comboId,Long storeId, int quantity);

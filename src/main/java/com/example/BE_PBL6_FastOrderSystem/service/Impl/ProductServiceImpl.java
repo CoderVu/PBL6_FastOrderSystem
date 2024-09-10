@@ -67,7 +67,14 @@ public class ProductServiceImpl implements IProductService {
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
     }
-
+    @Override 
+    public Long calculateOrderNowAmountProduct(Long productId, int quantity) {
+        Optional<Product> product = productRepository.findById(productId);
+        if (product.isEmpty()) {
+            return null;
+        }
+        return (long) (product.get().getPrice() * quantity);
+    }
     @Override
     public ResponseEntity<APIRespone> getProductsByCategoryId(Long categoryId) {
         Optional<Category> category = categoryRepository.findById(categoryId);
