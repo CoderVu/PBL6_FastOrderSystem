@@ -60,5 +60,5 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
         return null;
     }
-    // lấy token từ header của request
+
 }
