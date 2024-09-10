@@ -142,59 +142,6 @@ public class PaymentServiceImpl implements IPaymentService {
     public PaymentMethod findPaymentMethodByNameMomo(String momo) {
         return paymentMethodRepository.findByName(momo).orElseThrow(() -> new RuntimeException("Payment method not found"));
     }
-
-
-    @Override
-    public ResponseEntity<APIRespone> savePaymentMomo(PaymentRequest orderRequest, Order order, Long userId) {
-        Payment payment = new Payment();
-        payment.setOrder(order);
-        payment.setPaymentDate(LocalDateTime.now());
-        payment.setAmountPaid(orderRequest.getAmount().doubleValue());
-        payment.setPaymentMethod(findPaymentMethodByNameMomo(orderRequest.getPaymentMethod()));
-        payment.setStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("MOMO") ? "Đã thanh toán" : "Chưa thanh toán");
-        payment.setCreatedAt(LocalDateTime.now());
-        payment.setOrderCode(orderRequest.getOrderId());
-        payment.setUserId(userId);
-        payment.setOrderInfo(orderRequest.getOrderInfo());
-        payment.setLang(orderRequest.getLang());
-        payment.setExtraData(orderRequest.getExtraData());
-        paymentRepository.save(payment);
-        return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
-    }
-    @Override
-    public ResponseEntity<APIRespone> savePaymentZaloPay(PaymentRequest orderRequest, Order order, Long userId) {
-        Payment payment = new Payment();
-        payment.setOrder(order);
-        payment.setPaymentDate(LocalDateTime.now());
-        payment.setAmountPaid(orderRequest.getAmount().doubleValue());
-        payment.setPaymentMethod(findPaymentMethodByNameMomo(orderRequest.getPaymentMethod()));
-        payment.setStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("ZALOPAY") ? "Đã thanh toán" : "Chưa thanh toán");
-        payment.setCreatedAt(LocalDateTime.now());
-        payment.setOrderCode(orderRequest.getOrderId());
-        payment.setUserId(userId);
-        payment.setOrderInfo(orderRequest.getOrderInfo());
-        payment.setLang(orderRequest.getLang());
-        payment.setExtraData(orderRequest.getExtraData());
-        paymentRepository.save(payment);
-        return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
-    }
-    @Override
-    public ResponseEntity<APIRespone> savePaymentCash(PaymentRequest orderRequest, Order order, Long userId) {
-        Payment payment = new Payment();
-        payment.setOrder(order);
-        payment.setPaymentDate(LocalDateTime.now());
-        payment.setAmountPaid(orderRequest.getAmount().doubleValue());
-        payment.setPaymentMethod(findPaymentMethodByNameMomo(orderRequest.getPaymentMethod()));
-        payment.setStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("CASH") ? "Chưa thanh toán" : "Đã thanh toán");
-        payment.setCreatedAt(LocalDateTime.now());
-        payment.setOrderCode(orderRequest.getOrderId());
-        payment.setUserId(userId);
-        payment.setOrderInfo(orderRequest.getOrderInfo());
-        payment.setLang(orderRequest.getLang());
-        payment.setExtraData(orderRequest.getExtraData());
-        paymentRepository.save(payment);
-        return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
-    }
     @Override
     public ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Order order, Long userId) {
         Payment payment = new Payment();

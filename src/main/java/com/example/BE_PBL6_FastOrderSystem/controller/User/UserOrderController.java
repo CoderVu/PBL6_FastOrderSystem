@@ -158,7 +158,7 @@ public class UserOrderController {
                             // Update order status
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Create and save Payment entity
-                            paymentService.savePaymentMomo(orderRequest, order, userId);
+                            paymentService.savePayment(orderRequest, order, userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -237,7 +237,7 @@ public class UserOrderController {
                             // Update order status
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Create and save Payment entity
-                            paymentService.savePaymentMomo(orderRequest, order, userId);
+                            paymentService.savePayment(orderRequest, order, userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -294,7 +294,7 @@ public class UserOrderController {
                 // Update order status
                 orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                 // Create and save Payment entity
-                paymentService.savePaymentCash(orderRequest, order, userId);
+                paymentService.savePayment(orderRequest, order, userId);
             }
 
             return response;
@@ -389,7 +389,7 @@ public class UserOrderController {
                             // Update order status
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Create and save Payment entity
-                            paymentService.savePaymentZaloPay(orderRequest, order, userId);
+                            paymentService.savePayment(orderRequest, order, userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -462,7 +462,7 @@ public class UserOrderController {
                             // Update order status
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             // Create and save Payment entity
-                            paymentService.savePaymentMomo(orderRequest, order, userId);
+                            paymentService.savePayment(orderRequest, order, userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -518,9 +518,8 @@ public class UserOrderController {
                 // Update order status
                 orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                 // Create and save Payment entity
-                paymentService.savePaymentCash(orderRequest, order, userId);
+                paymentService.savePayment(orderRequest, order, userId);
             }
-
             return response;
         } else {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Unsupported payment method", ""));
