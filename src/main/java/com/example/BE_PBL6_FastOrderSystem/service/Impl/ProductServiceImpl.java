@@ -124,16 +124,6 @@ public class ProductServiceImpl implements IProductService {
             return new ResponseEntity<>(new APIRespone(false, "Category not found", ""), HttpStatus.NOT_FOUND);
         }
         product.setCategory(category.get());
-        Optional<Store> store = storeRepository.findById(productRequest.getStoreId());
-        if (store.isEmpty()) {
-            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
-        }
-        ProductStore productStore = new ProductStore();
-        productStore.setProduct(product);
-        productStore.setStore(store.get());
-        productStore.setStockQuantity(productRequest.getStockQuantity());
-        product.getProductStores().add(productStore);
-        store.get().getProductStores().add(productStore);
         product.setBestSale(productRequest.getBestSale());
         product = productRepository.save(product);
         return new ResponseEntity<>(new APIRespone(true, "Product added successfully", ResponseConverter.convertToProductResponse(product)), HttpStatus.OK);
@@ -160,18 +150,7 @@ public class ProductServiceImpl implements IProductService {
         if (category.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Category not found", ""), HttpStatus.NOT_FOUND);
         }
-
         product.setCategory(category.get());
-        Optional<Store> store = storeRepository.findById(productRequest.getStoreId());
-        if (store.isEmpty()) {
-            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
-        }
-        ProductStore productStore = new ProductStore();
-        productStore.setProduct(product);
-        productStore.setStore(store.get());
-        productStore.setStockQuantity(productRequest.getStockQuantity());
-        product.getProductStores().add(productStore);
-        store.get().getProductStores().add(productStore);
         product.setBestSale(productRequest.getBestSale());
         product = productRepository.save(product);
         return new ResponseEntity<>(new APIRespone(true, "Product updated successfully", ResponseConverter.convertToProductResponse(product)), HttpStatus.OK);

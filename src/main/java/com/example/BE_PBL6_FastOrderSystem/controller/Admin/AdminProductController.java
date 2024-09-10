@@ -22,11 +22,10 @@ public class AdminProductController {
             @RequestParam("price") Double price,
             @RequestParam("description") String description,
             @RequestParam("categoryId") Long categoryId,
-            @RequestParam("storeId") Long storeId,
             @RequestParam("image") MultipartFile image,
             @RequestParam("stockQuantity") Integer stockQuantity,
             @RequestParam("bestSale") Boolean bestSale)  {
-        ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, storeId, stockQuantity, bestSale);
+        ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, stockQuantity, bestSale);
         return productService.addProduct(productRequest);
     }
 
@@ -37,11 +36,10 @@ public class AdminProductController {
             @RequestParam("price") Double price,
             @RequestParam("description") String description,
             @RequestParam("categoryId") Long categoryId,
-            @RequestParam("storeId") Long storeId,
             @RequestParam("image") MultipartFile image,
             @RequestParam("stockQuantity") Integer stockQuantity,
             @RequestParam("bestSale") Boolean bestSale) {
-        ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, storeId, stockQuantity, bestSale);
+        ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, stockQuantity, bestSale);
         return productService.updateProduct(id, productRequest);
     }
     @DeleteMapping("delete/{id}")

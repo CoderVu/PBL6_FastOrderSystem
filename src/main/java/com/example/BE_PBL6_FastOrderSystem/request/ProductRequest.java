@@ -8,17 +8,15 @@ public class ProductRequest {
     private String description;
     private Double price;
     private Long categoryId;
-    private Long storeId;
     private Integer stockQuantity;
     private Boolean bestSale;
 
-    public ProductRequest(String productName, MultipartFile image, String description, Double price, Long categoryId, Long storeId, Integer stockQuantity, Boolean bestSale) {
+    public ProductRequest(String productName, MultipartFile image, String description, Double price, Long categoryId, Integer stockQuantity, Boolean bestSale) {
         this.productName = productName;
         this.image = image;
         this.description = description;
         this.price = price;
         this.categoryId = categoryId;
-        this.storeId = storeId;
         this.stockQuantity = stockQuantity;
         this.bestSale = bestSale;
     }
@@ -43,9 +41,6 @@ public class ProductRequest {
         return categoryId;
     }
 
-    public Long getStoreId() {
-        return storeId;
-    }
 
     public Integer getStockQuantity() {
         return stockQuantity;
