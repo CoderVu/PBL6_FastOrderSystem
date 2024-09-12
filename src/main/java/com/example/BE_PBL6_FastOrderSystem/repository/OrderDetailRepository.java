@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderDetailRepository  extends JpaRepository<OrderDetail, Long> {
     List<OrderDetail> findOrderDetailsByProductIn(List<Product> products);
-//    Collection<Object> findSoldProductsByStoreId(Long storeId);
+
 }

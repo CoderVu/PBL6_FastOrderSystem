@@ -16,9 +16,6 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @ManyToOne
-    @JoinColumn(name = "store_id")
-    private Store store;
     private LocalDateTime orderDate;
     private Double totalAmount;
     private String status;
@@ -72,13 +69,13 @@ public class Order {
         this.user = user;
     }
 
-    public Store getStore() {
-        return store;
-    }
+    // public Store getStore() {
+    //     return store;
+    // }
 
-    public void setStore(Store store) {
-        this.store = store;
-    }
+    // public void setStore(Store store) {
+    //     this.store = store;
+    // }
 
     public LocalDateTime getOrderDate() {
         return orderDate;
@@ -141,7 +138,7 @@ public class Order {
                 "orderId=" + orderId +
                 ", orderCode='" + orderCode + '\'' +
                 ", user=" + user +
-                ", store=" + store +
+                // ", store=" + store +
                 ", orderDate=" + orderDate +
                 ", totalAmount=" + totalAmount +
                 ", status='" + status + '\'' +

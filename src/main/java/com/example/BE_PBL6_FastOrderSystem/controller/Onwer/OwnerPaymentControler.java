@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Onwer;
 
 import com.example.BE_PBL6_FastOrderSystem.model.Order;
+import com.example.BE_PBL6_FastOrderSystem.model.OrderDetail;
 import com.example.BE_PBL6_FastOrderSystem.model.Payment;
 import com.example.BE_PBL6_FastOrderSystem.repository.PaymentRepository;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
@@ -21,27 +22,24 @@ public class OwnerPaymentControler {
     private final IOrderService orderService;
     private final PaymentRepository paymentRepository;
 
-    @PutMapping("/update-payment-status")
-    public ResponseEntity<APIRespone> updatePaymentStatus(@RequestParam String orderCode) {
-        Long ownerId = FoodUserDetails.getCurrentUserId();
-        Order order = orderService.findOrderByOrderIdAndOwnerId(orderCode, ownerId);
-        if (order == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Order code not found", null));
-        }
-
-        Payment payment = paymentRepository.findByOrderCode(order.getOrderCode());
-        if (payment == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Payment not found", null));
-        }
-
-        if ("Đã thanh toán".equals(payment.getStatus())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Payment status has already Đã thanh toán", null));
-        }
-
-        payment.setStatus("Đã thanh toán");
-        payment.setPaymentDate(LocalDateTime.now());
-        paymentRepository.save(payment);
-
-        return ResponseEntity.ok(new APIRespone(true, "Payment status updated to Đã thanh toán", null));
-    }
+//    @PutMapping("/update-payment-status")
+//    public ResponseEntity<APIRespone> updatePaymentStatus(@RequestParam Long OrderId ) {
+//        Long ownerId = FoodUserDetails.getCurrentUserId();
+//        OrderDetail orderDetail = orderService.findOrderByOrderIdAndOwnerId(OrderId, ownerId).get(0); // get first order detail
+//        Order order = orderDetail.getOrder();
+//        Payment payment = paymentRepository.findByOrderCode(order.getOrderCode());
+//        if (payment == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Payment not found", null));
+//        }
+//
+//        if ("Đã thanh toán".equals(payment.getStatus())) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Payment status has already Đã thanh toán", null));
+//        }
+//
+//        payment.setStatus("Đã thanh toán");
+//        payment.setPaymentDate(LocalDateTime.now());
+//        paymentRepository.save(payment);
+//
+//        return ResponseEntity.ok(new APIRespone(true, "Payment status updated to Đã thanh toán", null));
+//    }
 }

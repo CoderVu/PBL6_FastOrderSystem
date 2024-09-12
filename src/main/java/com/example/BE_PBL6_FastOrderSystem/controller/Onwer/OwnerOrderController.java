@@ -20,15 +20,15 @@ public class OwnerOrderController {
             Long ownerId = FoodUserDetails.getCurrentUserId();
             return orderService.updateOrderStatusOfOwner(orderCode, ownerId, status);
     }
-    @GetMapping("/get-all")
-    public  ResponseEntity<APIRespone> getAllOrders() {
-        Long ownerId = FoodUserDetails.getCurrentUserId();
-        return orderService.getAllOrdersByOwner(ownerId);
-    }
-    @GetMapping("/get-by-status")
-    public ResponseEntity<APIRespone> getOrdersByStatus(@RequestParam String status) {
-        Long ownerId = FoodUserDetails.getCurrentUserId();
-        return orderService.getOrdersByStatusAndOwnerId(status, ownerId);
-    }
+    // @GetMapping("/get-all")
+    // public  ResponseEntity<APIRespone> getAllOrders() {
+    //     Long ownerId = FoodUserDetails.getCurrentUserId();
+    //     return orderService.getAllOrdersByOwner(ownerId);
+    // }
+    // @GetMapping("/get-by-status")
+    // public ResponseEntity<APIRespone> getOrdersByStatus(@RequestParam String status) {
+    //     Long ownerId = FoodUserDetails.getCurrentUserId();
+    //     return orderService.getOrdersByStatusAndOwnerId(status, ownerId);
+    // }
 
 }

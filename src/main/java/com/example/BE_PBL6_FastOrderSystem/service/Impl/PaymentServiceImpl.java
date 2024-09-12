@@ -1,7 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
-import com.example.BE_PBL6_FastOrderSystem.model.Order;
-import com.example.BE_PBL6_FastOrderSystem.model.Payment;
-import com.example.BE_PBL6_FastOrderSystem.model.PaymentMethod;
+import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.repository.PaymentDetailRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.PaymentMethodRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.PaymentRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
@@ -39,6 +38,7 @@ import java.text.SimpleDateFormat;
 public class PaymentServiceImpl implements IPaymentService {
       private final PaymentMethodRepository paymentMethodRepository;
       private final PaymentRepository paymentRepository;
+      private final PaymentDetailRepository paymentDetailRepository;
       public static String getCurrentTimeString(String format) {
             Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT+7"));
             SimpleDateFormat fmt = new SimpleDateFormat(format);
@@ -157,7 +157,21 @@ public class PaymentServiceImpl implements IPaymentService {
         payment.setLang(orderRequest.getLang());
         payment.setExtraData(orderRequest.getExtraData());
         paymentRepository.save(payment);
-        return ResponseEntity.ok(new APIRespone(true, "Payment saved successfully", ""));
+
+        // Save payment details for each product in the order
+        for (OrderDetail orderDetail : order.getOrderDetails()) {
+            PaymentDetail paymentDetail = new PaymentDetail();
+            paymentDetail.setPayment(payment);
+            paymentDetail.setOrder(order);
+            paymentDetail.setStore(orderDetail.getStore());
+            paymentDetail.setTotalAmount(orderDetail.getTotalPrice());
+            paymentDetail.setPaymentStatus("Pending");
+            paymentDetail.setCreatedAt(LocalDateTime.now());
+            paymentDetail.setUpdatedAt(LocalDateTime.now());
+            paymentDetailRepository.save(paymentDetail);
+        }
+
+        return ResponseEntity.ok(new APIRespone(true, "Payment and payment details saved successfully", ""));
     }
     @Override
     public Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException {
@@ -240,14 +254,11 @@ public class PaymentServiceImpl implements IPaymentService {
 		BufferedReader rd = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
 		StringBuilder resultJsonStr = new StringBuilder();
 		String line;
-
 		while ((line = rd.readLine()) != null) {
 			resultJsonStr.append(line);
 		}
-
 		JSONObject result = new JSONObject(resultJsonStr.toString());
 		Map<String, Object> response = new HashMap<>();
-
 		// Extract relevant fields from the response
 		int returncode = result.getInt("returncode");
 		boolean isProcessing = result.getBoolean("isprocessing");
@@ -261,7 +272,6 @@ public class PaymentServiceImpl implements IPaymentService {
 		response.put("amount", amount);
 		response.put("discountamount", discountAmount);
 		response.put("zptransid", zptransid);
-
 		// Check if the order has been paid or not
 		if (returncode == 1 && !isProcessing) {
 			response.put("status", "Success");

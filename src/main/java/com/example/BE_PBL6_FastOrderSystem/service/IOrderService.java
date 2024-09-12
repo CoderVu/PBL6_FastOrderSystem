@@ -2,6 +2,7 @@ package com.example.BE_PBL6_FastOrderSystem.service;
 
 import com.example.BE_PBL6_FastOrderSystem.model.Cart;
 import com.example.BE_PBL6_FastOrderSystem.model.Order;
+import com.example.BE_PBL6_FastOrderSystem.model.OrderDetail;
 import com.example.BE_PBL6_FastOrderSystem.model.Size;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
@@ -26,9 +27,8 @@ public interface IOrderService {
     List<Cart> getCartItemsByCartId(Long cartId);
     ResponseEntity<APIRespone> getStatusOrder(Long orderId, Long userId);
     Order findOrderByOrderCode(String orderCode);
-    Order findOrderByOrderIdAndOwnerId(String orderCode, Long ownerId);
-    ResponseEntity<APIRespone> getAllOrdersByOwner(Long ownerId);
+    // ResponseEntity<APIRespone> getAllOrdersByOwner(Long ownerId);
     ResponseEntity<APIRespone> getOrdersByStatusAndUserId(String status, Long userId);
     ResponseEntity<APIRespone> findOrderByOrderIdAndUserId(String orderCode, Long userId);
-    ResponseEntity<APIRespone> getOrdersByStatusAndOwnerId(String status, Long ownerId);
+    // ResponseEntity<APIRespone> getOrdersByStatusAndOwnerId(String status, Long ownerId);
 }
