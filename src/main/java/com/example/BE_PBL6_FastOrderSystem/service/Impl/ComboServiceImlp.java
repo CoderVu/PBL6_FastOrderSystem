@@ -1,6 +1,5 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.ComboRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.*;
@@ -31,7 +30,7 @@ public class ComboServiceImlp implements IComboService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No combo found", ""));
         }
         List<ComboResponse> comboResponses = comboRepository.findAll().stream()
-                .map(this::convertToComboResponse)
+                .map(ResponseConverter::convertToComboResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", comboResponses));
     }
@@ -47,7 +46,17 @@ public class ComboServiceImlp implements IComboService {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", productResponses));
     }
-
+    @Override
+    public ResponseEntity<APIRespone> getCombosByStoreId(Long storeId) {
+        List<Combo> combos = comboRepository.findCombosByStoreId(storeId);
+        if (combos.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No combo found", ""));
+        }
+        List<ComboResponse> comboResponses = combos.stream()
+                .map(ResponseConverter::convertToComboResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", comboResponses));
+    }
     @Override
     public ResponseEntity<APIRespone> addCombo(ComboRequest comboRequest) {
         if (comboRepository.existsByComboName(comboRequest.getComboName())) {
@@ -111,36 +120,14 @@ public class ComboServiceImlp implements IComboService {
         comboRepository.save(combo);
         return ResponseEntity.ok(new APIRespone(true, "Product added to combo successfully", ""));
     }
-
-    public ComboResponse convertToComboResponse(Combo combo) {
-        return new ComboResponse(
-                combo.getComboId(),
-                combo.getComboName(),
-                combo.getComboPrice(),
-                combo.getImage(),
-                combo.getDescription()
-        );
-    }
     @Override
     public ResponseEntity<APIRespone> getComboById(Long comboId) {
         if (comboRepository.findById(comboId).isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
         }
-        Combo combo = comboRepository.findById(comboId).get();
-        return ResponseEntity.ok(new APIRespone(true, "Success", convertToComboResponse(combo)));
-    }
-
-    @Override
-    public ResponseEntity<APIRespone> getCombosByStoreId(Long storeId) {
-        if (comboRepository.findAll().isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "No combo found", ""));
-        }
-        if (comboRepository.findAll().stream().noneMatch(combo -> combo.getProducts().stream().anyMatch(product -> product.getProductStores().stream().anyMatch(productStore -> productStore.getStore().getStoreId().equals(storeId))))) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "No combo found", ""));
-        }
         List<ComboResponse> comboResponses = comboRepository.findAll().stream()
-                .filter(combo -> combo.getProducts().stream().anyMatch(product -> product.getProductStores().stream().anyMatch(productStore -> productStore.getStore().getStoreId().equals(storeId))))
-                .map(this::convertToComboResponse)
+                .filter(combo1 -> combo1.getComboId().equals(comboId))
+                .map(ResponseConverter::convertToComboResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", comboResponses));
     }

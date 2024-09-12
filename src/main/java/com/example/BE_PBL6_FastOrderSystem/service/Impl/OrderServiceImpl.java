@@ -188,30 +188,29 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         order.setUser(user);
         order.setPaymentMethod(paymentMethodEntity);
         order.setDeliveryAddress(deliveryAddress);
-// Retrieve or create size
-Size s = sizeRepository.findByName(size);
-if (s == null) {
-    return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found zalo", ""));
-}
+        // Retrieve or create size
+        Size s = sizeRepository.findByName(size);
+        if (s == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found zalo", ""));
+        }
+        OrderDetail orderDetail = new OrderDetail();
+        orderDetail.setOrder(order);
+        orderDetail.setProduct(product);
+        orderDetail.setQuantity(quantity);
+        orderDetail.setUnitPrice(product.getPrice());
+        orderDetail.setTotalPrice(product.getPrice() * quantity);
+        orderDetail.setSize(s);
+        orderDetail.setStore(storeOptional.get());
 
-OrderDetail orderDetail = new OrderDetail();
-orderDetail.setOrder(order);
-orderDetail.setProduct(product);
-orderDetail.setQuantity(quantity);
-orderDetail.setUnitPrice(product.getPrice());
-orderDetail.setTotalPrice(product.getPrice() * quantity);
-orderDetail.setSize(s);
+        // Use a mutable list instead of List.of(...)
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        orderDetails.add(orderDetail);
 
-// Use a mutable list instead of List.of(...)
-List<OrderDetail> orderDetails = new ArrayList<>();
-orderDetails.add(orderDetail);
-
-order.setOrderDetails(orderDetails);
-order.setTotalAmount(orderDetail.getTotalPrice());
-orderRepository.save(order);
-
-return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
-}
+        order.setOrderDetails(orderDetails);
+        order.setTotalAmount(orderDetail.getTotalPrice());
+        orderRepository.save(order);
+        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
+        }
 
 
 

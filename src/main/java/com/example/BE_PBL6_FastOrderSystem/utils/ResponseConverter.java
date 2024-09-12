@@ -63,4 +63,18 @@ public class ResponseConverter {
                 product.getBestSale()
         );
     }
+    public static ComboResponse convertToComboResponse(Combo combo) {
+        List<ProductResponse> productResponses = combo.getProducts().stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
+
+        return new ComboResponse(
+                combo.getComboId(),
+                combo.getComboName(),
+                combo.getComboPrice(),
+                combo.getImage(),
+                combo.getDescription(),
+                productResponses
+        );
+    }
 }

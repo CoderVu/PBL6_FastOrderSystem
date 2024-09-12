@@ -165,7 +165,7 @@ public class PaymentServiceImpl implements IPaymentService {
             paymentDetail.setOrder(order);
             paymentDetail.setStore(orderDetail.getStore());
             paymentDetail.setTotalAmount(orderDetail.getTotalPrice());
-            paymentDetail.setPaymentStatus("Pending");
+            paymentDetail.setPaymentStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("MOMO") || orderRequest.getPaymentMethod().equalsIgnoreCase("ZALOPAY") ? "Đã thanh toán" : "Chưa thanh toán");
             paymentDetail.setCreatedAt(LocalDateTime.now());
             paymentDetail.setUpdatedAt(LocalDateTime.now());
             paymentDetailRepository.save(paymentDetail);

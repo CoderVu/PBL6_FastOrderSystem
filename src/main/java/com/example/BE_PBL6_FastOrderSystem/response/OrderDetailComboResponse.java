@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
 import com.example.BE_PBL6_FastOrderSystem.model.OrderDetail;
+import com.example.BE_PBL6_FastOrderSystem.utils.ResponseConverter;
 import lombok.Data;
 
 @Data
@@ -15,7 +16,7 @@ public class OrderDetailComboResponse {
 
     public OrderDetailComboResponse(OrderDetail orderDetail) {
         this.orderDetailId = orderDetail.getOrderDetailId();
-        this.combo = new ComboResponse(orderDetail.getCombo());
+        this.combo = ResponseConverter.convertToComboResponse(orderDetail.getCombo());
         this.quantity = orderDetail.getQuantity();
         this.unitPrice = orderDetail.getUnitPrice();
         this.totalPrice = orderDetail.getTotalPrice();

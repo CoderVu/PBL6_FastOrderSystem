@@ -22,8 +22,5 @@ public class Combo {
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private Set<Product> products;
-    @ManyToOne // nhiều combo thuộc về 1 cửa hàng
-    private Store store;
-
 
 }
