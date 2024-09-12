@@ -21,4 +21,6 @@ public interface IComboService {
     ResponseEntity<APIRespone> deleteCombo(Long comboId);
 
     ResponseEntity<APIRespone> addProduct(Long comboId, Long productId);
+    ResponseEntity<APIRespone> getComboById(Long comboId);
+    ResponseEntity<APIRespone> getCombosByStoreId(Long storeId);
 }

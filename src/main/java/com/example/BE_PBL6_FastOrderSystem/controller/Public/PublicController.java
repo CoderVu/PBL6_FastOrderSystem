@@ -54,14 +54,23 @@ public class PublicController {
     public ResponseEntity<APIRespone> getBestSaleProducts() {
        return productService.getBestSaleProduct();
     }
-    @GetMapping("/products/combos")
-    public ResponseEntity<?> getCombos() {
-       return comboService.getAllCombos();
-    }
     @GetMapping("/products/combos/{id}")
-    public ResponseEntity<?> getProductsByComboId(@PathVariable("id") Long comboId) {
+    public ResponseEntity<APIRespone> getProductsByComboId(@PathVariable("id") Long comboId) {
        return comboService.getProductsByComboId(comboId);
     }
+    @GetMapping("/combo/all")
+    public ResponseEntity<APIRespone> getCombos() {
+       return comboService.getAllCombos();
+    }
+
+    @GetMapping("/combo/{id}")
+      public ResponseEntity<APIRespone> getComboById(@PathVariable("id") Long comboId) {
+         return comboService.getComboById(comboId);
+      }
+    @GetMapping("/combo/store/{storeId}")
+      public ResponseEntity<APIRespone> getCombosByStoreId(@PathVariable("storeId") Long storeId) {
+         return comboService.getCombosByStoreId(storeId);
+      }
     @GetMapping("/stores/all")
     public ResponseEntity<APIRespone> getStores() {
          return storeService.getAllStores();
@@ -76,7 +85,7 @@ public class PublicController {
 
     }
     @GetMapping("/promotions/{id}")
-    public ResponseEntity<?> getPromotionById(@PathVariable("id") Long promotionId) {
+    public ResponseEntity<APIRespone> getPromotionById(@PathVariable("id") Long promotionId) {
          return promotionService.getPromotionById(promotionId);
     }
     @GetMapping("/sizes/all")

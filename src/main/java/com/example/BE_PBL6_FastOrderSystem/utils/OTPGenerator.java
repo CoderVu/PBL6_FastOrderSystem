@@ -9,7 +9,6 @@ public class OTPGenerator {
                 int digit = new Random().nextInt(10); // random number between 0 and 9
                 otp.append(digit);
             }
-
             return otp.toString();
         }
 }

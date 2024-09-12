@@ -24,4 +24,8 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "size_id")
     private Size size;
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private Store store;
+
 }

@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,70 +35,127 @@ public class OrderServiceImpl implements IOrderService {
         } while (orderRepository.existsByOrderCode(orderCode));
         return orderCode;
     }
-    @Override
-    public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
-        System.out.println("vao processProductOrder");
-        List<Cart> cartItems = cartIds.stream()
-                .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
-                .filter(cartItem -> cartItem.getUser().getId().equals(userId))
-                .collect(Collectors.toList()); // get all cart items by cartId and userId
+//    @Override
+//    public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
+//        System.out.println("vao processProductOrder");
+//        List<Cart> cartItems = cartIds.stream()
+//                .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
+//                .filter(cartItem -> cartItem.getUser().getId().equals(userId))
+//                .collect(Collectors.toList()); // get all cart items by cartId and userId
+//
+//        if (cartItems.isEmpty()) {
+//            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
+//        }
+//
+//        if (cartItems.stream().anyMatch(cartItem -> !cartItem.getUser().getId().equals(userId))) {
+//            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts does not belong to the specified you! ", ""));
+//        }
+//
+//        Long storeId = cartItems.get(0).getStoreId();
+//        Optional<Store> storeOptional = storeRepository.findById(storeId);
+//        if (storeOptional.isEmpty()) {
+//            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+//        }
+//        Store store = storeOptional.get();
+//
+//        Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
+//        if (paymentMethodOptional.isEmpty()) {
+//            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
+//        }
+//        PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
+//
+//        Optional<User> userOptional = userRepository.findById(userId);
+//        if (userOptional.isEmpty()) {
+//            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+//        }
+//        User user = userOptional.get();
+//
+//        Order order = new Order();
+//        order.setOrderDate(LocalDateTime.now());
+//        order.setStatus(cartItems.get(0).getStatus());
+//        order.setOrderCode(orderCode);
+//        order.setCreatedAt(LocalDateTime.now());
+//        order.setUpdatedAt(LocalDateTime.now());
+//        order.setStore(store);
+//        order.setUser(user);
+//        order.setPaymentMethod(paymentMethodEntity);
+//        order.setDeliveryAddress(deliveryAddress);
+//
+//        List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
+//            OrderDetail orderDetail = new OrderDetail();
+//            orderDetail.setOrder(order);
+//            orderDetail.setProduct(cartItem.getProduct());
+//            orderDetail.setQuantity(cartItem.getQuantity());
+//            orderDetail.setUnitPrice(cartItem.getUnitPrice());
+//            orderDetail.setTotalPrice(cartItem.getTotalPrice());
+//            orderDetail.setSize(cartItem.getSize());
+//            return orderDetail;
+//        }).collect(Collectors.toList());
+//        order.setOrderDetails(orderDetails);
+//        order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
+//        orderRepository.save(order);
+//        System.out.println("Đã lưu order processProductOrder");
+//        cartItemRepository.deleteAll(cartItems);
+//        System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
+//        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
+//    }
+@Override
+public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
+    List<Cart> cartItems = cartIds.stream()
+            .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
+            .filter(cartItem -> cartItem.getUser().getId().equals(userId))
+            .collect(Collectors.toList()); // get all cart items by cartId and userId
 
-        if (cartItems.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
-        }
-
-        if (cartItems.stream().anyMatch(cartItem -> !cartItem.getUser().getId().equals(userId))) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts does not belong to the specified you! ", ""));
-        }
-
-        Long storeId = cartItems.get(0).getStoreId();
-        Optional<Store> storeOptional = storeRepository.findById(storeId);
-        if (storeOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
-        }
-        Store store = storeOptional.get();
-
-        Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
-        if (paymentMethodOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
-        }
-        PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
-
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
-        }
-        User user = userOptional.get();
-
-        Order order = new Order();
-        order.setOrderDate(LocalDateTime.now());
-        order.setStatus(cartItems.get(0).getStatus());
-        order.setOrderCode(orderCode);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
-        order.setStore(store);
-        order.setUser(user);
-        order.setPaymentMethod(paymentMethodEntity);
-        order.setDeliveryAddress(deliveryAddress);
-
-        List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrder(order);
-            orderDetail.setProduct(cartItem.getProduct());
-            orderDetail.setQuantity(cartItem.getQuantity());
-            orderDetail.setUnitPrice(cartItem.getUnitPrice());
-            orderDetail.setTotalPrice(cartItem.getTotalPrice());
-            orderDetail.setSize(cartItem.getSize());
-            return orderDetail;
-        }).collect(Collectors.toList());
-        order.setOrderDetails(orderDetails);
-        order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
-        orderRepository.save(order);
-        System.out.println("Đã lưu order processProductOrder");
-        cartItemRepository.deleteAll(cartItems);
-        System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
-        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
+    if (cartItems.isEmpty()) {
+        return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
     }
+
+    if (cartItems.stream().anyMatch(cartItem -> !cartItem.getUser().getId().equals(userId))) {
+        return ResponseEntity.badRequest().body(new APIRespone(false, "Carts does not belong to the specified user!", ""));
+    }
+
+    Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
+    if (paymentMethodOptional.isEmpty()) {
+        return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
+    }
+    PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
+
+    Optional<User> userOptional = userRepository.findById(userId);
+    if (userOptional.isEmpty()) {
+        return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+    }
+    User user = userOptional.get();
+
+    Order order = new Order();
+    order.setOrderDate(LocalDateTime.now());
+    order.setStatus("PENDING");
+    order.setOrderCode(orderCode);
+    order.setCreatedAt(LocalDateTime.now());
+    order.setUpdatedAt(LocalDateTime.now());
+    order.setUser(user);
+    order.setPaymentMethod(paymentMethodEntity);
+    order.setDeliveryAddress(deliveryAddress);
+
+    List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
+        OrderDetail orderDetail = new OrderDetail();
+        orderDetail.setOrder(order);
+        orderDetail.setProduct(cartItem.getProduct());
+        orderDetail.setQuantity(cartItem.getQuantity());
+        orderDetail.setUnitPrice(cartItem.getUnitPrice());
+        orderDetail.setTotalPrice(cartItem.getTotalPrice());
+        orderDetail.setSize(cartItem.getSize());
+        Store store = storeRepository.findById(cartItem.getStoreId()).orElseThrow(() -> new EntityNotFoundException("Store not found"));
+        orderDetail.setStore(store);
+        return orderDetail;
+    }).collect(Collectors.toList());
+    order.setOrderDetails(orderDetails);
+    order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
+
+    orderRepository.save(order);
+    cartItemRepository.deleteAll(cartItems);
+
+    return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
+}
     public ResponseEntity<APIRespone> processProductOrderNow(Long userId, String paymentMethod, Long productId, Long storeId, Integer quantity, String size ,String deliveryAddress, String orderCode){
         Optional<Product> productOptional = productRepository.findByProductId(productId);
         if (productOptional.isEmpty()) {
