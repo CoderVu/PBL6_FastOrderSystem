@@ -2,11 +2,10 @@ package com.example.BE_PBL6_FastOrderSystem.controller.User;
 import com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO.PaymentMomoCheckStatusController;
 import com.example.BE_PBL6_FastOrderSystem.controller.Payment.ZALOPAY.PaymentZaloPayCheckStatusController;
 import com.example.BE_PBL6_FastOrderSystem.model.Cart;
-import com.example.BE_PBL6_FastOrderSystem.model.Order;
-import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
+import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IComboService;
 import com.example.BE_PBL6_FastOrderSystem.service.IPaymentService;
@@ -18,17 +17,17 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.lang.StackWalker.Option;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+
 
 @RestController
 @RequestMapping("/api/v1/user/order")
@@ -68,6 +67,7 @@ public class UserOrderController {
             System.out.println("Message response data: " + responseData.get("status"));
             System.out.println("Response get statuscode: " + response.getStatusCode());
             if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("status"))) {
+
                 return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
             } else {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Payment status check failed", ""));
@@ -77,8 +77,7 @@ public class UserOrderController {
         }
     }
     @PostMapping("/create/product/now")
-    public ResponseEntity<APIRespone> placeProductOrderNow(
-            @RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public ResponseEntity<APIRespone> placeProductOrderNow(@RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         String paymentMethod = orderRequest.getPaymentMethod();
         Long productId = orderRequest.getProductId();
         Long storeId = orderRequest.getStoreId();
@@ -90,7 +89,6 @@ public class UserOrderController {
         orderRequest.setOrderId(orderCode);
         orderRequest.setUserId(userId);
         orderRequest.setAmount(productService.calculateOrderNowAmountProduct(productId, quantity));
-        System.out.println("Order code: " + orderCode);
         if ("ZALOPAY".equalsIgnoreCase(paymentMethod)) {
             orderRequest.setOrderId(orderCode);
             orderRequest.setUserId(userId);
@@ -108,23 +106,16 @@ public class UserOrderController {
                     System.out.println("Checking payment status...");
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
                     System.out.println("Payment status response: " + statusResponse);
-
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Payment status is OK. Proceeding with order placement...");
                         ResponseEntity<APIRespone> response = orderService.processProductOrderNow(userId, paymentMethod, productId, storeId, quantity, size, deliveryAddress, orderCode);
-                        System.out.println("Response order khi processProductOrder Zalo: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
-                            // Update the product quantity based on the aggregated values
-                            ResponseEntity<APIRespone> updateResponse = orderService.updateQuantityProductOrderByProduct(productId, storeId, quantity);
-                            System.out.println("Updating productId: " + productId + " in storeId: " + storeId + " with total quantity: " + quantity);
-                            // Print the response
-                            System.out.println("Update response: " + updateResponse);
-                            // Retrieve the Order object
-                            Order order = orderService.findOrderByOrderCode(orderCode);
-                            // Update order status
-                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                            // Create and save Payment entity
-                            paymentService.savePayment(orderRequest, order, userId);
+                          // Update the product quantity based on the aggregated values
+                          orderService.updateQuantityProductOrderByProduct(productId, storeId, quantity);
+                        ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                        OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
+                        orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                 
+                        paymentService.savePayment(orderRequest,  data.getOrderId(), userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -154,21 +145,16 @@ public class UserOrderController {
                 scheduler.scheduleAtFixedRate(() -> {
                     ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Payment status is OK. Proceeding with order placement...");
                         ResponseEntity<APIRespone> response = orderService.processProductOrderNow(userId, paymentMethod, productId, storeId, quantity, size, deliveryAddress, orderCode);
-                        System.out.println("Response order khi processProductOrder Zalo: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             // Update the product quantity based on the aggregated values
-                            ResponseEntity<APIRespone> updateResponse = orderService.updateQuantityProductOrderByProduct(productId, storeId, quantity);
-                            System.out.println("Updating productId: " + productId + " in storeId: " + storeId + " with total quantity: " + quantity);
-                            // Print the response
-                            System.out.println("Update response: " + updateResponse);
-                            // Retrieve the Order object
-                            Order order = orderService.findOrderByOrderCode(orderCode);
-                            // Update order status
+                            orderService.updateQuantityProductOrderByProduct(productId, storeId, quantity);
+                    
+                            ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                            OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                            // Create and save Payment entity
-                            paymentService.savePayment(orderRequest, order, userId);
+                     
+                            paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -190,19 +176,17 @@ public class UserOrderController {
             orderRequest.setOrderInfo("Payment CASH for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-            ResponseEntity<APIRespone> response = orderService.processProductOrderNow(userId, paymentMethod, productId, storeId, quantity,size, deliveryAddress, orderCode);
+            ResponseEntity<APIRespone> response = orderService.processProductOrderNow(userId, paymentMethod, productId, storeId, quantity, size, deliveryAddress, orderCode);
+            System.out.println("Response order khi processProductOrderNow = CASH: " + response);
             if (response.getStatusCode() == HttpStatus.OK) {
                 // Update the product quantity based on the aggregated values
-                ResponseEntity<APIRespone> updateResponse = orderService.updateQuantityProductOrderByProduct(productId, storeId, quantity);
-                System.out.println("Updating productId: " + productId + " in storeId: " + storeId + " with total quantity: " + quantity);
-                // Print the response
-                System.out.println("Update response: " + updateResponse);
-                // Retrieve the Order object
-                Order order = orderService.findOrderByOrderCode(orderCode);
-                // Update order status
+                orderService.updateQuantityProductOrderByProduct(productId, storeId, quantity);
+        
+                ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                 orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                // Create and save Payment entity
-                paymentService.savePayment(orderRequest, order, userId);
+         
+                 paymentService.savePayment(orderRequest, data.getOrderId(), userId);
             }
             return response;
         } else {
@@ -211,8 +195,7 @@ public class UserOrderController {
     }
 
     @PostMapping("/create/product")
-    public ResponseEntity<APIRespone> placeProductOrder(
-            @RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+    public ResponseEntity<APIRespone> placeProductOrder(@RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         String paymentMethod = orderRequest.getPaymentMethod();
         List<Long> cartIds = orderRequest.getCartIds();
         String deliveryAddress = orderRequest.getDeliveryAddress();
@@ -230,7 +213,6 @@ public class UserOrderController {
         orderRequest.setUserId(userId);
         Long totalAmount = calculateOrderAmount(cartIds);
         orderRequest.setAmount(totalAmount);
-        System.out.println("Order code: " + orderCode);
         if ("ZALOPAY".equalsIgnoreCase(paymentMethod)) {
             orderRequest.setOrderId(orderCode);
             orderRequest.setUserId(userId);
@@ -239,31 +221,22 @@ public class UserOrderController {
                     return ResponseEntity.badRequest().body(new APIRespone(false, "One or more carts do not belong to current user", ""));
                 }
             }
-            System.out.println("Cart IDs: " + orderRequest.getCartIds());
-            System.out.println("User ID: " + orderRequest.getUserId());
             orderRequest.setOrderInfo("Payment ZaloPay for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
             // Initiate ZaloPay payment
             Map<String, Object> zalopayResponse = paymentService.createOrderZaloPay(orderRequest);
-            System.out.println("ZaloPay response: " + zalopayResponse);
-            System.out.println();
             if (Integer.parseInt(zalopayResponse.get("returncode").toString()) == 1) {
                 System.out.println("ZaloPay payment initiation successful");
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 scheduler.scheduleAtFixedRate(() -> {
-                    System.out.println("Checking payment status...");
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
                     System.out.println("Payment status response: " + statusResponse);
-
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Payment status is OK. Proceeding with order placement...");
                         ResponseEntity<APIRespone> response = orderService.processProductOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
-                        System.out.println("Response order khi processProductOrder Zalo: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             // Step 1: Create a map to store the total quantity for each product in each store
                             Map<Long, Map<Long, Integer>> storeProductQuantities = new HashMap<>();
-
                             // Step 2: Iterate through the cart items and sum the quantities for each product in each store
                             for (Cart cart : cartItems) {
                                 if (cart.getProduct() != null && cart.getProduct().getProductId() != null) {
@@ -285,20 +258,15 @@ public class UserOrderController {
                                 for (Map.Entry<Long, Integer> productEntry : storeEntry.getValue().entrySet()) {
                                     Long productId = productEntry.getKey();
                                     int totalQuantity = productEntry.getValue();
-                                    // Capture the response from the update method
-                                    ResponseEntity<APIRespone> updateResponse = orderService.updateQuantityProductOrderByProduct(productId, storeId, totalQuantity);
-                                    System.out.println("Updating productId: " + productId + " in storeId: " + storeId + " with total quantity: " + totalQuantity);
-                                    // Print the response
-                                    System.out.println("Update response: " + updateResponse);
+                                    orderService.updateQuantityProductOrderByProduct(productId, storeId, totalQuantity);
                                 }
                             }
-
-                            // Retrieve the Order object
-                            Order order = orderService.findOrderByOrderCode(orderCode);
-                            // Update order status
+                    
+                            ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                            OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                            // Create and save Payment entity
-                            paymentService.savePayment(orderRequest, order, userId);
+                    
+                            paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -329,20 +297,16 @@ public class UserOrderController {
             orderRequest.setExtraData("additional data");
             // initiate MoMo payment
             Map<String, Object> momoResponse = paymentService.createOrderMomo(orderRequest);
-            System.out.println("MoMo response khi product: " + momoResponse);
             if ("Success".equals(momoResponse.get("message"))) {
                 // schedule a task to check payment status every 10 seconds
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 scheduler.scheduleAtFixedRate(() -> {
                     ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Payment status is OK. Proceeding with order placement...");
                         ResponseEntity<APIRespone> response = orderService.processProductOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
-                        System.out.println("Response order khi processProductOrder Zalo: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             // Step 1: Create a map to store the total quantity for each product in each store
                             Map<Long, Map<Long, Integer>> storeProductQuantities = new HashMap<>();
-
                             // Step 2: Iterate through the cart items and sum the quantities for each product in each store
                             for (Cart cart : cartItems) {
                                 if (cart.getProduct() != null && cart.getProduct().getProductId() != null) {
@@ -364,20 +328,15 @@ public class UserOrderController {
                                 for (Map.Entry<Long, Integer> productEntry : storeEntry.getValue().entrySet()) {
                                     Long productId = productEntry.getKey();
                                     int totalQuantity = productEntry.getValue();
-                                    // Capture the response from the update method
-                                    ResponseEntity<APIRespone> updateResponse = orderService.updateQuantityProductOrderByProduct(productId, storeId, totalQuantity);
-                                    System.out.println("Updating productId: " + productId + " in storeId: " + storeId + " with total quantity: " + totalQuantity);
-                                    // Print the response
-                                    System.out.println("Update response: " + updateResponse);
+                                    orderService.updateQuantityProductOrderByProduct(productId, storeId, totalQuantity);
                                 }
                             }
-
-                            // Retrieve the Order object
-                            Order order = orderService.findOrderByOrderCode(orderCode);
-                            // Update order status
+                    
+                            ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                            OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                            // Create and save Payment entity
-                            paymentService.savePayment(orderRequest, order, userId);
+                     
+                            paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -424,19 +383,17 @@ public class UserOrderController {
                     for (Map.Entry<Long, Integer> productEntry : storeEntry.getValue().entrySet()) {
                         Long productId = productEntry.getKey();
                         int totalQuantity = productEntry.getValue();
-                        System.out.println("Updating productId: " + productId + " in storeId: " + storeId + " with total quantity: " + totalQuantity);
                         orderService.updateQuantityProductOrderByProduct(productId, storeId, totalQuantity);
                     }
                 }
 
-                // Retrieve the Order object
-                Order order = orderService.findOrderByOrderCode(orderCode);
-                // Update order status
+        
+                ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                 orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                // Create and save Payment entity
-                paymentService.savePayment(orderRequest, order, userId);
+         
+                 paymentService.savePayment(orderRequest, data.getOrderId(), userId);
             }
-
             return response;
         } else {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Unsupported payment method", ""));
@@ -461,12 +418,6 @@ public class UserOrderController {
         orderRequest.setUserId(userId);
         Long totalAmount = calculateOrderAmount(cartIds);
         orderRequest.setAmount(totalAmount);
-        System.out.println("Order code: " + orderCode);
-        List<Long> comboIds = cartItems.stream()
-                .map(cart -> cart.getCombo().getComboId())
-                .collect(Collectors.toList());
-
-        System.out.println("Combo IDs: " + comboIds);
         if ("ZALOPAY".equalsIgnoreCase(paymentMethod)) {
             orderRequest.setOrderId(orderCode);
             orderRequest.setUserId(userId);
@@ -475,27 +426,17 @@ public class UserOrderController {
                     return ResponseEntity.badRequest().body(new APIRespone(false, "One or more carts do not belong to current user", ""));
                 }
             }
-            System.out.println("Cart IDs: " + orderRequest.getCartIds());
-            System.out.println("User ID: " + orderRequest.getUserId());
             orderRequest.setOrderInfo("Payment ZaloPay for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
             // Initiate ZaloPay payment
             Map<String, Object> zalopayResponse = paymentService.createOrderZaloPay(orderRequest);
-            System.out.println("ZaloPay response: " + zalopayResponse);
-            System.out.println();
             if (Integer.parseInt(zalopayResponse.get("returncode").toString()) == 1) {
-                System.out.println("ZaloPay payment initiation successful");
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 scheduler.scheduleAtFixedRate(() -> {
-                    System.out.println("Checking payment status...");
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
-                    System.out.println("Payment status response: " + statusResponse);
-
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Payment status is OK. Proceeding with order placement...");
                         ResponseEntity<APIRespone> response = orderService.processComboOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
-                        System.out.println("Response order khi processProductOrder Zalo: " + response);
                         if (response.getStatusCode()== HttpStatus.OK) {
                             // Step 1: Create a map to store the total quantity for each combo in each store
                             Map<Long, Map<Long, Integer>> storeProductQuantities = new HashMap<>();
@@ -518,18 +459,15 @@ public class UserOrderController {
                                 for (Map.Entry<Long, Integer> comboEntry : storeEntry.getValue().entrySet()) {
                                     Long comboId = comboEntry.getKey();
                                     int totalQuantity = comboEntry.getValue();
-                                    System.out.println("Updating comboId: " + comboId + " in storeId: " + storeId + " with total quantity: " + totalQuantity);
-                                    ResponseEntity<APIRespone> updateResponse = orderService.updateQuantityProductOrderByCombo(comboId, storeId, totalQuantity);
-                                    System.out.println("Update response khi updatequantity: " + updateResponse);
-
+                                    orderService.updateQuantityProductOrderByCombo(comboId, storeId, totalQuantity);
                                 }
                             }
-                            // Retrieve the Order object
-                            Order order = orderService.findOrderByOrderCode(orderCode);
-                            // Update order status
+                    
+                            ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                            OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                            // Create and save Payment entity
-                            paymentService.savePayment(orderRequest, order, userId);
+
+                            paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -567,9 +505,7 @@ public class UserOrderController {
                 scheduler.scheduleAtFixedRate(() -> {
                     ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("Payment status is OK. Proceeding with order placement...");
                         ResponseEntity<APIRespone> response = orderService.processComboOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
-                        System.out.println("Response order khi processProductOrder Zalo: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             // Step 1: Create a map to store the total quantity for each combo in each store
                             Map<Long, Map<Long, Integer>> storeProductQuantities = new HashMap<>();
@@ -592,17 +528,14 @@ public class UserOrderController {
                                 for (Map.Entry<Long, Integer> comboEntry : storeEntry.getValue().entrySet()) {
                                     Long comboId = comboEntry.getKey();
                                     int totalQuantity = comboEntry.getValue();
-                                    System.out.println("Updating comboId: " + comboId + " in storeId: " + storeId + " with total quantity: " + totalQuantity);
-                                    ResponseEntity<APIRespone> updateResponse = orderService.updateQuantityProductOrderByCombo(comboId, storeId, totalQuantity);
-                                    System.out.println("Update response khi updatequantity: " + updateResponse);
+                                    orderService.updateQuantityProductOrderByCombo(comboId, storeId, totalQuantity);
                                 }
                             }
-                            // Retrieve the Order object
-                            Order order = orderService.findOrderByOrderCode(orderCode);
-                            // Update order status
+                    
+                            ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                            OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                            // Create and save Payment entity
-                            paymentService.savePayment(orderRequest, order, userId);
+                            paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -653,12 +586,12 @@ public class UserOrderController {
                         System.out.println("Update response khi updatequantity: " + updateResponse);
                     }
                 }
-                // Retrieve the Order object
-                Order order = orderService.findOrderByOrderCode(orderCode);
-                // Update order status
+        
+                ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                 orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                // Create and save Payment entity
-                paymentService.savePayment(orderRequest, order, userId);
+                paymentService.savePayment(orderRequest, data.getOrderId(), userId);
+
             }
             return response;
         } else {
@@ -685,24 +618,25 @@ public class UserOrderController {
         return orderService.cancelOrder(orderCode, userId);
     }
     @GetMapping("/history/all")
-    public ResponseEntity<APIRespone> getAllOrdersByUser() {
+    public ResponseEntity<APIRespone> getAllOrders() {
         Long userId = FoodUserDetails.getCurrentUserId();
-        return orderService.getAllOrdersByUser(userId);
+        return orderService.getAllOrderDetailsByUser(userId);
     }
-    @GetMapping("/history/{orderId}")
-    public ResponseEntity<APIRespone> getOrderById(@PathVariable Long orderId) {
+    @GetMapping("/history/{orderCode}")
+    public ResponseEntity<APIRespone> findOrderByOrderIdAndUserId(@PathVariable String orderCode) {
         Long userId = FoodUserDetails.getCurrentUserId();
-        return orderService.getOrderByIdAndUserId(orderId, userId);
+        return orderService.findOrderByOrderCodeAndUserId(orderCode, userId);
     }
-    @GetMapping("/status/{orderId}")
-    public ResponseEntity<APIRespone> getStatus(@PathVariable Long orderId) {
-        Long userId = FoodUserDetails.getCurrentUserId();
-        return orderService.getStatusOrder(orderId, userId);
-    }
+
     @GetMapping("/history/status")
     public ResponseEntity<APIRespone> getOrdersByStatus(@RequestParam String status) {
         Long userId = FoodUserDetails.getCurrentUserId();
         return orderService.getOrdersByStatusAndUserId(status, userId);
     }
+    @GetMapping("/find")
+    public ResponseEntity<APIRespone> findOrderByOrderCode(@RequestParam String orderCode) {
+        return orderService.findOrderByOrderCode(orderCode);
+    }
+    
 
 }

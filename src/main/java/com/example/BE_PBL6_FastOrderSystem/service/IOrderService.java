@@ -21,14 +21,9 @@ public interface IOrderService {
     ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status);
     ResponseEntity<APIRespone> updateOrderStatus(String orderCode, String status);
     ResponseEntity<APIRespone> cancelOrder(String orderCode, Long serId);
-    ResponseEntity<APIRespone> getOrderByIdAndUserId(Long orderId, Long userId);
-    ResponseEntity<APIRespone> getAllOrdersByUser(Long userId);
-    ResponseEntity<APIRespone> getAllOrdersByAdmin();
     List<Cart> getCartItemsByCartId(Long cartId);
-    ResponseEntity<APIRespone> getStatusOrder(Long orderId, Long userId);
-    Order findOrderByOrderCode(String orderCode);
-    // ResponseEntity<APIRespone> getAllOrdersByOwner(Long ownerId);
+    ResponseEntity<APIRespone> findOrderByOrderCode(String orderCode);
     ResponseEntity<APIRespone> getOrdersByStatusAndUserId(String status, Long userId);
-    ResponseEntity<APIRespone> findOrderByOrderIdAndUserId(String orderCode, Long userId);
-    // ResponseEntity<APIRespone> getOrdersByStatusAndOwnerId(String status, Long ownerId);
+    ResponseEntity<APIRespone>  findOrderByOrderCodeAndUserId(String orderCode, Long userId);
+    ResponseEntity<APIRespone> getAllOrderDetailsByUser(Long userId);
 }

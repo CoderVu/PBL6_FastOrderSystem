@@ -35,4 +35,19 @@ public class Store {
     private Set<Promotion> promotions;
     @OneToMany(mappedBy = "store")
     private Set<ProductStore> productStores = new HashSet<>();
+    @Override
+    public String toString() {
+        return "Store{" +
+                "storeId=" + storeId +
+                ", storeName='" + storeName + '\'' +
+                ", location='" + location + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", openingTime=" + openingTime +
+                ", closingTime=" + closingTime +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

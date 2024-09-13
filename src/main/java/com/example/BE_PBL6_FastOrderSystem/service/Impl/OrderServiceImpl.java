@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 import com.example.BE_PBL6_FastOrderSystem.model.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
+import com.example.BE_PBL6_FastOrderSystem.response.OrderDetailResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import jakarta.persistence.EntityNotFoundException;
@@ -230,25 +231,6 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         return ResponseEntity.ok(new APIRespone(true, "Order canceled successfully", ""));
     }
 
-    @Override
-    public ResponseEntity<APIRespone> getOrderByIdAndUserId(Long orderId, Long userId) {
-        Optional<Order> orderOptional = orderRepository.findByOrderIdAndUserId(orderId, userId);
-        if (orderOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
-        }
-        Order order = orderOptional.get();
-        return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
-    }
-
-    @Override
-    public ResponseEntity<APIRespone> getAllOrdersByUser(Long userId) {
-        List<Order> orders = orderRepository.findAllByUserId(userId);
-        if (orders.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
-        }
-        List<OrderResponse> orderResponses = orders.stream().map(OrderResponse::new).collect(Collectors.toList());
-        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
-    }
 
 
     @Override
@@ -262,7 +244,7 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
     }
 
     @Override
-    public ResponseEntity<APIRespone> findOrderByOrderIdAndUserId(String orderCode, Long userId) {
+    public ResponseEntity<APIRespone> findOrderByOrderCodeAndUserId(String orderCode, Long userId) {
         Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
         if (orderOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
@@ -330,37 +312,30 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
-
-    @Override
-    public ResponseEntity<APIRespone> getAllOrdersByAdmin() {
-      if (orderRepository.findAll().isEmpty()) {
-          return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
-      }
-        List<Order> orders = orderRepository.findAll();
-        List<OrderResponse> orderResponses = orders.stream().map(OrderResponse::new).collect(Collectors.toList());
-        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
-    }
-
     @Override
     public List<Cart> getCartItemsByCartId(Long cartId) {
         return cartItemRepository.findByCartId(cartId);
     }
-
+    @Transactional
     @Override
-    public ResponseEntity<APIRespone> getStatusOrder(Long orderId, Long userId) {
-        Optional<Order> orderOptional = orderRepository.findByOrderIdAndUserId(orderId, userId);
+    public ResponseEntity<APIRespone> findOrderByOrderCode(String orderCode) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
         if (orderOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
         }
         Order order = orderOptional.get();
-        return ResponseEntity.ok(new APIRespone(true, "Success", order.getStatus()));
+        return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
     }
-
     @Override
-    public Order findOrderByOrderCode(String orderCode) {
-        return orderRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found with code: " + orderCode));
+    public ResponseEntity<APIRespone> getAllOrderDetailsByUser(Long userId) {
+        List<Order> orders = orderRepository.findAllByUserId(userId);
+        if (orders.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
+        }
+        List<OrderResponse> orderResponses = orders.stream().map(OrderResponse::new).collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
     }
+       
 
 
 

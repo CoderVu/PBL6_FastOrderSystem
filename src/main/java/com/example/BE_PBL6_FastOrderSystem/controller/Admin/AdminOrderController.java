@@ -17,9 +17,4 @@ import java.util.List;
 public class AdminOrderController {
     final IOrderService orderService;
 
-    @GetMapping("/all")
-    public ResponseEntity<APIRespone> getAllOrders() {
-        return orderService.getAllOrdersByAdmin();
-    }
-
 }

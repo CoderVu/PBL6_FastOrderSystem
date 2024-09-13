@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String phoneNumber;
+    @JsonIgnore
     private String password;
     private String fullName;
     @Column(name = "avatar", columnDefinition = "LONGTEXT")

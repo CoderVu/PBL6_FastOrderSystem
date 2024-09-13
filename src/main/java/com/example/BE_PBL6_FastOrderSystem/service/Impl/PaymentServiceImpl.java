@@ -1,10 +1,13 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.repository.OrderDetailRepository;
+import com.example.BE_PBL6_FastOrderSystem.repository.OrderRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.PaymentDetailRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.PaymentMethodRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.PaymentRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
+import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IPaymentService;
 import com.example.BE_PBL6_FastOrderSystem.utils.Helper.HelperHmacSHA256;
 import com.example.BE_PBL6_FastOrderSystem.utils.constants.MoMoConstant;
@@ -42,6 +45,8 @@ public class PaymentServiceImpl implements IPaymentService {
       private final PaymentMethodRepository paymentMethodRepository;
       private final PaymentRepository paymentRepository;
       private final PaymentDetailRepository paymentDetailRepository;
+      private final OrderRepository orderRepository;
+      private final OrderDetailRepository orderDetailRepository;
       private static final Logger logger = Logger.getLogger(PaymentServiceImpl.class.getName());
       public static String getCurrentTimeString(String format) {
             Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT+7"));
@@ -142,8 +147,14 @@ public class PaymentServiceImpl implements IPaymentService {
         }
         return result;
     }
-    @Override
-    public ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Order order, Long userId) {
+    public ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Long orderId, Long userId) {
+        Optional<Order> optionalOrder = orderRepository.findByOrderId(orderId);
+        if (!optionalOrder.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Order not found", ""));
+        }
+    
+        Order order = optionalOrder.get();
+        
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentDate(LocalDateTime.now());
@@ -157,13 +168,12 @@ public class PaymentServiceImpl implements IPaymentService {
         payment.setLang(orderRequest.getLang());
         payment.setExtraData(orderRequest.getExtraData());
         paymentRepository.save(payment);
-
-        // Save payment details for each product in the order
-        for (OrderDetail orderDetail : order.getOrderDetails()) {
-            System.out.println("orderdetail"+ orderDetail);
+    
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
+        for (OrderDetail orderDetail : orderDetails) {
             PaymentDetail paymentDetail = new PaymentDetail();
             paymentDetail.setPayment(payment);
-            paymentDetail.setOrder(order);
+            paymentDetail.setOrder(orderDetail.getOrder());
             paymentDetail.setStore(orderDetail.getStore());
             paymentDetail.setTotalAmount(orderDetail.getTotalPrice());
             paymentDetail.setPaymentStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("MOMO") || orderRequest.getPaymentMethod().equalsIgnoreCase("ZALOPAY") ? "Đã thanh toán" : "Chưa thanh toán");
@@ -171,8 +181,10 @@ public class PaymentServiceImpl implements IPaymentService {
             paymentDetail.setUpdatedAt(LocalDateTime.now());
             paymentDetailRepository.save(paymentDetail);
         }
+    
         return ResponseEntity.ok(new APIRespone(true, "Payment and payment details saved successfully", ""));
     }
+    
     @Override
     public Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException {
         Long amount = orderRequest.getAmount();

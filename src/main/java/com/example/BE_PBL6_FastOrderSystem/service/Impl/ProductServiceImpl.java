@@ -202,31 +202,37 @@ public class ProductServiceImpl implements IProductService {
         productRepository.save(product);
         return new ResponseEntity<>(new APIRespone(true, "Product applied to store successfully", ""), HttpStatus.OK);
     }
-
     @Override
     public ResponseEntity<APIRespone> applyProductToAllStores(Long productId) {
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
         }
-        if (productOptional.get().getProductStores().size() == storeRepository.findAll().size()) {
-            return new ResponseEntity<>(new APIRespone(false, "Product already applied to all stores", ""), HttpStatus.BAD_REQUEST);
-        }
         Product product = productOptional.get();
         List<Store> stores = storeRepository.findAll();
+        int initialProductStoreCount = product.getProductStores().size();
+    
         for (Store store : stores) {
-            ProductStore productStore = new ProductStore();
-            productStore.setProduct(product);
-            productStore.setStore(store);
-            productStore.setStockQuantity(0);
-            product.getProductStores().add(productStore);
-            store.getProductStores().add(productStore);
-            productStoreRepository.save(productStore); // Save the ProductStore entity
+            boolean storeHasProduct = store.getProductStores().stream()
+            .anyMatch(productStore -> productStore.getProduct().getProductId().equals(productId));
+            if (!storeHasProduct) {
+                ProductStore productStore = new ProductStore();
+                productStore.setProduct(product);
+                productStore.setStore(store);
+                productStore.setStockQuantity(0);
+                product.getProductStores().add(productStore);
+                store.getProductStores().add(productStore);
+                productStoreRepository.save(productStore); 
+            }
         }
-        productRepository.save(product); // Save the Product entity
+    
+        if (initialProductStoreCount == product.getProductStores().size()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product already applied to all stores", ""), HttpStatus.BAD_REQUEST);
+        }
+    
+        productRepository.save(product); 
         return new ResponseEntity<>(new APIRespone(true, "Product applied to all stores successfully", ""), HttpStatus.OK);
     }
-
     @Override
     public ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId) {
         Optional<Store> storeOptional = storeRepository.findById(storeId);
