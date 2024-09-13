@@ -1,13 +1,9 @@
-package com.example.BE_PBL6_FastOrderSystem.utils;
+package com.example.BE_PBL6_FastOrderSystem.response;
 
 import com.example.BE_PBL6_FastOrderSystem.model.Combo;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.model.Promotion;
 import com.example.BE_PBL6_FastOrderSystem.model.Store;
-import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
-import com.example.BE_PBL6_FastOrderSystem.response.ComboResponse;
-import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
-import com.example.BE_PBL6_FastOrderSystem.response.StoreResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;

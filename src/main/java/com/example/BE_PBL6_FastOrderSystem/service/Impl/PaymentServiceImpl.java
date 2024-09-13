@@ -11,6 +11,8 @@ import com.example.BE_PBL6_FastOrderSystem.utils.constants.MoMoConstant;
 import com.example.BE_PBL6_FastOrderSystem.utils.constants.ZaloPayConstant;
 import lombok.RequiredArgsConstructor;
 import java.util.*;
+import java.util.logging.Logger;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -22,6 +24,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
@@ -39,6 +42,7 @@ public class PaymentServiceImpl implements IPaymentService {
       private final PaymentMethodRepository paymentMethodRepository;
       private final PaymentRepository paymentRepository;
       private final PaymentDetailRepository paymentDetailRepository;
+      private static final Logger logger = Logger.getLogger(PaymentServiceImpl.class.getName());
       public static String getCurrentTimeString(String format) {
             Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT+7"));
             SimpleDateFormat fmt = new SimpleDateFormat(format);
@@ -139,16 +143,12 @@ public class PaymentServiceImpl implements IPaymentService {
         return result;
     }
     @Override
-    public PaymentMethod findPaymentMethodByNameMomo(String momo) {
-        return paymentMethodRepository.findByName(momo).orElseThrow(() -> new RuntimeException("Payment method not found"));
-    }
-    @Override
     public ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Order order, Long userId) {
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentDate(LocalDateTime.now());
         payment.setAmountPaid(orderRequest.getAmount().doubleValue());
-        payment.setPaymentMethod(findPaymentMethodByNameMomo(orderRequest.getPaymentMethod()));
+        payment.setPaymentMethod(paymentMethodRepository.findByName(orderRequest.getPaymentMethod()));
         payment.setStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("MOMO") || orderRequest.getPaymentMethod().equalsIgnoreCase("ZALOPAY") ? "Đã thanh toán" : "Chưa thanh toán");
         payment.setCreatedAt(LocalDateTime.now());
         payment.setOrderCode(orderRequest.getOrderId());
@@ -160,6 +160,7 @@ public class PaymentServiceImpl implements IPaymentService {
 
         // Save payment details for each product in the order
         for (OrderDetail orderDetail : order.getOrderDetails()) {
+            System.out.println("orderdetail"+ orderDetail);
             PaymentDetail paymentDetail = new PaymentDetail();
             paymentDetail.setPayment(payment);
             paymentDetail.setOrder(order);
@@ -170,7 +171,6 @@ public class PaymentServiceImpl implements IPaymentService {
             paymentDetail.setUpdatedAt(LocalDateTime.now());
             paymentDetailRepository.save(paymentDetail);
         }
-
         return ResponseEntity.ok(new APIRespone(true, "Payment and payment details saved successfully", ""));
     }
     @Override
@@ -178,7 +178,6 @@ public class PaymentServiceImpl implements IPaymentService {
         Long amount = orderRequest.getAmount();
         String order_id = orderRequest.getOrderId();
         String apptransid = getCurrentTimeString("yyMMdd") + "_" + new Date().getTime();
-
         Map<String, Object> zalopay_Params = new HashMap<>();
         zalopay_Params.put("appid", ZaloPayConstant.APP_ID);
         zalopay_Params.put("apptransid", apptransid);
@@ -286,6 +285,6 @@ public class PaymentServiceImpl implements IPaymentService {
 
 		return response;
 	}
-    
+
 }
 

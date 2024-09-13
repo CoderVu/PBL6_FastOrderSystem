@@ -22,24 +22,5 @@ public class OwnerPaymentControler {
     private final IOrderService orderService;
     private final PaymentRepository paymentRepository;
 
-//    @PutMapping("/update-payment-status")
-//    public ResponseEntity<APIRespone> updatePaymentStatus(@RequestParam Long OrderId ) {
-//        Long ownerId = FoodUserDetails.getCurrentUserId();
-//        OrderDetail orderDetail = orderService.findOrderByOrderIdAndOwnerId(OrderId, ownerId).get(0); // get first order detail
-//        Order order = orderDetail.getOrder();
-//        Payment payment = paymentRepository.findByOrderCode(order.getOrderCode());
-//        if (payment == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Payment not found", null));
-//        }
-//
-//        if ("Đã thanh toán".equals(payment.getStatus())) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Payment status has already Đã thanh toán", null));
-//        }
-//
-//        payment.setStatus("Đã thanh toán");
-//        payment.setPaymentDate(LocalDateTime.now());
-//        paymentRepository.save(payment);
-//
-//        return ResponseEntity.ok(new APIRespone(true, "Payment status updated to Đã thanh toán", null));
-//    }
+    
 }

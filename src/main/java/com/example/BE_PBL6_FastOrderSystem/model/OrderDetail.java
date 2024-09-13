@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -9,8 +10,9 @@ public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderDetailId;
-    @ManyToOne // nhiều order detail có thể thuộc về 1 order
+    @ManyToOne
     @JoinColumn(name = "order_id")
+    @JsonIgnore
     private Order order;
     @ManyToOne
     @JoinColumn(name = "product_id")

@@ -68,7 +68,6 @@ public class UserOrderController {
             System.out.println("Message response data: " + responseData.get("status"));
             System.out.println("Response get statuscode: " + response.getStatusCode());
             if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("status"))) {
-
                 return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
             } else {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Payment status check failed", ""));

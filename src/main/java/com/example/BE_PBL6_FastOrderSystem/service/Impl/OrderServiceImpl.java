@@ -36,70 +36,6 @@ public class OrderServiceImpl implements IOrderService {
         } while (orderRepository.existsByOrderCode(orderCode));
         return orderCode;
     }
-//    @Override
-//    public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
-//        System.out.println("vao processProductOrder");
-//        List<Cart> cartItems = cartIds.stream()
-//                .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
-//                .filter(cartItem -> cartItem.getUser().getId().equals(userId))
-//                .collect(Collectors.toList()); // get all cart items by cartId and userId
-//
-//        if (cartItems.isEmpty()) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
-//        }
-//
-//        if (cartItems.stream().anyMatch(cartItem -> !cartItem.getUser().getId().equals(userId))) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts does not belong to the specified you! ", ""));
-//        }
-//
-//        Long storeId = cartItems.get(0).getStoreId();
-//        Optional<Store> storeOptional = storeRepository.findById(storeId);
-//        if (storeOptional.isEmpty()) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
-//        }
-//        Store store = storeOptional.get();
-//
-//        Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
-//        if (paymentMethodOptional.isEmpty()) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
-//        }
-//        PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
-//
-//        Optional<User> userOptional = userRepository.findById(userId);
-//        if (userOptional.isEmpty()) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
-//        }
-//        User user = userOptional.get();
-//
-//        Order order = new Order();
-//        order.setOrderDate(LocalDateTime.now());
-//        order.setStatus(cartItems.get(0).getStatus());
-//        order.setOrderCode(orderCode);
-//        order.setCreatedAt(LocalDateTime.now());
-//        order.setUpdatedAt(LocalDateTime.now());
-//        order.setStore(store);
-//        order.setUser(user);
-//        order.setPaymentMethod(paymentMethodEntity);
-//        order.setDeliveryAddress(deliveryAddress);
-//
-//        List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
-//            OrderDetail orderDetail = new OrderDetail();
-//            orderDetail.setOrder(order);
-//            orderDetail.setProduct(cartItem.getProduct());
-//            orderDetail.setQuantity(cartItem.getQuantity());
-//            orderDetail.setUnitPrice(cartItem.getUnitPrice());
-//            orderDetail.setTotalPrice(cartItem.getTotalPrice());
-//            orderDetail.setSize(cartItem.getSize());
-//            return orderDetail;
-//        }).collect(Collectors.toList());
-//        order.setOrderDetails(orderDetails);
-//        order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
-//        orderRepository.save(order);
-//        System.out.println("Đã lưu order processProductOrder");
-//        cartItemRepository.deleteAll(cartItems);
-//        System.out.println("Các sản phẩm đã được xóa khỏi giỏ hàng");
-//        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
-//    }
 @Override
 public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
     List<Cart> cartItems = cartIds.stream()
@@ -115,12 +51,7 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         return ResponseEntity.badRequest().body(new APIRespone(false, "Carts does not belong to the specified user!", ""));
     }
 
-    Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
-    if (paymentMethodOptional.isEmpty()) {
-        return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
-    }
-    PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
-
+    PaymentMethod paymentMethodEntity = paymentMethodRepository.findByName(paymentMethod);
     Optional<User> userOptional = userRepository.findById(userId);
     if (userOptional.isEmpty()) {
         return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
@@ -167,12 +98,7 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         if (storeOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
         }
-        // Store store = storeOptional.get();
-        Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
-        if (paymentMethodOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
-        }
-        PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
+        PaymentMethod paymentMethodEntity = paymentMethodRepository.findByName(paymentMethod);
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
@@ -270,10 +196,6 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
         }
         Order order = orderOptional.get();
-        // Store store = order.getStore();
-        // if (!store.getManager().getId().equals(ownerId)) {
-        //     return ResponseEntity.badRequest().body(new APIRespone(false, "You are not authorized to update this order", ""));
-        // }
         order.setStatus(status);
         orderRepository.save(order);
         return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully", new OrderResponse(order)));
@@ -352,17 +274,6 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
     }
 
-    // @Override
-    // public ResponseEntity<APIRespone> getOrdersByStatusAndOwnerId(String status, Long ownerId) {
-    //     List<Order> orders = orderRepository.findAll();
-    //     List<Order> ownerOrders = orders.stream()
-    //             .filter(order -> order.getStore().getManager().getId().equals(ownerId))
-    //             .filter(order -> order.getStatus().equals(status))
-    //             .collect(Collectors.toList());
-    //     List<OrderResponse> orderResponses = ownerOrders.stream().map(OrderResponse::new).collect(Collectors.toList());
-    //     return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
-    // }
-
     @Override
     public ResponseEntity<APIRespone> processComboOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
         List<Cart> cartItems = cartIds.stream()
@@ -383,20 +294,13 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         if (storeOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
         }
-        // Store store = storeOptional.get();
-
-        Optional<PaymentMethod> paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
-        if (paymentMethodOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
-        }
-        PaymentMethod paymentMethodEntity = paymentMethodOptional.get();
+        PaymentMethod paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
 
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
         }
         User user = userOptional.get();
-
         Order order = new Order();
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(cartItems.get(0).getStatus());
@@ -405,7 +309,7 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         order.setUpdatedAt(LocalDateTime.now());
         // order.setStore(store);
         order.setUser(user);
-        order.setPaymentMethod(paymentMethodEntity);
+        order.setPaymentMethod(paymentMethodOptional);
         order.setDeliveryAddress(deliveryAddress);
 
         List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {

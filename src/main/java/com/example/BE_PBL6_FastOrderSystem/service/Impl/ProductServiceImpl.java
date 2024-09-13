@@ -10,7 +10,7 @@ import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
-import com.example.BE_PBL6_FastOrderSystem.utils.ResponseConverter;
+import com.example.BE_PBL6_FastOrderSystem.response.ResponseConverter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -186,7 +186,9 @@ public class ProductServiceImpl implements IProductService {
         if (storeOptional.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
         }
-
+        if (productOptional.get().getProductStores().stream().anyMatch(ps -> ps.getStore().equals(storeOptional.get()))) {
+            return new ResponseEntity<>(new APIRespone(false, "Product already applied to store", ""), HttpStatus.BAD_REQUEST);
+        }
         Product product = productOptional.get();
         Store store = storeOptional.get();
 
@@ -196,10 +198,8 @@ public class ProductServiceImpl implements IProductService {
         productStore.setStockQuantity(0);
         product.getProductStores().add(productStore);
         store.getProductStores().add(productStore);
-
-        productStoreRepository.save(productStore); // Save the ProductStore entity
-        productRepository.save(product); // Save the Product entity
-
+        productStoreRepository.save(productStore);
+        productRepository.save(product);
         return new ResponseEntity<>(new APIRespone(true, "Product applied to store successfully", ""), HttpStatus.OK);
     }
 
@@ -208,6 +208,9 @@ public class ProductServiceImpl implements IProductService {
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+        if (productOptional.get().getProductStores().size() == storeRepository.findAll().size()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product already applied to all stores", ""), HttpStatus.BAD_REQUEST);
         }
         Product product = productOptional.get();
         List<Store> stores = storeRepository.findAll();

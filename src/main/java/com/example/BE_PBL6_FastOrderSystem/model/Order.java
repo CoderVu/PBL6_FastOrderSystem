@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,7 +16,11 @@ public class Order {
     private String orderCode;
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
+    @JsonIgnore
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderDetail> orderDetails;
     private LocalDateTime orderDate;
     private Double totalAmount;
     private String status;
@@ -36,8 +41,6 @@ public class Order {
         updatedAt = LocalDateTime.now();
     }
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderDetail> orderDetails;
 
     public Long getOrderId() {
         return orderId;
@@ -68,14 +71,6 @@ public class Order {
     public void setUser(User user) {
         this.user = user;
     }
-
-    // public Store getStore() {
-    //     return store;
-    // }
-
-    // public void setStore(Store store) {
-    //     this.store = store;
-    // }
 
     public LocalDateTime getOrderDate() {
         return orderDate;
