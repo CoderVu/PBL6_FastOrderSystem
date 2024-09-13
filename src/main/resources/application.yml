@@ -1,6 +1,6 @@
 server:
-  port: 8080
-  address: 192.168.1.32
+  port: 8082
+  # address: 192.168.1.32
 spring:
   application:
     name: BE_PBL6_FastOrderSystem
@@ -8,7 +8,7 @@ spring:
     allow-circular-references: true
   datasource:
     username: root
-    password: 123456789
+    password: 
     url: jdbc:mysql://localhost:3306/db_pbl6
     driver-class-name: com.mysql.cj.jdbc.Driver
     security:
