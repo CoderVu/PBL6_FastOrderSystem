@@ -10,5 +10,5 @@ public class BePbl6FastOrderSystemApplication {
 		SpringApplication.run(BePbl6FastOrderSystemApplication.class, args);
 	}
 
-
+// hi
 }
