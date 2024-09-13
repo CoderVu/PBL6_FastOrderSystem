@@ -23,9 +23,6 @@ public class Order {
     private LocalDateTime orderDate;
     private Double totalAmount;
     private String status;
-    @ManyToOne
-    @JoinColumn(name = "payment_method_id")
-    private PaymentMethod paymentMethod;
     private String deliveryAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -51,7 +48,6 @@ public class Order {
                 ", orderDate=" + orderDate +
                 ", totalAmount=" + totalAmount +
                 ", status='" + status + '\'' +
-                ", paymentMethod=" + paymentMethod +
                 ", deliveryAddress='" + deliveryAddress + '\'' +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +

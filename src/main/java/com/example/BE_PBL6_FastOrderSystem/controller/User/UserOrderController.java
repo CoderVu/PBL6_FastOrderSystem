@@ -466,7 +466,6 @@ public class UserOrderController {
                             ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                             OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-
                             paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         }
                         // Cancel the scheduled task
@@ -582,8 +581,7 @@ public class UserOrderController {
                         Long comboId = comboEntry.getKey();
                         int totalQuantity = comboEntry.getValue();
                         System.out.println("Updating comboId: " + comboId + " in storeId: " + storeId + " with total quantity: " + totalQuantity);
-                        ResponseEntity<APIRespone> updateResponse = orderService.updateQuantityProductOrderByCombo(comboId, storeId, totalQuantity);
-                        System.out.println("Update response khi updatequantity: " + updateResponse);
+                        orderService.updateQuantityProductOrderByCombo(comboId, storeId, totalQuantity);
                     }
                 }
         

@@ -66,7 +66,6 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
     order.setCreatedAt(LocalDateTime.now());
     order.setUpdatedAt(LocalDateTime.now());
     order.setUser(user);
-    order.setPaymentMethod(paymentMethodEntity);
     order.setDeliveryAddress(deliveryAddress);
 
     List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
@@ -113,7 +112,7 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         order.setUpdatedAt(LocalDateTime.now());
         // order.setStore(store);
         order.setUser(user);
-        order.setPaymentMethod(paymentMethodEntity);
+
         order.setDeliveryAddress(deliveryAddress);
         // Retrieve or create size
         Size s = sizeRepository.findByName(size);
@@ -291,7 +290,6 @@ public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymen
         order.setUpdatedAt(LocalDateTime.now());
         // order.setStore(store);
         order.setUser(user);
-        order.setPaymentMethod(paymentMethodOptional);
         order.setDeliveryAddress(deliveryAddress);
 
         List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
