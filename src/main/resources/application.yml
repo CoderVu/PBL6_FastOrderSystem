@@ -8,7 +8,7 @@ spring:
     allow-circular-references: true
   datasource:
     username: root
-    password: 
+    password: 123456789
     url: jdbc:mysql://localhost:3306/db_pbl6
     driver-class-name: com.mysql.cj.jdbc.Driver
     security:
