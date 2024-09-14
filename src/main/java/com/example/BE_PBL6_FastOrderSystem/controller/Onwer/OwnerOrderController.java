@@ -18,7 +18,7 @@ public class OwnerOrderController {
             @RequestParam String orderCode,
             @RequestParam String status) {
             Long ownerId = FoodUserDetails.getCurrentUserId();
-            return orderService.updateOrderStatusOfOwner(orderCode, ownerId, status);
+            return orderService.updateStatusDetail(orderCode, ownerId, status);
     }
 
 }

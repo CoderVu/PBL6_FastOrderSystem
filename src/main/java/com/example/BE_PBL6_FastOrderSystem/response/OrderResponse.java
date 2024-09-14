@@ -16,7 +16,6 @@ public class OrderResponse {
     private LocalDateTime orderDate;
     private Double totalAmount;
     private String status;
-    private String paymentMethod;
     private String deliveryAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -28,7 +27,7 @@ public class OrderResponse {
         this.userId = order.getUser().getId();
         this.orderDate = order.getOrderDate();
         this.totalAmount = order.getTotalAmount();
-        this.status = order.getStatus();
+        this.status = order.getStatus().getStatusName();
         this.deliveryAddress = order.getDeliveryAddress();
         this.createdAt = order.getCreatedAt();
         this.updatedAt = order.getUpdatedAt();

@@ -26,7 +26,11 @@ public class OrderDetail {
     @JoinColumn(name = "size_id")
     private Size size;
     @ManyToOne
+    @JoinColumn(name = "status_id")
+    private StatusOrder status;
+    @ManyToOne
     @JoinColumn(name = "store_id")
     private Store store;
+
 
 }

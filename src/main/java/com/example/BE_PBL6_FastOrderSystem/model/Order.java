@@ -22,7 +22,9 @@ public class Order {
     private List<OrderDetail> orderDetails;
     private LocalDateTime orderDate;
     private Double totalAmount;
-    private String status;
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private StatusOrder status;
     private String deliveryAddress;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

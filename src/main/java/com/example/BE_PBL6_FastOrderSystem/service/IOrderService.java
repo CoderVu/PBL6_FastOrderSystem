@@ -14,12 +14,20 @@ public interface IOrderService {
     String generateUniqueOrderCode();
 
     ResponseEntity<APIRespone> processProductOrder(Long UserId ,String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
-    ResponseEntity<APIRespone> processProductOrderNow(Long userId, String paymentMethod, Long productId,Long storeId, Integer quantity, String size, String deliveryAddress, String orderCode);
+
+    ResponseEntity<APIRespone> processOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
+
+    ResponseEntity<APIRespone> processProductOrderNow(Long userId, String paymentMethod, Long productId, Long storeId, Integer quantity, String size, String deliveryAddress, String orderCode);
     ResponseEntity<APIRespone> processComboOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
+
+    ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, Long storeId, Integer quantity, String size, String deliveryAddress, String orderCode);
+    Long calculateOrderNowAmount(Long productId, Long comboId, int quantity);
+    ResponseEntity<APIRespone> updateQuantityProduct(Long productId, Long comboId, Long storeId, int quantity);
     ResponseEntity<APIRespone> updateQuantityProductOrderByProduct(Long productId, Long storeId, int quantity);
     ResponseEntity<APIRespone> updateQuantityProductOrderByCombo(Long comboId,Long storeId, int quantity);
-    ResponseEntity<APIRespone> updateOrderStatusOfOwner(String orderCode, Long ownerId, String status);
     ResponseEntity<APIRespone> updateOrderStatus(String orderCode, String status);
+
+    ResponseEntity<APIRespone> updateStatusDetail(String orderCode, Long storeId, String Status);
     ResponseEntity<APIRespone> cancelOrder(String orderCode, Long serId);
     List<Cart> getCartItemsByCartId(Long cartId);
     ResponseEntity<APIRespone> findOrderByOrderCode(String orderCode);

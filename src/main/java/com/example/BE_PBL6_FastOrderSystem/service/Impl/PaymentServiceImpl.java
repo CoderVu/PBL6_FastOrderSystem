@@ -30,6 +30,8 @@ import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -147,7 +149,10 @@ public class PaymentServiceImpl implements IPaymentService {
         }
         return result;
     }
+    @Transactional
+    @Override
     public ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Long orderId, Long userId) {
+        System.out.println("vao day");
         Optional<Order> optionalOrder = orderRepository.findByOrderId(orderId);
         if (!optionalOrder.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Order not found", ""));
@@ -184,7 +189,6 @@ public class PaymentServiceImpl implements IPaymentService {
     
         return ResponseEntity.ok(new APIRespone(true, "Payment and payment details saved successfully", ""));
     }
-    
     @Override
     public Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException {
         Long amount = orderRequest.getAmount();

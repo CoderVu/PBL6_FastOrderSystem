@@ -12,6 +12,7 @@ public class OrderDetailComboResponse {
     private Double totalPrice;
     private String size;
     private Long storeId;
+    private String status;
 
     public OrderDetailComboResponse(OrderDetail orderDetail) {
         this.orderDetailId = orderDetail.getOrderDetailId();
@@ -21,5 +22,6 @@ public class OrderDetailComboResponse {
         this.totalPrice = orderDetail.getTotalPrice();
         this.size = orderDetail.getSize().getName();
         this.storeId = orderDetail.getStore() != null ? orderDetail.getStore().getStoreId() : null;
+        this.status = orderDetail.getStatus().getStatusName();
     }
 }

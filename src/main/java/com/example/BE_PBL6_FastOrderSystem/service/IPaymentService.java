@@ -14,7 +14,7 @@ import java.util.Map;
 
 public interface IPaymentService {
     Map<String, Object> createOrderMomo(PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException;
-   ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Long orderId, Long userId);
+    ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Long orderId, Long userId);
     Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException;
     Map<String, Object> getStatusMomo(PaymentRequest requestDTO) throws IOException;
     Map<String, Object> getStatusZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException;

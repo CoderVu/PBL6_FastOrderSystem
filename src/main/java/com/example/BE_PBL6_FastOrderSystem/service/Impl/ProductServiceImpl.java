@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
 import com.example.BE_PBL6_FastOrderSystem.model.Category;
+import com.example.BE_PBL6_FastOrderSystem.model.Combo;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.model.ProductStore;
 import com.example.BE_PBL6_FastOrderSystem.model.Store;
@@ -229,7 +230,6 @@ public class ProductServiceImpl implements IProductService {
         if (initialProductStoreCount == product.getProductStores().size()) {
             return new ResponseEntity<>(new APIRespone(false, "Product already applied to all stores", ""), HttpStatus.BAD_REQUEST);
         }
-    
         productRepository.save(product); 
         return new ResponseEntity<>(new APIRespone(true, "Product applied to all stores successfully", ""), HttpStatus.OK);
     }
