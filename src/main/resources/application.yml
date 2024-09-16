@@ -7,10 +7,19 @@ spring:
   main:
     allow-circular-references: true
   datasource:
-    username: root
-    password: 123456789
-    url: jdbc:mysql://localhost:3306/db_pbl6
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3307/db_docker_pbl6}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DBMS_USERNAME:root}
+    password: ${DBMS_PASSWORD:123456789}
+#    username: root
+#    password: 123456789
+#    url: jdbc:mysql://localhost:3306/db_pbl6
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    datasource:
+#      url: jdbc:postgresql://dpg-crjoe92j1k6c73fntdc0-a.oregon-postgres.render.com:5432/db_pbl6_hmqe
+#      username: root
+#      password: iZMFckEnnHbBD7rZv3aKmWFO0czoz0ZT
+#      driver-class-name: org.postgresql.Driver
     security:
      jwt:
        signerKey: "W31fqJQUxdNSy/Y+F+RFsa/Zi4hx3sX2tfRH/dAk/0342mbKCFpdljSyUkeE59vxGYdSPYIAW2UW+pExDCD+1Q=="
@@ -30,10 +39,7 @@ spring:
       max-request-size: 5MB
       file-size-threshold: 2KB
 logging:
-  level:
-    com:
-      example:
-        BE_PBL6_FastOrderSystem:
-          service:
-            Impl:
-              ProductServiceImpl=DEBUG: INFO
+#  level:
+#    org.hibernate.SQL: debug
+#    org.hibernate.type: trace
+#docker run --name systemfastorder --network dockervu -p 8080:8080 -e DBMS_CONNECTION=jdbc:mysql://172.17.0.2:3306/db_docker_pbl6 -e DBMS_USERNAME=root -e DBMS_PASSWORD=123456789 -e DEBUG=true fastordersystem:0.0.1

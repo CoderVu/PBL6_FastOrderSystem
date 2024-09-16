@@ -27,5 +27,18 @@ public class GlobalExceptionHandler {
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(value = RuntimeException.class)
+    public ResponseEntity<APIRespone> handleRuntimeException(RuntimeException ex, WebRequest request) {
+        APIRespone apiResponse = APIRespone.builder()
+                .status(false)
+                .message(ex.getMessage())
+                .data(Map.of(
+                        "status", HttpStatus.BAD_REQUEST.value(),
+                        "error", "Internal Server Error",
+                        "path", request.getDescription(false)
+                ))
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
 
 }

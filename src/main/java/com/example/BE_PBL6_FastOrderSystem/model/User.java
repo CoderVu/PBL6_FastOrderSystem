@@ -14,7 +14,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String phoneNumber;
-    @JsonIgnore
     private String password;
     private String fullName;
     @Column(name = "avatar", columnDefinition = "LONGTEXT")
