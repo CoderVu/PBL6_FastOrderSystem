@@ -5,15 +5,40 @@ spring:
   application:
     name: BE_PBL6_FastOrderSystem
   datasource:
+<<<<<<< HEAD
     url: jdbc:mysql://localhost:3306/db_pbl6
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456789
+=======
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3307/db_docker_pbl6}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DBMS_USERNAME:root}
+    password: ${DBMS_PASSWORD:123456789}
+#    username: root
+#    password: 123456789
+#    url: jdbc:mysql://localhost:3306/db_pbl6
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    datasource:
+#      url: jdbc:postgresql://dpg-crjoe92j1k6c73fntdc0-a.oregon-postgres.render.com:5432/db_pbl6_hmqe
+#      username: root
+#      password: iZMFckEnnHbBD7rZv3aKmWFO0czoz0ZT
+#      driver-class-name: org.postgresql.Driver
+    security:
+     jwt:
+       signerKey: "W31fqJQUxdNSy/Y+F+RFsa/Zi4hx3sX2tfRH/dAk/0342mbKCFpdljSyUkeE59vxGYdSPYIAW2UW+pExDCD+1Q=="
+       valid-duration: 86400 # 1 day
+       refreshable-duration: 86400 # 1 day
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+>>>>>>> 7b903cd8995a6bee3c5be38ef0e2db44f4bea023
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
       format_sql: true
+<<<<<<< HEAD
       dialect: org.hibernate.dialect.MySQLDialect
   security:
     jwt:
@@ -25,3 +50,15 @@ spring:
       fail-on-empty-beans: false
 #docker run --name mysql -e MYSQL_DATABASE=db -e MYSQL_ROOT_PASSWORD=123456789 -p 3306:3306 -v mysql-data:/var/lib/mysql --network dockervu --health-cmd="mysqladmin ping -h localhost" --health-interval=10s --health-timeout=5s --health-retries=5 -d mysql:8.0.38
 #docker run --name springboot -p 8080:8080 -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db -e SPRING_DATASOURCE_USERNAME=root -e SPRING_DATASOURCE_PASSWORD=123456789 --network dockervu -d vunguyen2901/pbl6-app:latest
+=======
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+      file-size-threshold: 2KB
+logging:
+#  level:
+#    org.hibernate.SQL: debug
+#    org.hibernate.type: trace
+#docker run --name systemfastorder --network dockervu -p 8080:8080 -e DBMS_CONNECTION=jdbc:mysql://172.17.0.2:3306/db_docker_pbl6 -e DBMS_USERNAME=root -e DBMS_PASSWORD=123456789 -e DEBUG=true fastordersystem:0.0.1
+>>>>>>> 7b903cd8995a6bee3c5be38ef0e2db44f4bea023

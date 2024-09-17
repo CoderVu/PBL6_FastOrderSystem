@@ -17,6 +17,7 @@ public class BePbl6FastOrderSystemApplication {
         SpringApplication.run(BePbl6FastOrderSystemApplication.class, args);
     }
 
+<<<<<<< HEAD
     @Component
     @RequiredArgsConstructor
     class RoleInitialize implements ApplicationRunner{
@@ -36,3 +37,24 @@ public class BePbl6FastOrderSystemApplication {
         }
     }
 }
+=======
+	@Component
+	@RequiredArgsConstructor
+	class RoleInitialize implements ApplicationRunner{
+	private final RoleRepository roleRepository;
+
+		@Override
+		public void run(ApplicationArguments args) throws Exception {
+			if (roleRepository.findByName(Role.name.ROLE_USER.name()).isEmpty()) {
+				roleRepository.save(new Role(Role.name.ROLE_USER.name()));
+			}
+			if (roleRepository.findByName(Role.name.ROLE_ADMIN.name()).isEmpty()) {
+				roleRepository.save(new Role(Role.name.ROLE_ADMIN.name()));
+			}
+			if (roleRepository.findByName(Role.name.ROLE_OWNER.name()).isEmpty()) {
+				roleRepository.save(new Role(Role.name.ROLE_OWNER.name()));
+			}
+		}
+}
+}
+>>>>>>> 7b903cd8995a6bee3c5be38ef0e2db44f4bea023
