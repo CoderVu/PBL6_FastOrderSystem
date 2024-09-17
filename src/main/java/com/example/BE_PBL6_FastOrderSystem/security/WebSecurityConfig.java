@@ -2,8 +2,12 @@ package com.example.BE_PBL6_FastOrderSystem.security;
 
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.AuthTokenFilter;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtAuthEntryPoint;
+import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetailsService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -19,13 +23,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration// là một annotation đánh dấu một class là một file cấu hình
+@Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
 public class WebSecurityConfig {
-    private final @Lazy FoodUserDetailsService userDetailsService;
+    private final FoodUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
-
+    private final JwtUtils jwtUtils;
     private static final String[] AUTH = {
             "/api/v1/auth/**"
     };
@@ -47,10 +51,16 @@ public class WebSecurityConfig {
     private static final String[] ZALO = {
             "/api/v1/zalopay/**"
     };
+    @Autowired
+    public WebSecurityConfig(@Lazy JwtUtils jwtUtils, JwtAuthEntryPoint jwtAuthEntryPoint, FoodUserDetailsService userDetailsService) {
+        this.jwtUtils = jwtUtils;
+        this.jwtAuthEntryPoint = jwtAuthEntryPoint;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Bean
-    public AuthTokenFilter authenticationTokenFilter(){
-        return new AuthTokenFilter();
+    public AuthTokenFilter authTokenFilter() {
+        return new AuthTokenFilter(jwtUtils, userDetailsService);
     }
 
     @Bean
@@ -88,7 +98,7 @@ public class WebSecurityConfig {
                 );
 
         http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
