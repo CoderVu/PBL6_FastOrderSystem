@@ -8,7 +8,6 @@ import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,120 +38,7 @@ public class OrderServiceImpl implements IOrderService {
         } while (orderRepository.existsByOrderCode(orderCode));
         return orderCode;
     }
-    @Override
-    public ResponseEntity<APIRespone> processProductOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
-    List<Cart> cartItems = cartIds.stream()
-            .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
-            .filter(cartItem -> cartItem.getUser().getId().equals(userId))
-            .collect(Collectors.toList());
 
-    if (cartItems.isEmpty()) {
-        return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
-    }
-
-    if (cartItems.stream().anyMatch(cartItem -> !cartItem.getUser().getId().equals(userId))) {
-        return ResponseEntity.badRequest().body(new APIRespone(false, "Carts does not belong to the specified user!", ""));
-    }
-
-    PaymentMethod paymentMethodEntity = paymentMethodRepository.findByName(paymentMethod);
-    if (paymentMethodEntity == null) {
-        return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
-    }
-    Optional<User> userOptional = userRepository.findById(userId);
-    if (userOptional.isEmpty()) {
-        return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
-    }
-    User user = userOptional.get();
-
-    Order order = new Order();
-    order.setOrderDate(LocalDateTime.now());
-    StatusOrder statusOrder = statusOrderRepository.findByStatusName("Đơn hàng mới");
-    order.setStatus(statusOrder);
-    order.setOrderCode(orderCode);
-    order.setCreatedAt(LocalDateTime.now());
-    order.setUpdatedAt(LocalDateTime.now());
-    order.setUser(user);
-    order.setDeliveryAddress(deliveryAddress);
-
-    List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
-        OrderDetail orderDetail = new OrderDetail();
-        orderDetail.setOrder(order);
-        orderDetail.setProduct(cartItem.getProduct());
-        orderDetail.setQuantity(cartItem.getQuantity());
-        orderDetail.setUnitPrice(cartItem.getUnitPrice());
-        orderDetail.setTotalPrice(cartItem.getTotalPrice());
-        orderDetail.setSize(cartItem.getSize());
-        Store store = storeRepository.findById(cartItem.getStoreId()).orElseThrow(() -> new EntityNotFoundException("Store not found"));
-        orderDetail.setStore(store);
-        orderDetail.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
-        return orderDetail;
-    }).collect(Collectors.toList());
-    order.setOrderDetails(orderDetails);
-    order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
-
-    orderRepository.save(order);
-    cartItemRepository.deleteAll(cartItems);
-
-    return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
-}
-    @Override
-    public ResponseEntity<APIRespone> processComboOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
-        List<Cart> cartItems = cartIds.stream()
-                .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
-                .filter(cartItem -> cartItem.getUser().getId().equals(userId))
-                .collect(Collectors.toList());
-
-        if (cartItems.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts are empty", ""));
-        }
-
-        if (cartItems.stream().anyMatch(cartItem -> !cartItem.getUser().getId().equals(userId))) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Carts does not belong to the specified you! ", ""));
-        }
-
-        Long storeId = cartItems.get(0).getStoreId();
-        Optional<Store> storeOptional = storeRepository.findById(storeId);
-        if (storeOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
-        }
-        PaymentMethod paymentMethodOptional = paymentMethodRepository.findByName(paymentMethod);
-        if (paymentMethodOptional == null) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
-        }
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
-        }
-        User user = userOptional.get();
-        Order order = new Order();
-        order.setOrderDate(LocalDateTime.now());
-        order.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
-        order.setOrderCode(orderCode);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
-        order.setUser(user);
-        order.setDeliveryAddress(deliveryAddress);
-
-        List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrder(order);
-            System.out.println("idcombo"+ cartItem.getCombo());
-            orderDetail.setCombo(cartItem.getCombo());
-
-            orderDetail.setQuantity(cartItem.getQuantity());
-            orderDetail.setUnitPrice(cartItem.getUnitPrice());
-            orderDetail.setTotalPrice(cartItem.getTotalPrice());
-            orderDetail.setSize(cartItem.getSize());
-            orderDetail.setStore(storeOptional.get());
-            orderDetail.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
-            return orderDetail;
-        }).collect(Collectors.toList());
-        order.setOrderDetails(orderDetails);
-        order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
-        orderRepository.save(order);
-        cartItemRepository.deleteAll(cartItems);
-        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
-    }
     @Override
     public ResponseEntity<APIRespone> processOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
         List<Cart> cartItems = cartIds.stream()
@@ -463,25 +349,61 @@ public class OrderServiceImpl implements IOrderService {
         orderRepository.save(order);
         return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully", new OrderResponse(order)));
     }
+
     @Override
-    public ResponseEntity<APIRespone> updateStatusDetail(String orderCode, Long storeId, String Status) {
+    public ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId) {
+        List<Order> orders = orderRepository.findAll();
+        if (orders.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
+        }
+        List<Store> stores = storeRepository.findAllByManagerId(ownerId);
+        if (stores.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        List<Order> orders1 = orders.stream()
+                .filter(order -> order.getOrderDetails().stream().anyMatch(orderDetail -> stores.contains(orderDetail.getStore())))
+                .collect(Collectors.toList());
+        if (orders1.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
+        }
+        List<OrderResponse> orderResponses = orders1.stream()
+                .map(OrderResponse::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> updateStatusDetail(String orderCode, Long OwnerId, String Status) {
         Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
         if (orderOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
         }
+        // update status order detail
         Order order = orderOptional.get();
         List<OrderDetail> orderDetails = order.getOrderDetails();
-        for (OrderDetail orderDetail : orderDetails) {
-            if (orderDetail.getStore().getManager().equals(storeId)) {
-                orderDetail.setStatus(statusOrderRepository.findByStatusName(Status));
-                orderDetailRepository.save(orderDetail);
-            }
+        StatusOrder statusOrder = statusOrderRepository.findByStatusName(Status);
+        if (statusOrder == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Status not found", ""));
         }
-        if (orderDetails.stream().allMatch(orderDetail -> orderDetail.getStatus().equals("Đã giao"))) {
-            order.setStatus(statusOrderRepository.findByStatusName("Đã giao"));
-            orderRepository.save(order);
+        // tim tat ca store cua StoreId
+        List<Store> stores = storeRepository.findAllByManagerId(OwnerId);
+        if (stores.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
         }
-        return ResponseEntity.ok(new APIRespone(true, "Delivery status updated successfully", ""));
+        if (orderDetails.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order detail not found", ""));
+        }
+        // tim tat ca order detail cua store
+        List<OrderDetail> orderDetails1 = orderDetails.stream()
+                .filter(orderDetail -> stores.contains(orderDetail.getStore()))
+                .collect(Collectors.toList());
+        if (orderDetails1.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order detail not found", ""));
+        }
+        orderDetails1.forEach(orderDetail -> orderDetail.setStatus(statusOrder));
+        orderDetailRepository.saveAll(orderDetails1);
+        orderRepository.save(order);
+        return ResponseEntity.ok(new APIRespone(true, "Status OrderDetail updated successfully", ""));
     }
     @Override
     public ResponseEntity<APIRespone> cancelOrder(String orderCode, Long userId) {

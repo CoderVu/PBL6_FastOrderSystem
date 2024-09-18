@@ -21,6 +21,7 @@ public class PublicController {
     private final IPromotionService promotionService;
     private final IStoreService storeService;
     private final ISizeService sizeService;
+    private final IStatusOrderService statusOrderService;
     @GetMapping("/categories/all")
     public  ResponseEntity<APIRespone> getAllCategories() {
      return categoryService.getAllCategories();
@@ -96,4 +97,8 @@ public class PublicController {
       public ResponseEntity<APIRespone> getSizeById(@PathVariable("id") Long sizeId) {
          return sizeService.getSizeById(sizeId);
       }
+    @GetMapping("/status/all")
+    public ResponseEntity<APIRespone> getStatus() {
+        return statusOrderService.getAllStatus();
+    }
 }
