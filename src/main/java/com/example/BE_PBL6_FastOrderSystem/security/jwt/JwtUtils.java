@@ -115,4 +115,24 @@ public class JwtUtils {
         }
         return false;
     }
+
+    public String generateTokenFromGoogleToken(String googleToken) {
+        return Jwts.builder()
+                .setSubject(googleToken)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs * 1000L))
+                .setIssuer("FastOrderSystem")
+                .setAudience("FastOrderSystem")
+                .setNotBefore(new Date())
+                .setHeaderParam("typ", "JWT")
+                .setHeaderParam("alg", "HS512")
+                .setHeaderParam("kid", "fastorder")
+                .setId(UUID.randomUUID().toString())
+                .signWith(key(), SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+    public String generateToken(Authentication authentication) {
+        return generateJwtTokenForUser(authentication);
+    }
 }

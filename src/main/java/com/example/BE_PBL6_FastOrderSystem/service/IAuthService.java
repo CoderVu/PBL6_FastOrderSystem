@@ -5,6 +5,7 @@ import com.example.BE_PBL6_FastOrderSystem.request.RefreshRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 public interface IAuthService {
     ResponseEntity<APIRespone> authenticateUser(String numberPhone, String password);
@@ -23,4 +24,8 @@ public interface IAuthService {
     ResponseEntity<APIRespone> SendOTP(String email);
 
     ResponseEntity<APIRespone> confirmOTP(String email, String otp, String newPassword);
+
+    ResponseEntity<APIRespone> currentUser(OAuth2AuthenticationToken oAuth2AuthenticationToken);
+
+    ResponseEntity<APIRespone> authenticateUserWithGoogle(String googleToken);
 }

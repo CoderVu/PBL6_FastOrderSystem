@@ -17,8 +17,14 @@ public class FoodUserDetailsService implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String numberPhone) throws UsernameNotFoundException {
-        User user = userRepository.findByPhoneNumber(numberPhone);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByPhoneNumber(username);
+        if (user == null) {
+            user = userRepository.findByEmail(username);
+        }
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with username or phone number: " + username);
+        }
         return FoodUserDetails.buildUserDetails(user);
     }
 

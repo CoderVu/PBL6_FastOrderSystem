@@ -9,6 +9,10 @@ import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +23,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+
+import static org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames.CLIENT_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,19 +44,23 @@ public class AuthServiceImpl implements IAuthService {
     private final OTPServiceImpl otpService;
 
     @Override
-    public ResponseEntity<APIRespone> authenticateUser(String numberPhone, String password) {
-        if (userRepository.findByPhoneNumber(numberPhone) == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Phone number is required", ""));
+    public ResponseEntity<APIRespone> authenticateUser(String username, String password) {
+        User user = userRepository.findByPhoneNumber(username);
+        if (user == null) {
+            user = userRepository.findByEmail(username);
         }
-        if (userRepository.findByPhoneNumber(numberPhone).getPassword() == null) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Username is required", ""));
+        }
+        if (user.getPassword() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Password is required", ""));
         }
-        if (userRepository.findByPhoneNumber(numberPhone).isAccountLocked()) {
+        if (user.isAccountLocked()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Account is locked", ""));
         }
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(numberPhone, password));
+                    new UsernamePasswordAuthenticationToken(username, password));
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtils.generateJwtTokenForUser(authentication);
             FoodUserDetails userDetails = (FoodUserDetails) authentication.getPrincipal();
@@ -63,7 +71,7 @@ public class AuthServiceImpl implements IAuthService {
                     userDetails.getEmail(), userDetails.getFullName(), userDetails.getPhoneNumber(), userDetails.getAddress(),
                     userDetails.getCreatedAt(), userDetails.getUpdatedAt(), userDetails.isAccountLocked(), jwt, roles)));
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Invalid phone number or password", ""));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Invalid username or password", ""));
         }
     }
 
@@ -134,12 +142,14 @@ public class AuthServiceImpl implements IAuthService {
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
+
     private final Set<String> invalidTokens = new HashSet<>();
 
     @Override
     public void logout(String token) {
         invalidTokens.add(token);
     }
+
     @Override
     public boolean isTokenInvalid(String token) {
         return invalidTokens.contains(token);
@@ -161,19 +171,55 @@ public class AuthServiceImpl implements IAuthService {
         emailService.sendEmail(email, "Password reset request", "OTP: " + otp);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
+
     @Override
     public ResponseEntity<APIRespone> confirmOTP(String email, String otp, String newPassword) {
-       if (otpService.verifyOTP(email, otp)) {
-           User user = userRepository.findByEmail(email);
-           user.setPassword(passwordEncoder.encode(newPassword));
-           userRepository.save(user);
-           return ResponseEntity.ok(new APIRespone(true, "Password reset successfully", ""));
-       }
-       else {
-           return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid OTP", ""));
-       }
+        if (otpService.verifyOTP(email, otp)) {
+            User user = userRepository.findByEmail(email);
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+            return ResponseEntity.ok(new APIRespone(true, "Password reset successfully", ""));
+        } else {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid OTP", ""));
+        }
+    }
+    @Override
+    public ResponseEntity<APIRespone> currentUser(OAuth2AuthenticationToken oAuth2AuthenticationToken) {
+      if (oAuth2AuthenticationToken != null) {
+          return ResponseEntity.ok(new APIRespone(true, "Success", oAuth2AuthenticationToken.getPrincipal().getAttributes()));
+      } else {
+          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Unauthorized", ""));
+      }
     }
 
+    @Override
+    public ResponseEntity<APIRespone> authenticateUserWithGoogle(String googleToken) {
+        try {
+            boolean isValid = validateGoogleToken(googleToken);
+            if (isValid) {
+                String jwtToken = jwtUtils.generateTokenFromGoogleToken(googleToken);
+                return ResponseEntity.ok(new APIRespone(true, "Login successful", jwtToken));
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new APIRespone(false, "Invalid Google token", null));
+            }
+        } catch (Exception e) {
+            // Log the exception and return a 500 Internal Server Error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new APIRespone(false, "Internal server error", null));
+        }
+    }
 
+    private boolean validateGoogleToken(String googleToken) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+                    .setAudience(Collections.singletonList(CLIENT_ID))
+                    .build();
+            GoogleIdToken idToken = verifier.verify(googleToken);
+            return idToken != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
 }

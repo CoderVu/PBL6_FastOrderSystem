@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -118,5 +119,9 @@ public class User {
     }
     public void setAccountLocked(boolean accountLocked) {
         this.accountLocked = accountLocked;
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return new HashSet<>();
     }
 }

@@ -20,8 +20,23 @@ spring:
       signerKey: "W31fqJQUxdNSy/Y+F+RFsa/Zi4hx3sX2tfRH/dAk/0342mbKCFpdljSyUkeE59vxGYdSPYIAW2UW+pExDCD+1Q=="
       valid-duration: 86400 # 1 ngày
       refreshable-duration: 86400 # 1 ngày
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 684504390647-3n31glri0v6tt6ackrf2rq1hfpsb6m23.apps.googleusercontent.com
+            client-secret: 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
+            scope: profile, email
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            authorization-grant-type: authorization_code
+
+
   jackson:
     serialization:
       fail-on-empty-beans: false
+logging:
+  level:
+    org.springframework.security: DEBUG
+      
 #docker run --name mysql -e MYSQL_DATABASE=db -e MYSQL_ROOT_PASSWORD=123456789 -p 3306:3306 -v mysql-data:/var/lib/mysql --network dockervu -d mysql:8.0.38
 #docker run --name springboot -p 8080:8080 -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db -e SPRING_DATASOURCE_USERNAME=root -e SPRING_DATASOURCE_PASSWORD=123456789 --network dockervu -d vunguyen2901/pbl6-app:latest

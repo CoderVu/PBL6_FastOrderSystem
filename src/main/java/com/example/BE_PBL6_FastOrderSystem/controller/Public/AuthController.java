@@ -1,19 +1,40 @@
 // AuthController.java
 package com.example.BE_PBL6_FastOrderSystem.controller.Public;
 
+import com.example.BE_PBL6_FastOrderSystem.repository.RoleRepository;
+import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.RefreshRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.request.LoginRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
+import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
+import org.springframework.http.HttpHeaders;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin
 @RestController
@@ -23,6 +44,10 @@ public class AuthController {
     private final IAuthService authService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+    private final UserRepository userRepository;
+
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
 
     @PostMapping("/register-user")
@@ -64,4 +89,63 @@ public class AuthController {
     public ResponseEntity<APIRespone> verifyOTP(@RequestParam String email, @RequestParam String otp, @RequestParam String newPassword) {
         return authService.confirmOTP(email, otp, newPassword);
     }
+    @GetMapping("/login-google")
+    public ResponseEntity<?> loginGoogle() {
+        // Redirect to Google login page
+        return ResponseEntity.status(HttpStatus.FOUND)
+                             .header(HttpHeaders.LOCATION, "/oauth2/authorization/google")
+                             .build();
+    }
+
+    @GetMapping("/login-google-success")
+    public ResponseEntity<APIRespone> loginGoogleSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
+        String email = oauth2User.getAttribute("email");
+        String name = oauth2User.getAttribute("name");
+        String picture = oauth2User.getAttribute("picture");
+        String base64Image = ImageGeneral.urlToBase64(picture);
+        // Kiểm tra nếu người dùng đã tồn tại trong cơ sở dữ liệu
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmail(email));
+        User user;
+
+        if (optionalUser.isPresent()) {
+            // Nếu người dùng đã tồn tại, lấy người dùng từ cơ sở dữ liệu
+            user = optionalUser.get();
+        } else {
+            // Nếu người dùng chưa tồn tại, tạo người dùng mới
+            user = new User();
+            user.setEmail(email);
+            user.setFullName(name);
+            user.setAvatar(base64Image);
+            user.setPassword(passwordEncoder.encode("123456789"));
+            user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
+            userRepository.save(user);
+        }
+
+        // Tạo token JWT
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+        String jwt = jwtUtils.generateTokenFromGoogleToken(jwtUtils.getUserNameFromToken(jwtUtils.generateToken(authentication)));
+
+        // Trả về thông tin người dùng và token
+        return ResponseEntity.ok(new APIRespone(true, "Login successful", new JwtResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getPhoneNumber(),
+                user.getAddress(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.isAccountLocked(),
+                jwt,
+                List.of("ROLE_USER")
+        )));
+    }
+
+
+    @GetMapping("/login-google-failure")
+    public ResponseEntity<?> loginGoogleFailure() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Login failed"));
+    }
+
+
+
 }
