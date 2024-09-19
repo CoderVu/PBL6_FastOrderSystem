@@ -25,6 +25,7 @@ public class FoodUserDetails implements UserDetails {
     private String fullName;
     private String email;
     private String address;
+    private String avatar;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -40,6 +41,7 @@ public class FoodUserDetails implements UserDetails {
                 user.getFullName(),
                 user.getEmail(),
                 user.getAddress(),
+                user.getAvatar(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.isAccountLocked(),

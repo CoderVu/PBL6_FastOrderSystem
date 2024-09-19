@@ -9,6 +9,7 @@ import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.request.LoginRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
+import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +22,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -103,43 +105,41 @@ public class AuthController {
         String name = oauth2User.getAttribute("name");
         String picture = oauth2User.getAttribute("picture");
         String base64Image = ImageGeneral.urlToBase64(picture);
-        // Kiểm tra nếu người dùng đã tồn tại trong cơ sở dữ liệu
         Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmail(email));
         User user;
 
         if (optionalUser.isPresent()) {
-            // Nếu người dùng đã tồn tại, lấy người dùng từ cơ sở dữ liệu
             user = optionalUser.get();
         } else {
-            // Nếu người dùng chưa tồn tại, tạo người dùng mới
             user = new User();
             user.setEmail(email);
             user.setFullName(name);
             user.setAvatar(base64Image);
-            user.setPassword(passwordEncoder.encode("123456789"));
             user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
             userRepository.save(user);
         }
+        // Chuyển đổi User thành FoodUserDetails
+        FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        String jwt = jwtUtils.generateToken(authentication);
 
-        // Tạo token JWT
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-        String jwt = jwtUtils.generateTokenFromGoogleToken(jwtUtils.getUserNameFromToken(jwtUtils.generateToken(authentication)));
-
-        // Trả về thông tin người dùng và token
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
         return ResponseEntity.ok(new APIRespone(true, "Login successful", new JwtResponse(
                 user.getId(),
                 user.getEmail(),
                 user.getFullName(),
                 user.getPhoneNumber(),
                 user.getAddress(),
+                user.getAvatar(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.isAccountLocked(),
                 jwt,
-                List.of("ROLE_USER")
+                roles
         )));
     }
-
 
     @GetMapping("/login-google-failure")
     public ResponseEntity<?> loginGoogleFailure() {

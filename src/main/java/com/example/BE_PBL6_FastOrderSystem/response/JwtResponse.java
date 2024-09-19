@@ -12,6 +12,7 @@ public class JwtResponse {
     private String fullName;
     private String phoneNumber;
     private String address;
+    private String avatar;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean accountLocked;
@@ -19,12 +20,13 @@ public class JwtResponse {
     private String type = "Bearer";
     private List<String> roles;
 
-    public JwtResponse(Long id, String email, String fullName, String phoneNumber, String address, LocalDateTime createdAt, LocalDateTime updatedAt,boolean accountLocked, String token, List<String> roles) {
+    public JwtResponse(Long id, String email, String fullName, String phoneNumber, String address, String avatar, LocalDateTime createdAt, LocalDateTime updatedAt,boolean accountLocked, String token, List<String> roles) {
         this.id = id;
         this.email = email;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.address = address;
+        this.avatar = avatar;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.accountLocked = accountLocked;

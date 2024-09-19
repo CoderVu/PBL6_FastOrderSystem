@@ -68,7 +68,7 @@ public class AuthServiceImpl implements IAuthService {
                     .map(GrantedAuthority::getAuthority)
                     .toList();
             return ResponseEntity.ok(new APIRespone(true, "Success", new JwtResponse((userDetails.getId()),
-                    userDetails.getEmail(), userDetails.getFullName(), userDetails.getPhoneNumber(), userDetails.getAddress(),
+                    userDetails.getEmail(), userDetails.getFullName(), userDetails.getPhoneNumber(), userDetails.getAddress(), userDetails.getAvatar(),
                     userDetails.getCreatedAt(), userDetails.getUpdatedAt(), userDetails.isAccountLocked(), jwt, roles)));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Invalid username or password", ""));
