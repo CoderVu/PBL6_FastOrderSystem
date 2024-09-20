@@ -46,7 +46,7 @@ public class WebSecurityConfig {
             "/api/v1/public/**"
     };
     private static final String[] MOMO = {
-             "/api/v1/momo/**"
+            "/api/v1/momo/**"
     };
     private static final String[] ZALO = {
             "/api/v1/zalopay/**"
@@ -82,45 +82,28 @@ public class WebSecurityConfig {
     }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http.csrf(AbstractHttpConfigurer::disable)
-//                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthEntryPoint))
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/v1/auth/**").permitAll()
-//                        .requestMatchers("/api/v1/public/**").permitAll()
-//                        .requestMatchers("/api/v1/momo/**").permitAll()
-//                        .requestMatchers("/api/v1/zalopay/**").permitAll()
-//                        .requestMatchers("/api/v1/user/**").hasAnyRole("ADMIN", "USER", "OWNER")
-//                        .requestMatchers("/api/v1/owner/**").hasAnyRole("OWNER", "ADMIN")
-//                        .requestMatchers("/api/v1/admin/**").hasAnyRole("ADMIN")
-//                        .requestMatchers("/api/v1/auth/login-google").authenticated()
-//                        .anyRequest().authenticated()
-//                )
-//                .oauth2Login(oauth2 -> oauth2
-//                        .loginPage("/api/v1/auth/login-google")
-//                        .defaultSuccessUrl("/api/v1/auth/login-google-success", true)
-//                        .failureUrl("/api/v1/auth/login-google-failure")
-//                );
+
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(AUTH).permitAll()
-                        .requestMatchers(PUBLIC).permitAll()
-                        .requestMatchers(MOMO).permitAll()
-                        .requestMatchers(ZALO).permitAll()
-                        .requestMatchers(USER).hasAnyRole("ADMIN", "USER", "OWNER")
-                        .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
-                        .requestMatchers(ADMIN).hasAnyRole("ADMIN")
-//                        .requestMatchers("/api/v1/auth/").authenticated()
-                        .anyRequest().authenticated()
+                                .requestMatchers(AUTH).permitAll()
+                                .requestMatchers(PUBLIC).permitAll()
+                                .requestMatchers(MOMO).permitAll()
+                                .requestMatchers(ZALO).permitAll()
+                                .requestMatchers(USER).hasAnyRole("ADMIN", "USER", "OWNER")
+                                .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
+                                .requestMatchers(ADMIN).hasAnyRole("ADMIN")
+                                .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/api/v1/auth/login-google")
                         .defaultSuccessUrl("/api/v1/auth/login-google-success", true)
                         .failureUrl("/api/v1/auth/login-google-failure")
+                        .loginPage("/api/v1/auth/login-facebook")
+                        .defaultSuccessUrl("/api/v1/auth/login-facebook-success", true)
+                        .failureUrl("/api/v1/auth/login-facebook-failure")
                 );
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
-    

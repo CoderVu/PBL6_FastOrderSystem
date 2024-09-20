@@ -9,10 +9,7 @@ import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
+import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +20,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-
-import static org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames.CLIENT_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -183,43 +178,83 @@ public class AuthServiceImpl implements IAuthService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid OTP", ""));
         }
     }
-    @Override
-    public ResponseEntity<APIRespone> currentUser(OAuth2AuthenticationToken oAuth2AuthenticationToken) {
-      if (oAuth2AuthenticationToken != null) {
-          return ResponseEntity.ok(new APIRespone(true, "Success", oAuth2AuthenticationToken.getPrincipal().getAttributes()));
-      } else {
-          return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Unauthorized", ""));
-      }
-    }
 
     @Override
-    public ResponseEntity<APIRespone> authenticateUserWithGoogle(String googleToken) {
-        try {
-            boolean isValid = validateGoogleToken(googleToken);
-            if (isValid) {
-                String jwtToken = jwtUtils.generateTokenFromGoogleToken(googleToken);
-                return ResponseEntity.ok(new APIRespone(true, "Login successful", jwtToken));
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new APIRespone(false, "Invalid Google token", null));
-            }
-        } catch (Exception e) {
-            // Log the exception and return a 500 Internal Server Error
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new APIRespone(false, "Internal server error", null));
+    public ResponseEntity<APIRespone> loginGoogle(OAuth2User oauth2User) throws Exception {
+        String email = oauth2User.getAttribute("email");
+        String name = oauth2User.getAttribute("name");
+        String picture = oauth2User.getAttribute("picture");
+        String base64Image = ImageGeneral.urlToBase64(picture);
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmail(email));
+        User user;
+
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+        } else {
+            user = new User();
+            user.setEmail(email);
+            user.setFullName(name);
+            user.setAvatar(base64Image);
+            user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
+            userRepository.save(user);
         }
+        // Chuyển đổi User thành FoodUserDetails
+        FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        String jwt = jwtUtils.generateToken(authentication);
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        return ResponseEntity.ok(new APIRespone(true, "Success", new JwtResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getPhoneNumber(),
+                user.getAddress(),
+                user.getAvatar(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.isAccountLocked(),
+                jwt,
+                roles
+        )));
     }
 
-    private boolean validateGoogleToken(String googleToken) {
-        try {
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
-                    .setAudience(Collections.singletonList(CLIENT_ID))
-                    .build();
-            GoogleIdToken idToken = verifier.verify(googleToken);
-            return idToken != null;
-        } catch (Exception e) {
-            return false;
+    @Override
+    public ResponseEntity<APIRespone> loginFacebook(OAuth2User oauth2User) throws Exception {
+        System.out.println("OAuth2 User attributes: " + oauth2User.getAttributes());
+        String name = oauth2User.getAttribute("name");
+        String facebookId = oauth2User.getAttribute("id");
+        Optional<User> optionalUser = Optional.ofNullable((User) userRepository.findByFacebookId(facebookId));
+        User user;
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+        } else {
+            user = new User();
+            user.setFullName(name);
+            user.setFacebookId(facebookId); // Set Facebook ID
+            user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
+            userRepository.save(user);
         }
+        FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        String jwt = jwtUtils.generateToken(authentication);
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        return ResponseEntity.ok(new APIRespone(true, "Success", new JwtResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getPhoneNumber(),
+                user.getAddress(),
+                user.getAvatar(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.isAccountLocked(),
+                jwt,
+                roles
+        )));
     }
-
 }

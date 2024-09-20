@@ -18,9 +18,8 @@ public class Combo {
     @ManyToMany
     @JoinTable(
             name = "combo_product",
-            joinColumns = @JoinColumn(name = "combo_id"), //
+            joinColumns = @JoinColumn(name = "combo_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private Set<Product> products;
-
 }

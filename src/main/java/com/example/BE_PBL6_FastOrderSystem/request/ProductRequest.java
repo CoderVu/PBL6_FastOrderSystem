@@ -10,7 +10,6 @@ public class ProductRequest {
     private Long categoryId;
     private Integer stockQuantity;
     private Boolean bestSale;
-
     public ProductRequest(String productName, MultipartFile image, String description, Double price, Long categoryId, Integer stockQuantity, Boolean bestSale) {
         this.productName = productName;
         this.image = image;
@@ -20,7 +19,6 @@ public class ProductRequest {
         this.stockQuantity = stockQuantity;
         this.bestSale = bestSale;
     }
-
     public String getProductName() {
         return productName;
     }

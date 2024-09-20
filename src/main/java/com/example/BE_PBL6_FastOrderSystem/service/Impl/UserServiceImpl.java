@@ -134,4 +134,22 @@ public class UserServiceImpl implements IUserService {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", userResponses));
     }
+
+    @Override
+    public ResponseEntity<APIRespone> addPhone(Long userId, String phone) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+        }
+        if (!phone.matches("\\d{10}") || !phone.startsWith("0")) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid phone number format", ""));
+        }
+        if (userRepository.existsByPhoneNumber(phone)) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Phone number already exists", ""));
+        }
+        User user = optionalUser.get();
+        user.setPhoneNumber(phone);
+        userRepository.save(user);
+        return ResponseEntity.ok(new APIRespone(true, "Success", ""));
+    }
 }

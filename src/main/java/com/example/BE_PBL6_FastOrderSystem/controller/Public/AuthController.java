@@ -92,60 +92,35 @@ public class AuthController {
         return authService.confirmOTP(email, otp, newPassword);
     }
     @GetMapping("/login-google")
-    public ResponseEntity<?> loginGoogle() {
+    public ResponseEntity<?> loginGoogle(@AuthenticationPrincipal OAuth2User oauth2User) {
         // Redirect to Google login page
         return ResponseEntity.status(HttpStatus.FOUND)
                              .header(HttpHeaders.LOCATION, "/oauth2/authorization/google")
                              .build();
     }
+    @GetMapping("/login-facebook")
+    public ResponseEntity<?> loginFacebook() {
+        // Redirect to Facebook login page
+        return ResponseEntity.status(HttpStatus.FOUND)
+                             .header(HttpHeaders.LOCATION, "/oauth2/authorization/facebook")
+                             .build();
+    }
 
     @GetMapping("/login-google-success")
     public ResponseEntity<APIRespone> loginGoogleSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
-        String email = oauth2User.getAttribute("email");
-        String name = oauth2User.getAttribute("name");
-        String picture = oauth2User.getAttribute("picture");
-        String base64Image = ImageGeneral.urlToBase64(picture);
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmail(email));
-        User user;
-
-        if (optionalUser.isPresent()) {
-            user = optionalUser.get();
-        } else {
-            user = new User();
-            user.setEmail(email);
-            user.setFullName(name);
-            user.setAvatar(base64Image);
-            user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
-            userRepository.save(user);
+        if (oauth2User == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User information is missing", null));
         }
-        // Chuyển đổi User thành FoodUserDetails
-        FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        String jwt = jwtUtils.generateToken(authentication);
-
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-        return ResponseEntity.ok(new APIRespone(true, "Login successful", new JwtResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFullName(),
-                user.getPhoneNumber(),
-                user.getAddress(),
-                user.getAvatar(),
-                user.getCreatedAt(),
-                user.getUpdatedAt(),
-                user.isAccountLocked(),
-                jwt,
-                roles
-        )));
+        return authService.loginGoogle(oauth2User);
     }
 
-    @GetMapping("/login-google-failure")
-    public ResponseEntity<?> loginGoogleFailure() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Login failed"));
+    @GetMapping("/login-facebook-success")
+    public ResponseEntity<APIRespone> loginFacebookSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
+        if (oauth2User == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User information is missing", null));
+        }
+        return authService.loginFacebook(oauth2User);
     }
-
 
 
 }

@@ -25,4 +25,8 @@ public interface IPromotionService {
     ResponseEntity<APIRespone> applyPromotionToAllStores(Long promotionId);
 
     ResponseEntity<APIRespone> applyPromotionToProduct(Long promotionId, Long productId);
+
+    ResponseEntity<APIRespone> DeletePromotion(Long promotionId);
+
+    ResponseEntity<APIRespone> updatePromotion(Long promotionId, PromotionRequest promotionRequest);
 }

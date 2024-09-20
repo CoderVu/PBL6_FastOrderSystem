@@ -39,5 +39,10 @@ public class UserAuthController {
              return userService.updateUser(userId, userResquest);
 
     }
+    @PutMapping("/profile/add-phone")
+    public ResponseEntity<APIRespone> addPhone(@RequestParam("phone") String phone) {
+        Long userId = FoodUserDetails.getCurrentUserId();
+        return userService.addPhone(userId, phone);
+    }
 }
 
