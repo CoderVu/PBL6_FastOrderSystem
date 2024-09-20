@@ -98,14 +98,6 @@ public class AuthController {
                              .header(HttpHeaders.LOCATION, "/oauth2/authorization/google")
                              .build();
     }
-//    @GetMapping("/login-facebook")
-//    public ResponseEntity<?> loginFacebook() {
-//        // Redirect to Facebook login page
-//        return ResponseEntity.status(HttpStatus.FOUND)
-//                             .header(HttpHeaders.LOCATION, "/oauth2/authorization/facebook")
-//                             .build();
-//    }
-
     @GetMapping("/login-google-success")
     public ResponseEntity<APIRespone> loginGoogleSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
         if (oauth2User == null) {
@@ -113,12 +105,18 @@ public class AuthController {
         }
         return authService.loginGoogle(oauth2User);
     }
-
-//    @GetMapping("/login-facebook-success")
-//    public ResponseEntity<APIRespone> loginFacebookSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
-//        if (oauth2User == null) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "User information is missing", null));
-//        }
-//        return authService.loginFacebook(oauth2User);
-//    }
+    @GetMapping("/login-facebook")
+    public ResponseEntity<?> loginFacebook() {
+        // Redirect to Facebook login page
+        return ResponseEntity.status(HttpStatus.FOUND)
+                             .header(HttpHeaders.LOCATION, "/oauth2/authorization/facebook")
+                             .build();
+    }
+    @GetMapping("/login-facebook-success")
+    public ResponseEntity<APIRespone> loginFacebookSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
+        if (oauth2User == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User information is missing", null));
+        }
+        return authService.loginFacebook(oauth2User);
+    }
 }

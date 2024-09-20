@@ -4,6 +4,9 @@ import com.example.BE_PBL6_FastOrderSystem.security.jwt.AuthTokenFilter;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtAuthEntryPoint;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetailsService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,17 +14,24 @@ import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.io.IOException;
 
 @Configuration
 @RequiredArgsConstructor
@@ -57,7 +67,16 @@ public class WebSecurityConfig {
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
         this.userDetailsService = userDetailsService;
     }
-
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return new AccessDeniedHandler() {
+            @Override
+            public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException, IOException {
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+                response.getWriter().write("Access Denied: " + accessDeniedException.getMessage());
+            }
+        };
+    }
     @Bean
     public AuthTokenFilter authTokenFilter() {
         return new AuthTokenFilter(jwtUtils, userDetailsService);
@@ -80,39 +99,40 @@ public class WebSecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(AUTH).permitAll()
-                                .requestMatchers(PUBLIC).permitAll()
-                                .requestMatchers(MOMO).permitAll()
-                                .requestMatchers(ZALO).permitAll()
-                                .requestMatchers(USER).hasAnyRole("ADMIN", "USER", "OWNER")
-                                .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
-                                .requestMatchers(ADMIN).hasAnyRole("ADMIN")
-                                .anyRequest().authenticated()
-                                );
-                        configureGoogleLogin(http);
-//                        configureFacebookLogin(http);
-
-                        http.authenticationProvider(authenticationProvider());
-                        http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-                        return http.build();
+                        .requestMatchers(AUTH).permitAll()
+                        .requestMatchers(PUBLIC).permitAll()
+                        .requestMatchers(MOMO).permitAll()
+                        .requestMatchers(ZALO).permitAll()
+                        .requestMatchers(USER).hasAnyRole("ADMIN", "USER", "OWNER")
+                        .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
+                        .requestMatchers(ADMIN).hasAnyRole("ADMIN")
+                        .anyRequest().authenticated()
+                );
+        configureGoogleLogin(http);
+        configureFacebookLogin(http);
+        http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        return http.build();
     }
+
     private void configureGoogleLogin(HttpSecurity http) throws Exception {
         http.oauth2Login(oauth2 -> oauth2
                 .loginPage("/api/v1/auth/login-google")
-                .defaultSuccessUrl("/api/v1/auth/login-google-success", true)
+                .defaultSuccessUrl("/api/v1/auth/login-facebook-success", true)
                 .failureUrl("/api/v1/auth/login-google-failure")
         );
     }
 
-//    private void configureFacebookLogin(HttpSecurity http) throws Exception {
-//        http.oauth2Login(oauth2 -> oauth2
-//                .loginPage("/api/v1/auth/login-facebook")
-//                .defaultSuccessUrl("/api/v1/auth/login-facebook-success", true)
-//                .failureUrl("/api/v1/auth/login-facebook-failure")
-//        );
-//    }
+    private void configureFacebookLogin(HttpSecurity http) throws Exception {
+        http.oauth2Login(oauth2 -> oauth2
+                .loginPage("/api/v1/auth/login-facebook")
+                .defaultSuccessUrl("/api/v1/auth/login-google-success", true)
+                .failureUrl("/api/v1/auth/login-facebook-failure")
+        );
+    }
 }
