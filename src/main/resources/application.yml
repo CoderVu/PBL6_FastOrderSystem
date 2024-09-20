@@ -1,6 +1,7 @@
 server:
   port: 8080
 
+
 spring:
   application:
     name: BE_PBL6_FastOrderSystem
@@ -29,12 +30,12 @@ spring:
             scope: profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/google"
             authorization-grant-type: authorization_code
-          facebook:
-            client-id: ${FACEBOOK_CLIENT_ID}
-            client-secret: ${FACEBOOK_CLIENT_SECRET}
-            scope: profile, email
-            redirect-uri: "{baseUrl}/login/oauth2/code/facebook"
-            authorization-grant-type: authorization_code
+#          facebook:
+#            client-id: ${FACEBOOK_CLIENT_ID}
+#            client-secret: ${FACEBOOK_CLIENT_SECRET}
+#            scope: profile, email
+#            redirect-uri: "{baseUrl}/login/oauth2/code/facebook"
+#            authorization-grant-type: authorization_code
 
 
   jackson:

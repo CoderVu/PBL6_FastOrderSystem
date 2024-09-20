@@ -82,7 +82,6 @@ public class WebSecurityConfig {
     }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(AUTH).permitAll()
@@ -93,17 +92,27 @@ public class WebSecurityConfig {
                                 .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
                                 .requestMatchers(ADMIN).hasAnyRole("ADMIN")
                                 .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/v1/auth/login-google")
-                        .defaultSuccessUrl("/api/v1/auth/login-google-success", true)
-                        .failureUrl("/api/v1/auth/login-google-failure")
-                        .loginPage("/api/v1/auth/login-facebook")
-                        .defaultSuccessUrl("/api/v1/auth/login-facebook-success", true)
-                        .failureUrl("/api/v1/auth/login-facebook-failure")
-                );
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-        return http.build();
+                                );
+                        configureGoogleLogin(http);
+//                        configureFacebookLogin(http);
+
+                        http.authenticationProvider(authenticationProvider());
+                        http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+                        return http.build();
     }
+    private void configureGoogleLogin(HttpSecurity http) throws Exception {
+        http.oauth2Login(oauth2 -> oauth2
+                .loginPage("/api/v1/auth/login-google")
+                .defaultSuccessUrl("/api/v1/auth/login-google-success", true)
+                .failureUrl("/api/v1/auth/login-google-failure")
+        );
+    }
+
+//    private void configureFacebookLogin(HttpSecurity http) throws Exception {
+//        http.oauth2Login(oauth2 -> oauth2
+//                .loginPage("/api/v1/auth/login-facebook")
+//                .defaultSuccessUrl("/api/v1/auth/login-facebook-success", true)
+//                .failureUrl("/api/v1/auth/login-facebook-failure")
+//        );
+//    }
 }

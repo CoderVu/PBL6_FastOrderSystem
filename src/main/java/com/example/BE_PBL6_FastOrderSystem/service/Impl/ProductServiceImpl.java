@@ -131,6 +131,7 @@ public class ProductServiceImpl implements IProductService {
         if (category.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Category not found", ""), HttpStatus.NOT_FOUND);
         }
+        product.setStockQuantity(productRequest.getStockQuantity());
         product.setCategory(category.get());
         product.setBestSale(productRequest.getBestSale());
         product = productRepository.save(product);
@@ -159,6 +160,7 @@ public class ProductServiceImpl implements IProductService {
             return new ResponseEntity<>(new APIRespone(false, "Category not found", ""), HttpStatus.NOT_FOUND);
         }
         product.setCategory(category.get());
+        product.setStockQuantity(productRequest.getStockQuantity());
         product.setBestSale(productRequest.getBestSale());
         product = productRepository.save(product);
         return new ResponseEntity<>(new APIRespone(true, "Product updated successfully", ResponseConverter.convertToProductResponse(product)), HttpStatus.OK);
