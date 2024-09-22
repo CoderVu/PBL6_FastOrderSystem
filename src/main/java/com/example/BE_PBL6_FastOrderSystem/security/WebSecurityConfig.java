@@ -49,6 +49,9 @@ public class WebSecurityConfig {
     private static final String[] OWNER = {
             "/api/v1/owner/**"
     };
+    private static final String[] STAFF = {
+            "/api/v1/staff/**"
+    };
     private static final String[] USER = {
             "/api/v1/user/**"
     };
@@ -123,7 +126,7 @@ public class WebSecurityConfig {
     private void configureGoogleLogin(HttpSecurity http) throws Exception {
         http.oauth2Login(oauth2 -> oauth2
                 .loginPage("/api/v1/auth/login-google")
-                .defaultSuccessUrl("/api/v1/auth/login-facebook-success", true)
+                .defaultSuccessUrl("/api/v1/auth/login-facebook-callback", true)
                 .failureUrl("/api/v1/auth/login-google-failure")
         );
     }
@@ -131,7 +134,7 @@ public class WebSecurityConfig {
     private void configureFacebookLogin(HttpSecurity http) throws Exception {
         http.oauth2Login(oauth2 -> oauth2
                 .loginPage("/api/v1/auth/login-facebook")
-                .defaultSuccessUrl("/api/v1/auth/login-google-success", true)
+                .defaultSuccessUrl("/api/v1/auth/login-google-callback", true)
                 .failureUrl("/api/v1/auth/login-facebook-failure")
         );
     }

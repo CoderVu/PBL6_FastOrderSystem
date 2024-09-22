@@ -78,13 +78,14 @@ public class UserServiceImpl implements IUserService {
         }
         User existingUser = optionalUser.get();
         existingUser.setFullName(userRequest.getFullName());
-        try {
-            InputStream imageInputStream = userRequest.getAvatar().getInputStream();
-            String base64Image = ImageGeneral.fileToBase64(imageInputStream);
-            existingUser.setAvatar(base64Image);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new APIRespone(false, "Failed to process avatar image", ""));
+        if(userRequest.getAvatar() != null) {
+            try {
+                InputStream imageInputStream = userRequest.getAvatar().getInputStream();
+                String base64Image = ImageGeneral.fileToBase64(imageInputStream);
+                existingUser.setAvatar(base64Image);
+            } catch (IOException e) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid image", ""));
+            }
         }
         existingUser.setEmail(userRequest.getEmail());
         existingUser.setAddress(userRequest.getAddress());

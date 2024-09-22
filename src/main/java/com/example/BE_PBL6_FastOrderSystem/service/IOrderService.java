@@ -24,6 +24,10 @@ public interface IOrderService {
 
     ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long storeId);
 
+    ResponseEntity<APIRespone> getOrderDetailOfStore(Long ownerId, String orderCode);
+
+    ResponseEntity<APIRespone> getOrderDetailByUserId(Long userId, String orderCode);
+
     ResponseEntity<APIRespone> updateStatusDetail(String orderCode, Long storeId, String Status);
     ResponseEntity<APIRespone> cancelOrder(String orderCode, Long serId);
     List<Cart> getCartItemsByCartId(Long cartId);

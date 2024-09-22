@@ -19,6 +19,11 @@ public class OwnerOrderController {
         System.out.println(ownerId);
         return orderService.getAllOrderDetailOfStore(ownerId);
     }
+    @GetMapping("/get-by-code")
+    public ResponseEntity<APIRespone> getOrderByCode(@RequestParam String orderCode) {
+        Long ownerId = FoodUserDetails.getCurrentUserId();
+        return orderService.getOrderDetailOfStore(ownerId, orderCode);
+    }
     @PutMapping("/update-status")
     public ResponseEntity<APIRespone> updateOrderStatus(
             @RequestParam String orderCode,

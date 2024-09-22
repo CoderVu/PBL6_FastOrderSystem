@@ -371,6 +371,37 @@ public class OrderServiceImpl implements IOrderService {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
     }
+    @Override
+    public ResponseEntity<APIRespone> getOrderDetailOfStore(Long ownerId, String orderCode) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
+        }
+        Order order = orderOptional.get();
+        List<Store> stores = storeRepository.findAllByManagerId(ownerId);
+        if (stores.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        if (order.getOrderDetails().stream().noneMatch(orderDetail -> stores.contains(orderDetail.getStore()))) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified store", ""));
+        }
+        return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
+    }
+    @Override
+    public ResponseEntity<APIRespone> getOrderDetailByUserId(Long userId, String orderCode) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
+        }
+        Order order = orderOptional.get();
+        if (!order.getUser().getId().equals(userId)) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
+        }
+        if (order.getOrderDetails().stream().noneMatch(orderDetail -> order.getUser().getId().equals(userId))) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
+        }
+        return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
+    }
 
     @Override
     public ResponseEntity<APIRespone> updateStatusDetail(String orderCode, Long OwnerId, String Status) {

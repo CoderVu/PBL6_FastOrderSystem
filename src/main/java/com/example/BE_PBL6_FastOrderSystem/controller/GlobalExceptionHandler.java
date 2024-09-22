@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 
 import java.util.Map;
 @ControllerAdvice
@@ -68,5 +69,18 @@ public class GlobalExceptionHandler {
                 ))
                 .build();
         return new ResponseEntity<>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(AsyncRequestTimeoutException.class)
+    public ResponseEntity<APIRespone> handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex) {
+        APIRespone apiResponse = APIRespone.builder()
+                .status(false)
+                .message("Request timeout: " + ex.getMessage())
+                .data(Map.of(
+                        "status", HttpStatus.REQUEST_TIMEOUT.value(),
+                        "error", "Request Timeout",
+                        "path", "N/A"
+                ))
+                .build();
+        return new ResponseEntity<>(apiResponse, HttpStatus.REQUEST_TIMEOUT);
     }
 }

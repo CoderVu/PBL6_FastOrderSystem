@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,6 +20,7 @@ public class PublicController {
     private final IStoreService storeService;
     private final ISizeService sizeService;
     private final IStatusOrderService statusOrderService;
+    private final IStaffService scheduleService;
     @GetMapping("/categories/all")
     public  ResponseEntity<APIRespone> getAllCategories() {
      return categoryService.getAllCategories();
@@ -101,4 +100,5 @@ public class PublicController {
     public ResponseEntity<APIRespone> getStatus() {
         return statusOrderService.getAllStatus();
     }
+
 }

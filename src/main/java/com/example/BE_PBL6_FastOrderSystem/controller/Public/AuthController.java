@@ -98,7 +98,7 @@ public class AuthController {
                              .header(HttpHeaders.LOCATION, "/oauth2/authorization/google")
                              .build();
     }
-    @GetMapping("/login-google-success")
+    @GetMapping("/login-google-callback")
     public ResponseEntity<APIRespone> loginGoogleSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
         if (oauth2User == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User information is missing", null));
@@ -112,7 +112,7 @@ public class AuthController {
                              .header(HttpHeaders.LOCATION, "/oauth2/authorization/facebook")
                              .build();
     }
-    @GetMapping("/login-facebook-success")
+    @GetMapping("/login-facebook-callback")
     public ResponseEntity<APIRespone> loginFacebookSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
         if (oauth2User == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User information is missing", null));

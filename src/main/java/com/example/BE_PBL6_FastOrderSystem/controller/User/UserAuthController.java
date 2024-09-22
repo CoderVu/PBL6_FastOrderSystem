@@ -29,15 +29,14 @@ public class UserAuthController {
     }
 
     @PutMapping("/profile/update")
-    public ResponseEntity<APIRespone> updateUser(
-            @RequestParam("fullName") String fullName,
-            @RequestParam("avatar") MultipartFile avatar,
-            @RequestParam("email") String email,
-            @RequestParam("address") String address) {
-             Long userId = FoodUserDetails.getCurrentUserId();
-             UserRequest userResquest = new UserRequest(fullName, avatar, email, address);
-             return userService.updateUser(userId, userResquest);
-
+    public ResponseEntity<APIRespone> updateUser(@RequestBody UserRequest userRequest) {
+            String fullName = userRequest.getFullName();
+            MultipartFile avatar = userRequest.getAvatar();
+            String email = userRequest.getEmail();
+            String address = userRequest.getAddress();
+            Long userId = FoodUserDetails.getCurrentUserId();
+            UserRequest userResquest = new UserRequest(fullName, avatar, email, address);
+            return userService.updateUser(userId, userResquest);
     }
     @PutMapping("/profile/add-phone")
     public ResponseEntity<APIRespone> addPhone(@RequestParam("phone") String phone) {
