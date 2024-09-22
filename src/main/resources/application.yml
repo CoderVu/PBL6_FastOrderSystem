@@ -1,9 +1,6 @@
 server:
   port: 8080
   connection-timeout: 20000
-
-
-
 spring:
   application:
     name: BE_PBL6_FastOrderSystem

@@ -40,6 +40,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.text.SimpleDateFormat;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -174,17 +175,37 @@ public class PaymentServiceImpl implements IPaymentService {
         payment.setExtraData(orderRequest.getExtraData());
         paymentRepository.save(payment);
     
-        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
-        for (OrderDetail orderDetail : orderDetails) {
+       List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
+//        for (OrderDetail orderDetail : orderDetails) {
+//            PaymentDetail paymentDetail = new PaymentDetail();
+//            paymentDetail.setPayment(payment);
+//            paymentDetail.setOrder(orderDetail.getOrder());
+//            paymentDetail.setStore(orderDetail.getStore());
+//            paymentDetail.setTotalAmount(orderDetail.getTotalPrice());
+//            paymentDetail.setPaymentStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("MOMO") || orderRequest.getPaymentMethod().equalsIgnoreCase("ZALOPAY") ? "Đã thanh toán" : "Chưa thanh toán");
+//            paymentDetail.setCreatedAt(LocalDateTime.now());
+//            paymentDetail.setUpdatedAt(LocalDateTime.now());
+//            paymentDetailRepository.save(paymentDetail);
+//        }
+        // group cac order detail theo store
+        Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
+                .collect(Collectors.groupingBy(OrderDetail::getStore));
+        for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
+            Store store = entry.getKey();
+               List<OrderDetail> orderDetailList = entry.getValue();
+            // culutate total amount of order detail
+            double totalAmount = orderDetailList.stream().mapToDouble(OrderDetail::getTotalPrice).sum();
+            // save payment detail
             PaymentDetail paymentDetail = new PaymentDetail();
             paymentDetail.setPayment(payment);
-            paymentDetail.setOrder(orderDetail.getOrder());
-            paymentDetail.setStore(orderDetail.getStore());
-            paymentDetail.setTotalAmount(orderDetail.getTotalPrice());
+            paymentDetail.setOrder(order);
+            paymentDetail.setStore(store);
+            paymentDetail.setTotalAmount(totalAmount);
             paymentDetail.setPaymentStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("MOMO") || orderRequest.getPaymentMethod().equalsIgnoreCase("ZALOPAY") ? "Đã thanh toán" : "Chưa thanh toán");
             paymentDetail.setCreatedAt(LocalDateTime.now());
             paymentDetail.setUpdatedAt(LocalDateTime.now());
             paymentDetailRepository.save(paymentDetail);
+
         }
     
         return ResponseEntity.ok(new APIRespone(true, "Payment and payment details saved successfully", ""));
