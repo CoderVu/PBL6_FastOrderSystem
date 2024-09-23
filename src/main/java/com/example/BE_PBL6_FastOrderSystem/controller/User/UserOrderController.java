@@ -44,9 +44,7 @@ public class UserOrderController {
     public ResponseEntity<APIRespone> checkPaymentMomoStatus(PaymentRequest orderRequest) {
         try {
             ResponseEntity<APIRespone> response = paymentMomoCheckStatusController.getStatus(orderRequest);
-            System.out.println("Order Request "+ orderRequest);
             Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
-            System.out.println("reponse Status đã thanh toán hãy chưa:" + responseData);
             if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("message"))) {
                 return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
             } else {
@@ -60,12 +58,7 @@ public class UserOrderController {
         try {
             // Perform the HTTP request to check payment status
             ResponseEntity<APIRespone> response = paymentZaloPayCheckStatusController.getStatus(apptransid);
-            System.out.println("apptransid: " + apptransid);
-            System.out.println("Response Status đã thanh toán hãy chưa(zalo): " + response);
-
             Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
-            System.out.println("Message response data: " + responseData.get("status"));
-            System.out.println("Response get statuscode: " + response.getStatusCode());
             if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("status"))) {
 
                 return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
@@ -81,6 +74,7 @@ public class UserOrderController {
         String paymentMethod = orderRequest.getPaymentMethod();
         Long productId = orderRequest.getProductId();
         Long comboId = orderRequest.getComboId();
+        Long drinkId = orderRequest.getDrinkId();
         Long storeId = orderRequest.getStoreId();
         Integer quantity = orderRequest.getQuantity();
         String size = orderRequest.getSize();
@@ -108,15 +102,15 @@ public class UserOrderController {
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
                     System.out.println("Payment status response: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, storeId, quantity, size, deliveryAddress, orderCode);
+                        ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, orderCode);
                        System.out.println("Response khi processOrderNow = ZALOPAY: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
+                            System.out.println(("vo luon"));
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
                             ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                             OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                             paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                     
                         }
                         // Cancel the scheduled task
                         scheduler.shutdown();
@@ -146,7 +140,7 @@ public class UserOrderController {
                 scheduler.scheduleAtFixedRate(() -> {
                     ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, storeId, quantity, size, deliveryAddress, orderCode);
+                        ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, orderCode);
                         if (response.getStatusCode() == HttpStatus.OK) {
         
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
@@ -175,7 +169,7 @@ public class UserOrderController {
             orderRequest.setOrderInfo("Payment CASH for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-            ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, storeId, quantity, size, deliveryAddress, orderCode);
+            ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, orderCode);
             System.out.println("Response order khi processOrderNow = CASH: " + response);
             if (response.getStatusCode() == HttpStatus.OK) {
                 orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
@@ -189,7 +183,6 @@ public class UserOrderController {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Unsupported payment method", ""));
         }
     }
-
     @PostMapping("/create")
     public ResponseEntity<APIRespone> placeOrder(@RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         String paymentMethod = orderRequest.getPaymentMethod();

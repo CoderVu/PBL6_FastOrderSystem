@@ -3,7 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 import com.example.BE_PBL6_FastOrderSystem.model.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.request.CartComboRequest;
-import com.example.BE_PBL6_FastOrderSystem.request.CartRequest;
+import com.example.BE_PBL6_FastOrderSystem.request.CartProductRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.CartResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.ICartService;
@@ -27,23 +27,23 @@ public class CartServiceImpl implements ICartService {
     final private SizeRepository sizeRepository;
 
     @Override
-    public ResponseEntity<APIRespone> addProductToCart(Long userId, CartRequest cartRequest) {
+    public ResponseEntity<APIRespone> addProductToCart(Long userId, CartProductRequest cartProductRequest) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
         }
-        Product product = productRepository.findById(cartRequest.getProductId()).orElse(null);
+        Product product = productRepository.findById(cartProductRequest.getProductId()).orElse(null);
         if (product == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
         }
-        if (cartRequest.getQuantity() <= 0) {
+        if (cartProductRequest.getQuantity() <= 0) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Quantity must be greater than 0", ""));
         }
-        if (product.getStockQuantity() < cartRequest.getQuantity()) {
+        if (product.getStockQuantity() < cartProductRequest.getQuantity()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product not enough", ""));
         }
         ProductStore productStore = product.getProductStores().stream()
-                .filter(ps -> Objects.equals(ps.getStore().getStoreId(), cartRequest.getStoreId()))
+                .filter(ps -> Objects.equals(ps.getStore().getStoreId(), cartProductRequest.getStoreId()))
                 .findFirst()
                 .orElse(null);
         Store store = (productStore != null) ? productStore.getStore() : null;
@@ -53,19 +53,18 @@ public class CartServiceImpl implements ICartService {
         Cart cartItem = new Cart();
         cartItem.setUser(user);
         cartItem.setProduct(product);
-        cartItem.setQuantity(cartRequest.getQuantity());
+        cartItem.setQuantity(cartProductRequest.getQuantity());
         cartItem.setUnitPrice(product.getPrice());
-        cartItem.setTotalPrice(product.getPrice() * cartRequest.getQuantity());
+        cartItem.setTotalPrice(product.getPrice() * cartProductRequest.getQuantity());
 
-        Size size = sizeRepository.findByName(cartRequest.getSize());
+        Size size = sizeRepository.findByName(cartProductRequest.getSize());
         if (size == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found", ""));
         }
         cartItem.setSize(size);
-        cartItem.setStoreId(cartRequest.getStoreId());
-        cartItem.setStatus(cartRequest.getStatus());
+        cartItem.setStoreId(cartProductRequest.getStoreId());
+        cartItem.setStatus(cartProductRequest.getStatus());
         cartItemRepository.save(cartItem);
-        ;
         return ResponseEntity.ok(new APIRespone(true, "Add to cart successfully", cartItem.getCartId().toString()));
     }
 
@@ -80,6 +79,25 @@ public class CartServiceImpl implements ICartService {
         if (combo == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
         }
+        // Lay drink product tu drink product id
+        Product drinkProduct = productRepository.findById(cartComboRequest.getDrinkId()).orElse(null);
+        if (drinkProduct == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product not found", ""));
+        }
+        // Kiem tra so luong cua drink product
+        if (drinkProduct.getStockQuantity() < cartComboRequest.getQuantity()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product not enough", ""));
+        }
+        // Kiem tra store cua drink product
+        ProductStore drinkProductStore = drinkProduct.getProductStores().stream()
+                .filter(ps -> Objects.equals(ps.getStore().getStoreId(), cartComboRequest.getStoreId()))
+                .findFirst()
+                .orElse(null);
+        Store drinkStore = (drinkProductStore != null) ? drinkProductStore.getStore() : null;
+        if (drinkStore == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product does not belong to the specified store", ""));
+        }
+
         // Kiem tra so luong cua tung product trong combo
         for (Product product : combo.getProducts()) {
             if (product.getStockQuantity() < cartComboRequest.getQuantity()) {
@@ -100,6 +118,7 @@ public class CartServiceImpl implements ICartService {
         Cart cartItem = new Cart();
         cartItem.setUser(user);
         cartItem.setCombo(combo); // Set combo
+        cartItem.setDrinkProduct(drinkProduct); // Set drink product
         cartItem.setQuantity(cartComboRequest.getQuantity());
         cartItem.setUnitPrice(combo.getComboPrice());
         cartItem.setTotalPrice(combo.getComboPrice() * cartComboRequest.getQuantity());

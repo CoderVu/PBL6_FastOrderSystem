@@ -155,7 +155,7 @@ public class OrderServiceImpl implements IOrderService {
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
         }
     @Override
-    public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, Long storeId, Integer quantity, String size, String deliveryAddress, String orderCode){
+    public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, Long drinkId, Long storeId, Integer quantity, String size, String deliveryAddress, String orderCode) {
         Product product = null;
         Combo combo = null;
 
@@ -178,18 +178,22 @@ public class OrderServiceImpl implements IOrderService {
         if (product == null && combo == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Neither product nor combo found", ""));
         }
-        Optional<Store>  storeOptional = storeRepository.findById(storeId);
-        if (storeOptional.isEmpty()){
+
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
         }
+
         PaymentMethod paymentMethodEntity = paymentMethodRepository.findByName(paymentMethod);
         if (paymentMethodEntity == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
         }
+
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
         }
+
         User user = userOptional.get();
         Order order = new Order();
         order.setOrderDate(LocalDateTime.now());
@@ -201,29 +205,45 @@ public class OrderServiceImpl implements IOrderService {
         order.setUser(user);
         order.setDeliveryAddress(deliveryAddress);
         Size s = sizeRepository.findByName(size);
+
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.setOrder(order);
         orderDetail.setProduct(product);
         orderDetail.setCombo(combo);
         orderDetail.setQuantity(quantity);
+
         if (product != null) {
             orderDetail.setUnitPrice(product.getPrice());
             orderDetail.setTotalPrice(product.getPrice() * quantity);
-        } else {
+        } else if (combo != null) {
             orderDetail.setUnitPrice(combo.getComboPrice());
             orderDetail.setTotalPrice(combo.getComboPrice() * quantity);
         }
+
+        // Thiết lập thông tin nước uống nếu có
+        if (drinkId != null) {
+            Optional<Product> drinkOptional = productRepository.findByProductId(drinkId);
+            if (drinkOptional.isEmpty()) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Drink not found", ""));
+            }
+            if (drinkOptional.isPresent()) {
+                Product drink = drinkOptional.get();
+                orderDetail.setDrinkProduct(drink);
+            }
+        }
+
         orderDetail.setSize(s);
         orderDetail.setStore(storeOptional.get());
-        orderDetail.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
+        orderDetail.setStatus(statusOrder);
         List<OrderDetail> orderDetails = new ArrayList<>();
         orderDetails.add(orderDetail);
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetail.getTotalPrice());
         orderRepository.save(order);
-        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
 
+        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
+
     @Override
     public Long calculateOrderNowAmount(Long productId, Long comboId, int quantity) {
         if (productId != null) {

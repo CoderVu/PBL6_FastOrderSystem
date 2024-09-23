@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.User;
 
 import com.example.BE_PBL6_FastOrderSystem.request.CartComboRequest;
-import com.example.BE_PBL6_FastOrderSystem.request.CartRequest;
+import com.example.BE_PBL6_FastOrderSystem.request.CartProductRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.ICartService;
@@ -21,23 +21,13 @@ public class UserCartController {
     }
 
     @PostMapping("/add/product")
-    public  ResponseEntity<APIRespone> addToCart(
-            @RequestParam Long productId,
-            @RequestParam int quantity,
-            @RequestParam String size,
-            @RequestParam Long storeId) {
+    public  ResponseEntity<APIRespone> addToCart(@RequestBody CartProductRequest cartProductRequest) {
         Long userId = getCurrentUserId();
-        CartRequest cartRequest = new CartRequest(productId, quantity, size ,storeId, "PENDING");
-        return cartService.addProductToCart(userId, cartRequest);
+        return cartService.addProductToCart(userId, cartProductRequest);
     }
     @PostMapping("/add/combo")
-    public ResponseEntity<APIRespone> addToCartCombo(
-            @RequestParam Long comboId,
-            @RequestParam int quantity,
-            @RequestParam String size,
-            @RequestParam Long storeId) {
+    public ResponseEntity<APIRespone> addToCartCombo(@RequestBody CartComboRequest cartComboRequest) {
         Long userId = getCurrentUserId();
-        CartComboRequest cartComboRequest = new CartComboRequest(comboId, quantity, size, storeId, "PENDING");
         return cartService.addComboToCart(userId, cartComboRequest);
     }
     @GetMapping("/history")

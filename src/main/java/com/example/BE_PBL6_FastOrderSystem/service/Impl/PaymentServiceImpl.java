@@ -153,7 +153,6 @@ public class PaymentServiceImpl implements IPaymentService {
     @Transactional
     @Override
     public ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Long orderId, Long userId) {
-        System.out.println("vao day");
         Optional<Order> optionalOrder = orderRepository.findByOrderId(orderId);
         if (!optionalOrder.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Order not found", ""));

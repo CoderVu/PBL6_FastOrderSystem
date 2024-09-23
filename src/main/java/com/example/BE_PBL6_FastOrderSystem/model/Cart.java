@@ -32,6 +32,9 @@ public class Cart {
     @ManyToOne
     @JoinColumn(name = "size_id")
     private Size size;
+    @ManyToOne
+    @JoinColumn(name = "drink_product_id")
+    private Product drinkProduct;
     private Long storeId;
     private String status;
     private LocalDateTime createdAt;

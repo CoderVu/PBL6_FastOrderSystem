@@ -20,7 +20,7 @@ public class Product {
     private String description;
     private Double price;
     private Double discountedPrice;
-    @ManyToMany(mappedBy = "products") // để tránh việc tạo bảng trung gian
+    @ManyToMany(mappedBy = "products")
     private Set<Promotion> promotions = new HashSet<>();
 
     @ManyToOne

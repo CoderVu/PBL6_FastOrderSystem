@@ -17,6 +17,7 @@ public class PaymentRequest {
     private Long storeId;
     private Integer quantity;
     private Long comboId;
+    private Long drinkId;
     private String size;
     private String appuser;
     private String apptransid;

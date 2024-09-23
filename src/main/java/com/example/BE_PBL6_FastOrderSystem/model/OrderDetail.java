@@ -19,6 +19,10 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "combo_id")
     private Combo combo;
+    @ManyToOne
+    @JoinColumn(name = "drink_product_id")
+    private Product drinkProduct;
+
     private Integer quantity;
     private Double unitPrice;
     private Double totalPrice;
