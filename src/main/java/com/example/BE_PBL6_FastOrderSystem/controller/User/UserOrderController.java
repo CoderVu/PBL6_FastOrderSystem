@@ -60,7 +60,6 @@ public class UserOrderController {
             ResponseEntity<APIRespone> response = paymentZaloPayCheckStatusController.getStatus(apptransid);
             Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
             if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("status"))) {
-
                 return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
             } else {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Payment status check failed", ""));
@@ -95,17 +94,20 @@ public class UserOrderController {
             System.out.println("ZaloPay response: " + zalopayResponse);
             System.out.println();
             if (Integer.parseInt(zalopayResponse.get("returncode").toString()) == 1) {
-                System.out.println("ZaloPay payment initiation successful");
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                final int[] count = {0};
                 scheduler.scheduleAtFixedRate(() -> {
-                    System.out.println("Checking payment status...");
+                    count[0]++;
+                    if (count[0] > 10) {
+                        scheduler.shutdown();
+                        return;
+                    }
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
                     System.out.println("Payment status response: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
                         ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, orderCode);
                        System.out.println("Response khi processOrderNow = ZALOPAY: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
-                            System.out.println(("vo luon"));
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
                             ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                             OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
@@ -137,12 +139,17 @@ public class UserOrderController {
             if ("Success".equals(momoResponse.get("message"))) {
                 // schedule a task to check payment status every 10 seconds
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                final int[] count = {0};
                 scheduler.scheduleAtFixedRate(() -> {
+                    count[0]++;
+                    if (count[0] > 10) {
+                        scheduler.shutdown();
+                        return;
+                    }
                     ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
                         ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, orderCode);
                         if (response.getStatusCode() == HttpStatus.OK) {
-        
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
                             ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                             OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
@@ -175,8 +182,8 @@ public class UserOrderController {
                 orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
                 ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                 OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
-                orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                 paymentService.savePayment(orderRequest, data.getOrderId(), userId);
+                orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
             }
             return response;
         } else {
@@ -216,66 +223,39 @@ public class UserOrderController {
             // Initiate ZaloPay payment
             Map<String, Object> zalopayResponse = paymentService.createOrderZaloPay(orderRequest);
             if (Integer.parseInt(zalopayResponse.get("returncode").toString()) == 1) {
-                System.out.println("ZaloPay payment initiation successful");
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                final int[] count = {0};
                 scheduler.scheduleAtFixedRate(() -> {
+                    count[0]++;
+                    if (count[0] > 10) {
+                        scheduler.shutdown();
+                        return;
+                    }
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
                     System.out.println("Payment status response: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
                         ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
                         if (response.getStatusCode() == HttpStatus.OK) {
-                            // Step 1: Create a map to store the total quantity for each product in each store
-                            Map<Long, Map<Long, Integer>> storeProductQuantities = new HashMap<>();
-                            // Step 2: Iterate through the cart items and sum the quantities for each product in each store
+                            // duyệt qua tất cả các giỏ hàng
                             for (Cart cart : cartItems) {
-                                if (cart.getProduct() != null && cart.getProduct().getProductId() != null) {
+                                Long storeId = cart.getStoreId();
+                                int quantity = cart.getQuantity();
+                                if (cart.getProduct() != null) {
                                     Long productId = cart.getProduct().getProductId();
-                                    Long storeId = cart.getStoreId();
-                                    int quantity = cart.getQuantity();
-
-                                    storeProductQuantities
-                                            .computeIfAbsent(storeId, k -> new HashMap<>())
-                                            .put(productId, storeProductQuantities.get(storeId).getOrDefault(productId, 0) + quantity);
-                                } else {
-                                    System.err.println("Product or ProductId is null for cartId: " + cart.getCartId());
+                                    orderService.updateQuantityProduct(productId, null, storeId, quantity); // Cập nhật cho sản phẩm
                                 }
-                                if (cart.getCombo() != null && cart.getCombo().getComboId() != null) {
+
+                                if (cart.getCombo() != null) {
                                     Long comboId = cart.getCombo().getComboId();
-                                    Long storeId = cart.getStoreId();
-                                    int quantity = cart.getQuantity();
-
-                                    storeProductQuantities
-                                            .computeIfAbsent(storeId, k -> new HashMap<>())
-                                            .put(comboId, storeProductQuantities.get(storeId).getOrDefault(comboId, 0) + quantity);
-                                } else {
-                                    System.err.println("Combo or ComboId is null for cartId: " + cart.getCartId());
+                                    orderService.updateQuantityProduct(null, comboId, storeId, quantity); // Cập nhật cho combo
                                 }
                             }
-                            // Step 3: Update the product quantities and combo quantities based on the aggregated values
-                            for (Map.Entry<Long, Map<Long, Integer>> storeEntry : storeProductQuantities.entrySet()) {
-                                Long storeId = storeEntry.getKey();
-                                for (Map.Entry<Long, Integer> productEntry : storeEntry.getValue().entrySet()) {
-                                    Long productId = productEntry.getKey();
-                                    int totalQuantity = productEntry.getValue();
-                                    orderService.updateQuantityProductOrderByProduct(productId, storeId, totalQuantity);
-                                }
-                            }
-                            for (Map.Entry<Long, Map<Long, Integer>> storeEntry : storeProductQuantities.entrySet()) {
-                                Long storeId = storeEntry.getKey();
-                                for (Map.Entry<Long, Integer> comboEntry : storeEntry.getValue().entrySet()) {
-                                    Long comboId = comboEntry.getKey();
-                                    int totalQuantity = comboEntry.getValue();
-                                    orderService.updateQuantityProductOrderByCombo(comboId, storeId, totalQuantity);
-                                }
-                            }
-                        
-                           
-                            ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
-                            OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
-                            paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         }
-                        // Cancel the scheduled task
+                        ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                        OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
+                        paymentService.savePayment(orderRequest, data.getOrderId(), userId);
+                        orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                        // dung lai
                         scheduler.shutdown();
                     } else {
                         System.out.println("Payment status is not OK. Retrying...");
@@ -296,9 +276,6 @@ public class UserOrderController {
                     return ResponseEntity.badRequest().body(new APIRespone(false, "One or more carts do not belong to current user", ""));
                 }
             }
-
-            System.out.println("Cart IDs: " + orderRequest.getCartIds());
-            System.out.println("User ID: " + orderRequest.getUserId());
             orderRequest.setOrderInfo("Payment MOMO for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
@@ -307,43 +284,36 @@ public class UserOrderController {
             if ("Success".equals(momoResponse.get("message"))) {
                 // schedule a task to check payment status every 10 seconds
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                final int[] count = {0};
                 scheduler.scheduleAtFixedRate(() -> {
+                    count[0]++;
+                    if (count[0] > 10) {
+                        scheduler.shutdown();
+                        return;
+                    }
                     ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
                         ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
                         if (response.getStatusCode() == HttpStatus.OK) {
-                            // Step 1: Create a map to store the total quantity for each product in each store
-                            Map<Long, Map<Long, Integer>> storeProductQuantities = new HashMap<>();
-                            // Step 2: Iterate through the cart items and sum the quantities for each product in each store
+                            // duyệt qua tất cả các giỏ hàng
                             for (Cart cart : cartItems) {
-                                if (cart.getProduct() != null && cart.getProduct().getProductId() != null) {
+                                Long storeId = cart.getStoreId();
+                                int quantity = cart.getQuantity();
+                                if (cart.getProduct() != null) {
                                     Long productId = cart.getProduct().getProductId();
-                                    Long storeId = cart.getStoreId();
-                                    int quantity = cart.getQuantity();
+                                    orderService.updateQuantityProduct(productId, null, storeId, quantity); // Cập nhật cho sản phẩm
+                                }
 
-                                    storeProductQuantities
-                                            .computeIfAbsent(storeId, k -> new HashMap<>())
-                                            .put(productId, storeProductQuantities.get(storeId).getOrDefault(productId, 0) + quantity);
-                                } else {
-                                    System.err.println("Product or ProductId is null for cartId: " + cart.getCartId());
+                                if (cart.getCombo() != null) {
+                                    Long comboId = cart.getCombo().getComboId();
+                                    orderService.updateQuantityProduct(null, comboId, storeId, quantity); // Cập nhật cho combo
                                 }
                             }
-
-                            // Step 3: Update the product quantities based on the aggregated values
-                            for (Map.Entry<Long, Map<Long, Integer>> storeEntry : storeProductQuantities.entrySet()) {
-                                Long storeId = storeEntry.getKey();
-                                for (Map.Entry<Long, Integer> productEntry : storeEntry.getValue().entrySet()) {
-                                    Long productId = productEntry.getKey();
-                                    int totalQuantity = productEntry.getValue();
-                                    orderService.updateQuantityProductOrderByProduct(productId, storeId, totalQuantity);
-                                }
-                            }
-
-                            ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
-                            OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
-                            paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         }
+                        ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
+                        OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
+                        paymentService.savePayment(orderRequest, data.getOrderId(), userId);
+                        orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         // Cancel the scheduled task
                         scheduler.shutdown();
                     } else {
@@ -367,29 +337,20 @@ public class UserOrderController {
             orderRequest.setExtraData("additional data");
             ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
             if (response.getStatusCode() == HttpStatus.OK) {
-                // Step 1: Create a map to store the total quantity for each product in each store
-                Map<Long, Map<Long, Integer>> storeProductQuantities = new HashMap<>();
-                // Step 2: Iterate through the cart items and sum the quantities for each product in each store
-                for (Cart cart : cartItems) {
-                    if (cart.getProduct() != null && cart.getProduct().getProductId() != null) {
-                        Long productId = cart.getProduct().getProductId();
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    // Duyệt qua tất cả các giỏ hàng
+                    for (Cart cart : cartItems) {
                         Long storeId = cart.getStoreId();
                         int quantity = cart.getQuantity();
+                        if (cart.getProduct() != null) {
+                            Long productId = cart.getProduct().getProductId();
+                            orderService.updateQuantityProduct(productId, null, storeId, quantity); // Cập nhật cho sản phẩm
+                        }
 
-                        storeProductQuantities
-                                .computeIfAbsent(storeId, k -> new HashMap<>())
-                                .put(productId, storeProductQuantities.get(storeId).getOrDefault(productId, 0) + quantity);
-                    } else {
-                        System.err.println("Product or ProductId is null for cartId: " + cart.getCartId());
-                    }
-                }
-                // Step 3: Update the product quantities based on the aggregated values
-                for (Map.Entry<Long, Map<Long, Integer>> storeEntry : storeProductQuantities.entrySet()) {
-                    Long storeId = storeEntry.getKey();
-                    for (Map.Entry<Long, Integer> productEntry : storeEntry.getValue().entrySet()) {
-                        Long productId = productEntry.getKey();
-                        int totalQuantity = productEntry.getValue();
-                        orderService.updateQuantityProductOrderByProduct(productId, storeId, totalQuantity);
+                        if (cart.getCombo() != null) {
+                            Long comboId = cart.getCombo().getComboId();
+                            orderService.updateQuantityProduct(null, comboId, storeId, quantity); // Cập nhật cho combo
+                        }
                     }
                 }
                 ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);

@@ -174,27 +174,19 @@ public class PaymentServiceImpl implements IPaymentService {
         payment.setExtraData(orderRequest.getExtraData());
         paymentRepository.save(payment);
     
-       List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
-//        for (OrderDetail orderDetail : orderDetails) {
-//            PaymentDetail paymentDetail = new PaymentDetail();
-//            paymentDetail.setPayment(payment);
-//            paymentDetail.setOrder(orderDetail.getOrder());
-//            paymentDetail.setStore(orderDetail.getStore());
-//            paymentDetail.setTotalAmount(orderDetail.getTotalPrice());
-//            paymentDetail.setPaymentStatus(orderRequest.getPaymentMethod().equalsIgnoreCase("MOMO") || orderRequest.getPaymentMethod().equalsIgnoreCase("ZALOPAY") ? "Đã thanh toán" : "Chưa thanh toán");
-//            paymentDetail.setCreatedAt(LocalDateTime.now());
-//            paymentDetail.setUpdatedAt(LocalDateTime.now());
-//            paymentDetailRepository.save(paymentDetail);
-//        }
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
         // group cac order detail theo store
         Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
                 .collect(Collectors.groupingBy(OrderDetail::getStore));
+        System.out.println("Grouped order details by store"+ groupedOrderDetails);
         for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
             Store store = entry.getKey();
-               List<OrderDetail> orderDetailList = entry.getValue();
-            // culutate total amount of order detail
+            System.out.println("Store: " + store.getStoreName());
+            List<OrderDetail> orderDetailList = entry.getValue();
+
+            // tính tổng số tiền của các OrderDetail
             double totalAmount = orderDetailList.stream().mapToDouble(OrderDetail::getTotalPrice).sum();
-            // save payment detail
+            // lưu PaymentDetail cho từng store
             PaymentDetail paymentDetail = new PaymentDetail();
             paymentDetail.setPayment(payment);
             paymentDetail.setOrder(order);
@@ -204,13 +196,12 @@ public class PaymentServiceImpl implements IPaymentService {
             paymentDetail.setCreatedAt(LocalDateTime.now());
             paymentDetail.setUpdatedAt(LocalDateTime.now());
             paymentDetailRepository.save(paymentDetail);
-
+            System.out.println("Payment detail saved for store: " + store.getStoreName());
         }
-    
         return ResponseEntity.ok(new APIRespone(true, "Payment and payment details saved successfully", ""));
     }
-    @Override
-    public Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException {
+        @Override
+        public Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException {
         Long amount = orderRequest.getAmount();
         String order_id = orderRequest.getOrderId();
         String apptransid = getCurrentTimeString("yyMMdd") + "_" + new Date().getTime();

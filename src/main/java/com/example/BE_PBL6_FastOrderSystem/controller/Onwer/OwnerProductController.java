@@ -35,12 +35,5 @@ public class OwnerProductController {
     public ResponseEntity<APIRespone> removeProductFromStore(@RequestParam Long storeId, @RequestParam Long productId) {
         return productService.removeProductFromStore(storeId, productId);
     }
-    @PostMapping("/update-product-quantity")
-    public ResponseEntity<APIRespone> updateProductQuantity( @RequestParam Long productId, @RequestParam Long storeId,Integer quantity) {
-        return orderService.updateQuantityProductOrderByProduct(productId, storeId, quantity);
-    }
-    @PostMapping("/update-product-combo-quantity")
-    public ResponseEntity<APIRespone> updateProductComboQuantity(@RequestParam Long comboId, @RequestParam Long storeId,Integer quantity) {
-        return orderService.updateQuantityProductOrderByCombo(comboId, storeId, quantity);
-    }
+
 }

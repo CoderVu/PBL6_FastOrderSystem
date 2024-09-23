@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Onwer;
 
+import com.example.BE_PBL6_FastOrderSystem.request.UpdateQuantityRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
@@ -31,5 +32,14 @@ public class OwnerOrderController {
             Long ownerId = FoodUserDetails.getCurrentUserId();
             return orderService.updateStatusDetail(orderCode, ownerId, status);
     }
+    @PutMapping("/update-quantity")
+    public ResponseEntity<APIRespone> updateQuantityProduct(
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) Long comboId,
+            @RequestParam Long storeId,
+            @RequestParam int quantity) {
+        return orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
+    }
+
 
 }
