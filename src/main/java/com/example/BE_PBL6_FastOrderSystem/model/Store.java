@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Data
-@EqualsAndHashCode(exclude = {"manager", "promotions", "productStores"}) // để tránh vòng lặp khi lấy dữ liệu
+@EqualsAndHashCode(exclude = {"manager", "promotions", "productStores"})
 public class Store {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

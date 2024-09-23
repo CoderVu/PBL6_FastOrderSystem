@@ -11,6 +11,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 public interface IAuthService {
     ResponseEntity<APIRespone> authenticateUser(String numberPhone, String password);
     ResponseEntity<APIRespone> registerUser(User user);
+
+    ResponseEntity<APIRespone> registerShipper(User user);
+
     ResponseEntity<APIRespone> registerAdmin(User user);
     void logout(String token);
     boolean isTokenInvalid(String token);

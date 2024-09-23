@@ -63,8 +63,8 @@ public class AuthServiceImpl implements IAuthService {
                     .map(GrantedAuthority::getAuthority)
                     .toList();
             return ResponseEntity.ok(new APIRespone(true, "Success", new JwtResponse((userDetails.getId()),
-                    userDetails.getEmail(), userDetails.getFullName(), userDetails.getPhoneNumber(), userDetails.getAddress(), userDetails.getAvatar(),
-                    userDetails.getCreatedAt(), userDetails.getUpdatedAt(), userDetails.isAccountLocked(), jwt, roles)));
+                    userDetails.getEmail(), userDetails.getFullName(), userDetails.getPhoneNumber(), userDetails.getAddress(), userDetails.getLongitude(), userDetails.getLatitude(), userDetails.getAvatar(),
+                    userDetails.getCreatedAt(), userDetails.getUpdatedAt(), userDetails.isAccountLocked(), userDetails.getIsActive(), jwt, roles)));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Invalid username or password", ""));
         }
@@ -97,6 +97,39 @@ public class AuthServiceImpl implements IAuthService {
         Optional<Role> optionalRole = roleRepository.findByName("ROLE_USER");
         if (optionalRole.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "ROLE_USER not found", ""));
+        }
+        Role userRole = optionalRole.get();
+        user.setRole(userRole);
+        userRepository.save(user);
+        return ResponseEntity.ok(new APIRespone(true, "Success", ""));
+    }
+    @Override
+    public ResponseEntity<APIRespone> registerShipper(User user) {
+        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new APIRespone(false, user.getPhoneNumber() + " already exists", ""));
+        }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new APIRespone(false, user.getEmail() + " already exists", ""));
+        }
+        if (user.getPhoneNumber() == null || !user.getPhoneNumber().matches("\\d{10}") || user.getPhoneNumber().indexOf("0") != 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Phone number is required", ""));
+        }
+        if (user.getPassword() == null || user.getPassword().length() < 8) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Password must be at least 8 characters long", ""));
+        }
+        if (user.getFullName() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Full name is required", ""));
+        }
+        if (user.getEmail() == null || !user.getEmail().matches("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z0-9-]+\\.)+(com|net|org|edu|gov|mil|int)$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Email is required", ""));
+        }
+        if (user.getAddress() == null || !user.getAddress().matches("^[\\p{L}0-9\\s,.-]+$")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Address is required and must contain only letters, numbers, spaces, commas, periods, and hyphens", ""));
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        Optional<Role> optionalRole = roleRepository.findByName("ROLE_SHIPPER");
+        if (optionalRole.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "ROLE_SHIPPER not found", ""));
         }
         Role userRole = optionalRole.get();
         user.setRole(userRole);
@@ -212,10 +245,13 @@ public class AuthServiceImpl implements IAuthService {
                 user.getFullName(),
                 user.getPhoneNumber(),
                 user.getAddress(),
+                user.getLongitude(),
+                user.getLatitude(),
                 user.getAvatar(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.isAccountLocked(),
+                user.getIsActive(),
                 jwt,
                 roles
         )));
@@ -249,10 +285,13 @@ public class AuthServiceImpl implements IAuthService {
                 user.getFullName(),
                 user.getPhoneNumber(),
                 user.getAddress(),
+                user.getLongitude(),
+                user.getLatitude(),
                 user.getAvatar(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.isAccountLocked(),
+                user.getIsActive(),
                 jwt,
                 roles
         )));

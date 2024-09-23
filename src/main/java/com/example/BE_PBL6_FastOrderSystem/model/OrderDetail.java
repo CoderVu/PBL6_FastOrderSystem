@@ -9,6 +9,7 @@ import lombok.Data;
 public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_detail_id")
     private Long orderDetailId;
     @ManyToOne
     @JoinColumn(name = "order_id")
@@ -35,6 +36,8 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "store_id")
     private Store store;
-
+    @ManyToOne
+    @JoinColumn(name = "shipper_order_id")
+    private ShipperOrder shipperOrder;
 
 }

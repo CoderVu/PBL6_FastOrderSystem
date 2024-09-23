@@ -13,6 +13,8 @@ import java.util.List;
 public interface IOrderService {
     String generateUniqueOrderCode();
 
+    ResponseEntity<APIRespone> findNearestShipper(Double latitude, Double longitude, int limit);
+
     ResponseEntity<APIRespone> processOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode);
 
     ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, Long drinkId, Long storeId, Integer quantity, String size, String deliveryAddress, String orderCode);

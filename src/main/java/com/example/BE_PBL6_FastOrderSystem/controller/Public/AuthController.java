@@ -53,9 +53,16 @@ public class AuthController {
 
 
     @PostMapping("/register-user")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-      System.out.println(user);
+    public ResponseEntity<APIRespone> registerUser(@RequestBody User user) {
         return authService.registerUser(user);
+    }
+    @PostMapping("/register-owner")
+    public ResponseEntity<APIRespone>registerOwner(@RequestBody User user) {
+        return authService.registerAdmin(user);
+    }
+    @PostMapping("/register-shipper")
+    public ResponseEntity<APIRespone> registerShipper(@RequestBody User user) {
+        return authService.registerShipper(user);
     }
 
     @PostMapping("/login")

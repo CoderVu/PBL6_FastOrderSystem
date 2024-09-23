@@ -25,11 +25,14 @@ public class FoodUserDetails implements UserDetails {
     private String fullName;
     private String email;
     private String address;
+    private Double longitude;
+    private Double latitude;
     private String avatar;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     private boolean accountLocked;
+    private Boolean isActive;
     private Collection<GrantedAuthority> authorities;
 
     public static FoodUserDetails buildUserDetails(User user) {
@@ -41,22 +44,25 @@ public class FoodUserDetails implements UserDetails {
                 user.getFullName(),
                 user.getEmail(),
                 user.getAddress(),
+                user.getLongitude(),
+                user.getLatitude(),
                 user.getAvatar(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.isAccountLocked(),
+                user.getIsActive(),
                 List.of(authority));
-    } // Tạo ra một đối tượng FoodUserDetails từ một đối tượng User
+    }
 
     public static Long getCurrentUserId() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return ((FoodUserDetails) userDetails).getId();
-    } // SrcurityContextHolder lưu trữ thông tin người dùng hiện tại, lấy ra id của người dùng hiện tại
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
-    }// Trả về danh sách các quyền của người dùng
+    }
 
     @Override
     public String getPassword() {

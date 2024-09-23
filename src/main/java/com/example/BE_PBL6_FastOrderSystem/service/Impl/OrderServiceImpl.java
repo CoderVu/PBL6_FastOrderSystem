@@ -4,6 +4,7 @@ import com.example.BE_PBL6_FastOrderSystem.model.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IOrderService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,8 @@ public class OrderServiceImpl implements IOrderService {
     private final ProductStoreRepository productStoreRepository;
     private final SizeRepository sizeRepository;
     private final StatusOrderRepository statusOrderRepository;
+    private final ShipperOrderRepository shipperOrderRepository;
+    private final ShipperRepository shipperRepository;
     public String generateUniqueOrderCode() {
         Random random = new Random();
         String orderCode;
@@ -38,9 +41,22 @@ public class OrderServiceImpl implements IOrderService {
         } while (orderRepository.existsByOrderCode(orderCode));
         return orderCode;
     }
+    @Override
+    public ResponseEntity<APIRespone> findNearestShipper(Double latitude, Double longitude, int limit) {
+        List<User> nearestShippers = shipperRepository.findNearestShippers(latitude, longitude, limit);
+        if (nearestShippers.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No shippers found nearby", ""));
+        }
+        List<UserResponse> userResponses = nearestShippers.stream()
+                .map(UserResponse::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", userResponses));
+    }
+
 
     @Override
     public ResponseEntity<APIRespone> processOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, String orderCode) {
+
         List<Cart> cartItems = cartIds.stream()
                 .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
                 .filter(cartItem -> cartItem.getUser().getId().equals(userId))
@@ -98,6 +114,20 @@ public class OrderServiceImpl implements IOrderService {
             Store store = storeRepository.findById(cartItem.getStoreId()).orElseThrow(() -> new EntityNotFoundException("Store not found"));
             orderDetail.setStore(store);
             orderDetail.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
+//            //
+//            ShipperOrder shipperOrder = shipperOrderRepository.findByStoreAndDeliveryStatus(store, "Chưa giao")
+//                    .get(() -> {
+//                        ShipperOrder newShipperOrder = new ShipperOrder();
+//                        newShipperOrder.setStore(store);
+//                        newShipperOrder.setShipper(defaultShipper);
+//                        newShipperOrder.setCreatedAt(LocalDateTime.now());
+//                        newShipperOrder.setDeliveryStatus("Chưa giao");
+//                        return shipperOrderRepository.save(newShipperOrder);
+//                    });
+//
+//            // Liên kết OrderDetail với ShipperOrder
+//            orderDetail.setShipperOrder(shipperOrder);
+
             return orderDetail;
         }).collect(Collectors.toList());
         order.setOrderDetails(orderDetails);

@@ -4,7 +4,8 @@ import com.example.BE_PBL6_FastOrderSystem.model.User;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Optional;
+
 @Data
 public class UserResponse {
     private Long id;
@@ -13,24 +14,14 @@ public class UserResponse {
     private String avatar;
     private String email;
     private String address;
+    private Double longitude;
+    private Double latitude;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean accountLocked;
+    private Boolean isActive;
     private RoleResponse role;
 
-
-    public UserResponse(Long id, String phoneNumber, String fullName, String avatar, String email, String address, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean accountLocked, RoleResponse role, List<StoreResponse> stores, List<OrderResponse> orders) {
-        this.id = id;
-        this.phoneNumber = phoneNumber;
-        this.fullName = fullName;
-        this.avatar = avatar;
-        this.email = email;
-        this.address = address;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.accountLocked = accountLocked;
-        this.role = role;
-    }
 
     public UserResponse(User user) {
         this.id = user.getId();
@@ -39,10 +30,14 @@ public class UserResponse {
         this.avatar = user.getAvatar();
         this.email = user.getEmail();
         this.address = user.getAddress();
+        this.longitude = (user != null) ? user.getLongitude() : null;
+        this.latitude = (user != null) ? user.getLatitude() : null;
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
         this.accountLocked = user.isAccountLocked();
+        this.isActive = (user != null) ? user.getIsActive() : null;
         this.role = new RoleResponse(user.getRole().getId(), user.getRole().getName());
     }
+
 
 }

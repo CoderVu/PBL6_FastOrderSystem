@@ -21,6 +21,7 @@ public class PublicController {
     private final ISizeService sizeService;
     private final IStatusOrderService statusOrderService;
     private final IStaffService scheduleService;
+    private final IOrderService orderService;
     @GetMapping("/categories/all")
     public  ResponseEntity<APIRespone> getAllCategories() {
      return categoryService.getAllCategories();
@@ -100,5 +101,8 @@ public class PublicController {
     public ResponseEntity<APIRespone> getStatus() {
         return statusOrderService.getAllStatus();
     }
-
+    @PostMapping("/search/shipper")
+    public ResponseEntity<APIRespone> searchShipper(@RequestParam Double longitude, @RequestParam Double latitude, @RequestParam int limit) {
+        return orderService.findNearestShipper(longitude, latitude, limit);
+    }
 }
