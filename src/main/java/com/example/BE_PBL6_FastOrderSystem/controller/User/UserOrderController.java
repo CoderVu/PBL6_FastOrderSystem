@@ -90,7 +90,6 @@ public class UserOrderController {
             orderRequest.setOrderInfo("Payment ZaloPay for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-            // Initiate ZaloPay payment
             Map<String, Object> zalopayResponse = paymentService.createOrderZaloPay(orderRequest);
             System.out.println("ZaloPay response: " + zalopayResponse);
             System.out.println();
@@ -107,7 +106,7 @@ public class UserOrderController {
                     System.out.println("Payment status response: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
                         ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, orderCode);
-                       System.out.println("Response khi processOrderNow = ZALOPAY: " + response);
+                        System.out.println("Response khi processOrderNow = ZALOPAY: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
                             ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
@@ -117,13 +116,11 @@ public class UserOrderController {
                             paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         }
-                        // Cancel the scheduled task
                         scheduler.shutdown();
                     } else {
                         System.out.println("Payment status is not OK. Retrying...");
                     }
                 }, 0, 10, TimeUnit.SECONDS);
-                // Return response with payment URL
                 APIRespone apiResponse = new APIRespone(true, "ZaloPay payment initiated", zalopayResponse);
                 return ResponseEntity.ok(apiResponse);
             } else {
@@ -136,11 +133,9 @@ public class UserOrderController {
             orderRequest.setOrderInfo("Payment MOMO for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-            // initiate MoMo payment
             Map<String, Object> momoResponse = paymentService.createOrderMomo(orderRequest);
             System.out.println("MoMo response khi product: " + momoResponse);
             if ("Success".equals(momoResponse.get("message"))) {
-                // schedule a task to check payment status every 10 seconds
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 final int[] count = {0};
                 scheduler.scheduleAtFixedRate(() -> {
@@ -159,13 +154,11 @@ public class UserOrderController {
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         }
-                        // Cancel the scheduled task
                         scheduler.shutdown();
                     } else {
                         System.out.println("Payment status is not OK. Retrying...");
                     }
                 }, 0, 10, TimeUnit.SECONDS);
-                // return response with payment URL
                 APIRespone apiResponse = new APIRespone(true, "MoMo payment initiated", momoResponse);
                 return ResponseEntity.ok(apiResponse);
             } else {
@@ -173,7 +166,6 @@ public class UserOrderController {
             }
         }
         else if ("CASH".equalsIgnoreCase(paymentMethod)) {
-            // proceed with normal order placement
             orderRequest.setOrderId(orderCode);
             orderRequest.setUserId(userId);
             orderRequest.setOrderInfo("Payment CASH for order " + orderCode);
@@ -193,6 +185,7 @@ public class UserOrderController {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Unsupported payment method", ""));
         }
     }
+
     @PostMapping("/create")
     public ResponseEntity<APIRespone> placeOrder(@RequestBody PaymentRequest orderRequest) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         String paymentMethod = orderRequest.getPaymentMethod();
@@ -245,12 +238,11 @@ public class UserOrderController {
                                 int quantity = cart.getQuantity();
                                 if (cart.getProduct() != null) {
                                     Long productId = cart.getProduct().getProductId();
-                                    orderService.updateQuantityProduct(productId, null, storeId, quantity); // Cập nhật cho sản phẩm
+                                    orderService.updateQuantityProduct(productId, null, storeId, quantity);
                                 }
-
                                 if (cart.getCombo() != null) {
                                     Long comboId = cart.getCombo().getComboId();
-                                    orderService.updateQuantityProduct(null, comboId, storeId, quantity); // Cập nhật cho combo
+                                    orderService.updateQuantityProduct(null, comboId, storeId, quantity);
                                 }
                             }
                         }
@@ -259,7 +251,6 @@ public class UserOrderController {
                         System.out.println("data: " + data);
                         paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                        // dung lai
                         scheduler.shutdown();
                     } else {
                         System.out.println("Payment status is not OK. Retrying...");
@@ -283,10 +274,8 @@ public class UserOrderController {
             orderRequest.setOrderInfo("Payment MOMO for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-            // initiate MoMo payment
             Map<String, Object> momoResponse = paymentService.createOrderMomo(orderRequest);
             if ("Success".equals(momoResponse.get("message"))) {
-                // schedule a task to check payment status every 10 seconds
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 final int[] count = {0};
                 scheduler.scheduleAtFixedRate(() -> {
@@ -299,18 +288,17 @@ public class UserOrderController {
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
                         ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
                         if (response.getStatusCode() == HttpStatus.OK) {
-                            // duyệt qua tất cả các giỏ hàng
                             for (Cart cart : cartItems) {
                                 Long storeId = cart.getStoreId();
                                 int quantity = cart.getQuantity();
                                 if (cart.getProduct() != null) {
                                     Long productId = cart.getProduct().getProductId();
-                                    orderService.updateQuantityProduct(productId, null, storeId, quantity); // Cập nhật cho sản phẩm
+                                    orderService.updateQuantityProduct(productId, null, storeId, quantity);
                                 }
 
                                 if (cart.getCombo() != null) {
                                     Long comboId = cart.getCombo().getComboId();
-                                    orderService.updateQuantityProduct(null, comboId, storeId, quantity); // Cập nhật cho combo
+                                    orderService.updateQuantityProduct(null, comboId, storeId, quantity);
                                 }
                             }
                         }
@@ -318,13 +306,11 @@ public class UserOrderController {
                         OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                         paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
-                        // Cancel the scheduled task
                         scheduler.shutdown();
                     } else {
                         System.out.println("Payment status is not OK. Retrying...");
                     }
                 }, 0, 10, TimeUnit.SECONDS);
-                // return response with payment URL
                 APIRespone apiResponse = new APIRespone(true, "MoMo payment initiated", momoResponse);
                 return ResponseEntity.ok(apiResponse);
             } else {
@@ -333,7 +319,6 @@ public class UserOrderController {
         }
 
         else if ("CASH".equalsIgnoreCase(paymentMethod)) {
-            // proceed with normal order placement
             orderRequest.setOrderId(orderCode);
             orderRequest.setUserId(userId);
             orderRequest.setOrderInfo("Payment CASH for order " + orderCode);
@@ -342,18 +327,16 @@ public class UserOrderController {
             ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
             if (response.getStatusCode() == HttpStatus.OK) {
                 if (response.getStatusCode() == HttpStatus.OK) {
-                    // Duyệt qua tất cả các giỏ hàng
                     for (Cart cart : cartItems) {
                         Long storeId = cart.getStoreId();
                         int quantity = cart.getQuantity();
                         if (cart.getProduct() != null) {
                             Long productId = cart.getProduct().getProductId();
-                            orderService.updateQuantityProduct(productId, null, storeId, quantity); // Cập nhật cho sản phẩm
+                            orderService.updateQuantityProduct(productId, null, storeId, quantity);
                         }
-
                         if (cart.getCombo() != null) {
                             Long comboId = cart.getCombo().getComboId();
-                            orderService.updateQuantityProduct(null, comboId, storeId, quantity); // Cập nhật cho combo
+                            orderService.updateQuantityProduct(null, comboId, storeId, quantity);
                         }
                     }
                 }

@@ -324,9 +324,9 @@ public class OrderServiceImpl implements IOrderService {
         }
         return ResponseEntity.badRequest().body(new APIRespone(false, "Neither product nor combo found", ""));
     }
+    @Transactional
     @Override
     public ResponseEntity<APIRespone> updateOrderStatus(String orderCode,String status) {
-        System.out.println("vao updateOrderStatus");
         Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
         if (orderOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));

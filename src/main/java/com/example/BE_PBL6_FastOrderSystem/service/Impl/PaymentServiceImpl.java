@@ -150,6 +150,7 @@ public class PaymentServiceImpl implements IPaymentService {
         }
         return result;
     }
+    @Transactional
     @Override
     public ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Long orderId, Long userId) {
         Optional<Order> optionalOrder = orderRepository.findByOrderId(orderId);
@@ -158,7 +159,6 @@ public class PaymentServiceImpl implements IPaymentService {
         }
 
         Order order = optionalOrder.get();
-
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentDate(LocalDateTime.now());
@@ -174,17 +174,18 @@ public class PaymentServiceImpl implements IPaymentService {
         paymentRepository.save(payment);
 
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
-        // group cac order detail theo store
+
+        // nhom cac OrderDetail theo Store
         Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
                 .collect(Collectors.groupingBy(OrderDetail::getStore));
-        System.out.println("Grouped order details by store"+ groupedOrderDetails);
+
         for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
             Store store = entry.getKey();
-            System.out.println("Store: " + store.getStoreName());
             List<OrderDetail> orderDetailList = entry.getValue();
-            // tính tổng số tiền của các OrderDetail
+
+            // tinh tong tien cua cac OrderDetail cua Store
             double totalAmount = orderDetailList.stream().mapToDouble(OrderDetail::getTotalPrice).sum();
-            // lưu PaymentDetail cho từng store
+
             PaymentDetail paymentDetail = new PaymentDetail();
             paymentDetail.setPayment(payment);
             paymentDetail.setOrder(order);
@@ -194,10 +195,12 @@ public class PaymentServiceImpl implements IPaymentService {
             paymentDetail.setCreatedAt(LocalDateTime.now());
             paymentDetail.setUpdatedAt(LocalDateTime.now());
             paymentDetailRepository.save(paymentDetail);
+
             System.out.println("Payment detail saved for store: " + store.getStoreName());
         }
         return ResponseEntity.ok(new APIRespone(true, "Payment and payment details saved successfully", ""));
     }
+
         @Override
         public Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException {
         Long amount = orderRequest.getAmount();
