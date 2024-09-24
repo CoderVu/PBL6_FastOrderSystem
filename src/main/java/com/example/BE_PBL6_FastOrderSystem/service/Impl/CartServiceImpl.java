@@ -117,8 +117,8 @@ public class CartServiceImpl implements ICartService {
         // Them combo vao cart
         Cart cartItem = new Cart();
         cartItem.setUser(user);
-        cartItem.setCombo(combo); // Set combo
-        cartItem.setDrinkProduct(drinkProduct); // Set drink product
+        cartItem.setCombo(combo);
+        cartItem.setDrinkProduct(drinkProduct);
         cartItem.setQuantity(cartComboRequest.getQuantity());
         cartItem.setUnitPrice(combo.getComboPrice());
         cartItem.setTotalPrice(combo.getComboPrice() * cartComboRequest.getQuantity());

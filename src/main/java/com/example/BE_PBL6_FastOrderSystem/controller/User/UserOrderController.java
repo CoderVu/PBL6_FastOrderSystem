@@ -60,6 +60,7 @@ public class UserOrderController {
             ResponseEntity<APIRespone> response = paymentZaloPayCheckStatusController.getStatus(apptransid);
             Map<String, Object> responseData = (Map<String, Object>) response.getBody().getData();
             if (response.getStatusCode() == HttpStatus.OK && "Success".equals(responseData.get("status"))) {
+
                 return ResponseEntity.ok(new APIRespone(true, "Payment status is successful", responseData));
             } else {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Payment status check failed", ""));
@@ -111,6 +112,8 @@ public class UserOrderController {
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
                             ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                             OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
+
+                            System.out.println("data: " + data);
                             paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                             orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         }
@@ -253,6 +256,7 @@ public class UserOrderController {
                         }
                         ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                         OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
+                        System.out.println("data: " + data);
                         paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         // dung lai

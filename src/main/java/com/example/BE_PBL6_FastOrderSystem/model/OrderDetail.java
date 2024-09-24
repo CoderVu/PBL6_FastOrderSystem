@@ -36,7 +36,7 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "store_id")
     private Store store;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipper_order_id")
     private ShipperOrder shipperOrder;
 

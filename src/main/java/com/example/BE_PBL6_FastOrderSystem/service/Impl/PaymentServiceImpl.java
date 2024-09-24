@@ -150,16 +150,15 @@ public class PaymentServiceImpl implements IPaymentService {
         }
         return result;
     }
-    @Transactional
     @Override
     public ResponseEntity<APIRespone> savePayment(PaymentRequest orderRequest, Long orderId, Long userId) {
         Optional<Order> optionalOrder = orderRepository.findByOrderId(orderId);
         if (!optionalOrder.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Order not found", ""));
         }
-    
+
         Order order = optionalOrder.get();
-        
+
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentDate(LocalDateTime.now());
@@ -173,7 +172,7 @@ public class PaymentServiceImpl implements IPaymentService {
         payment.setLang(orderRequest.getLang());
         payment.setExtraData(orderRequest.getExtraData());
         paymentRepository.save(payment);
-    
+
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
         // group cac order detail theo store
         Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
@@ -183,7 +182,6 @@ public class PaymentServiceImpl implements IPaymentService {
             Store store = entry.getKey();
             System.out.println("Store: " + store.getStoreName());
             List<OrderDetail> orderDetailList = entry.getValue();
-
             // tính tổng số tiền của các OrderDetail
             double totalAmount = orderDetailList.stream().mapToDouble(OrderDetail::getTotalPrice).sum();
             // lưu PaymentDetail cho từng store

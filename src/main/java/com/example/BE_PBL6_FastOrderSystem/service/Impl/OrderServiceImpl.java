@@ -98,7 +98,6 @@ public class OrderServiceImpl implements IOrderService {
         order.setUpdatedAt(LocalDateTime.now());
         order.setUser(user);
         order.setDeliveryAddress(deliveryAddress);
-
         List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
@@ -114,76 +113,40 @@ public class OrderServiceImpl implements IOrderService {
             Store store = storeRepository.findById(cartItem.getStoreId()).orElseThrow(() -> new EntityNotFoundException("Store not found"));
             orderDetail.setStore(store);
             orderDetail.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
-//            //
-//            ShipperOrder shipperOrder = shipperOrderRepository.findByStoreAndDeliveryStatus(store, "Chưa giao")
-//                    .get(() -> {
-//                        ShipperOrder newShipperOrder = new ShipperOrder();
-//                        newShipperOrder.setStore(store);
-//                        newShipperOrder.setShipper(defaultShipper);
-//                        newShipperOrder.setCreatedAt(LocalDateTime.now());
-//                        newShipperOrder.setDeliveryStatus("Chưa giao");
-//                        return shipperOrderRepository.save(newShipperOrder);
-//                    });
-//
-//            // Liên kết OrderDetail với ShipperOrder
-//            orderDetail.setShipperOrder(shipperOrder);
-
             return orderDetail;
         }).collect(Collectors.toList());
+        // Nhóm các order detail theo cửa hàng
+        Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
+                .collect(Collectors.groupingBy(OrderDetail::getStore));
+        for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
+            Store store = entry.getKey();
+            List<OrderDetail> orderDetailList = entry.getValue();
+            // Tìm shipper gần nhất nhưng không phải shipper đang bận
+            User nearestShipper = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("No available shippers found nearby"));
+            ShipperOrder newShipperOrder = new ShipperOrder();
+            newShipperOrder.setStore(store);
+            newShipperOrder.setShipper(nearestShipper);
+            newShipperOrder.setCreatedAt(LocalDateTime.now());
+            newShipperOrder.setDeliveryStatus("Chưa giao");
+            // set the shipper to inactive
+            nearestShipper.setIsActive(false);
+            shipperRepository.save(nearestShipper);
+            shipperOrderRepository.save(newShipperOrder);
+            // Gán ShipperOrder cho tất cả các OrderDetail của store này
+            orderDetailList.forEach(orderDetail -> orderDetail.setShipperOrder(newShipperOrder));
+        }
+        // Lưu các order detail
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
-
         orderRepository.save(order);
         cartItemRepository.deleteAll(cartItems);
 
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
-    public ResponseEntity<APIRespone> processProductOrderNow(Long userId, String paymentMethod, Long productId, Long storeId, Integer quantity, String size ,String deliveryAddress, String orderCode){
-        Optional<Product> productOptional = productRepository.findByProductId(productId);
-        if (productOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
-        }
-        Product product = productOptional.get();
-        Optional<Store> storeOptional = storeRepository.findById(storeId);
-        if (storeOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
-        }
-        PaymentMethod paymentMethodEntity = paymentMethodRepository.findByName(paymentMethod);
-        if (paymentMethodEntity == null) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
-        }
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
-        }
-        User user = userOptional.get();
-        Order order = new Order();
-        order.setOrderDate(LocalDateTime.now());
-        StatusOrder statusOrder = statusOrderRepository.findByStatusName("Đơn hàng mới");
-        order.setStatus(statusOrder);
-        order.setOrderCode(orderCode);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
-        order.setUser(user);
-        order.setDeliveryAddress(deliveryAddress);
-        Size s = sizeRepository.findByName(size);
-        OrderDetail orderDetail = new OrderDetail();
-        orderDetail.setOrder(order);
-        orderDetail.setProduct(product);
-        orderDetail.setQuantity(quantity);
-        orderDetail.setUnitPrice(product.getPrice());
-        orderDetail.setTotalPrice(product.getPrice() * quantity);
-        orderDetail.setSize(s);
-        orderDetail.setStore(storeOptional.get());
-        orderDetail.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
-        // Use a mutable list instead of List.of(...)
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        orderDetails.add(orderDetail);
-        order.setOrderDetails(orderDetails);
-        order.setTotalAmount(orderDetail.getTotalPrice());
-        orderRepository.save(order);
-        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
-        }
+
     @Override
     public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, Long drinkId, Long storeId, Integer quantity, String size, String deliveryAddress, String orderCode) {
         Product product = null;
@@ -223,7 +186,6 @@ public class OrderServiceImpl implements IOrderService {
         if (userOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
         }
-
         User user = userOptional.get();
         Order order = new Order();
         order.setOrderDate(LocalDateTime.now());
@@ -235,7 +197,6 @@ public class OrderServiceImpl implements IOrderService {
         order.setUser(user);
         order.setDeliveryAddress(deliveryAddress);
         Size s = sizeRepository.findByName(size);
-
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.setOrder(order);
         orderDetail.setProduct(product);
@@ -249,7 +210,6 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setUnitPrice(combo.getComboPrice());
             orderDetail.setTotalPrice(combo.getComboPrice() * quantity);
         }
-
         // Thiết lập thông tin nước uống nếu có
         if (drinkId != null) {
             Optional<Product> drinkOptional = productRepository.findByProductId(drinkId);
@@ -261,7 +221,6 @@ public class OrderServiceImpl implements IOrderService {
                 orderDetail.setDrinkProduct(drink);
             }
         }
-
         orderDetail.setSize(s);
         orderDetail.setStore(storeOptional.get());
         orderDetail.setStatus(statusOrder);
@@ -269,6 +228,31 @@ public class OrderServiceImpl implements IOrderService {
         orderDetails.add(orderDetail);
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(orderDetail.getTotalPrice());
+        // Nhóm các order detail theo cửa hàng
+        Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
+                .collect(Collectors.groupingBy(OrderDetail::getStore));
+        for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
+            Store store = entry.getKey();
+            List<OrderDetail> orderDetailList = entry.getValue();
+            // Tìm shipper gần nhất nhưng không phải shipper đang bận
+            User nearestShipper = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("No available shippers found nearby"));
+            ShipperOrder newShipperOrder = new ShipperOrder();
+            newShipperOrder.setStore(store);
+            newShipperOrder.setShipper(nearestShipper);
+            newShipperOrder.setCreatedAt(LocalDateTime.now());
+            newShipperOrder.setDeliveryStatus("Chưa giao");
+            // set the shipper to inactive
+            nearestShipper.setIsActive(false);
+            shipperRepository.save(nearestShipper);
+            shipperOrderRepository.save(newShipperOrder);
+            // Gán ShipperOrder cho tất cả các OrderDetail của store này
+            orderDetailList.forEach(orderDetail1 -> orderDetail1.setShipperOrder(newShipperOrder));
+        }
+        // Lưu các order detail
+        order.setOrderDetails(orderDetails);
         orderRepository.save(order);
 
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
