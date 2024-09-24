@@ -52,6 +52,9 @@ public class WebSecurityConfig {
     private static final String[] STAFF = {
             "/api/v1/staff/**"
     };
+    private static final String[] SHIPPER = {
+            "/api/v1/shipper/**"
+    };
     private static final String[] USER = {
             "/api/v1/user/**"
     };
@@ -112,6 +115,8 @@ public class WebSecurityConfig {
                         .requestMatchers(MOMO).permitAll()
                         .requestMatchers(ZALO).permitAll()
                         .requestMatchers(USER).hasAnyRole("ADMIN", "USER", "OWNER")
+                        .requestMatchers(STAFF).hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers(SHIPPER).hasAnyRole("SHIPPER", "ADMIN", "OWNER")
                         .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers(ADMIN).hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
