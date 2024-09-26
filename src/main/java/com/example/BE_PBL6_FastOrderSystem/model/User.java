@@ -28,6 +28,8 @@ public class User {
     private Double latitude;
     @Column(name = "is_active")
     private Boolean isActive;
+    @Column(name = "is_busy")
+    private Boolean isBusy = false;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean accountLocked;

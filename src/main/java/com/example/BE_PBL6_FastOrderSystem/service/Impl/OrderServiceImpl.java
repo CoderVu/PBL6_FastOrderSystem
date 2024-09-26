@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +106,7 @@ public class OrderServiceImpl implements IOrderService {
             order.setLongitude(longitude);
             order.setLatitude(latitude);
         }
+
         List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
@@ -138,13 +140,17 @@ public class OrderServiceImpl implements IOrderService {
                 newShipperOrder.setStore(store);
                 newShipperOrder.setShipper(nearestShipper);
                 newShipperOrder.setCreatedAt(LocalDateTime.now());
-                newShipperOrder.setStatus(false);
+                newShipperOrder.setStatus("Chưa nhận");
                 // set the shipper to inactive
                 nearestShipper.setIsActive(false);
                 shipperRepository.save(nearestShipper);
                 shipperOrderRepository.save(newShipperOrder);
                 // Gán ShipperOrder cho tất cả các OrderDetail của store này
                 orderDetailList.forEach(orderDetail -> orderDetail.setShipperOrder(newShipperOrder));
+                // Tính phí vận chuyển
+                Double shippingFee = calculateShippingFee(order, store);
+                order.setShippingFee(shippingFee);
+
             }
         }
         // Lưu các order detail
@@ -260,21 +266,45 @@ public class OrderServiceImpl implements IOrderService {
                 newShipperOrder.setStore(store);
                 newShipperOrder.setShipper(nearestShipper);
                 newShipperOrder.setCreatedAt(LocalDateTime.now());
-                newShipperOrder.setStatus(false);
+                newShipperOrder.setStatus("Chưa nhận");
                 // set the shipper to inactive
                 nearestShipper.setIsActive(false);
                 shipperRepository.save(nearestShipper);
                 shipperOrderRepository.save(newShipperOrder);
                 // Gán ShipperOrder cho tất cả các OrderDetail của store này
                 orderDetailList.forEach(orderDetail1 -> orderDetail1.setShipperOrder(newShipperOrder));
+                // tính phí vận chuyển
+                Double shippingFee = calculateShippingFee(order, store);
+                order.setShippingFee(shippingFee);
             }
         }
-        // Lưu các order detail
         order.setOrderDetails(orderDetails);
         orderRepository.save(order);
 
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
+    private Double calculateShippingFee(Order order, Store store) {
+        double storeLatitude = store.getLatitude();
+        double storeLongitude = store.getLongitude();
+        double deliveryLatitude = order.getLatitude();
+        double deliveryLongitude = order.getLongitude();
+        // tinh khoang cach giua 2 diem tren trai dat
+        final int EARTH_RADIUS = 6371; // ban kinh trai dat
+        double latDistance = Math.toRadians(deliveryLatitude - storeLatitude);
+        double lonDistance = Math.toRadians(deliveryLongitude - storeLongitude);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(storeLatitude)) * Math.cos(Math.toRadians(deliveryLatitude))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = EARTH_RADIUS * c;
+        System.out.println("Distance: " + distance);
+        double shippingFeePerKm = 10000;
+        double shippingFee = distance * shippingFeePerKm;
+        // bội số của 1000
+        double roundedShippingFee = Math.floor(shippingFee / 1000) * 1000;
+        return roundedShippingFee;
+    }
+
 
     @Override
     public Long calculateOrderNowAmount(Long productId, Long comboId, int quantity) {
@@ -296,6 +326,45 @@ public class OrderServiceImpl implements IOrderService {
         }
         return null;
     }
+
+    @Scheduled(fixedRate = 10000) // 10 seconds
+    public void autoAssignNewShipper() {
+        List<ShipperOrder> unconfirmedShipperOrders = shipperOrderRepository.findAllByStatus("Chưa nhận");
+
+        for (ShipperOrder shipperOrder : unconfirmedShipperOrders) {
+            if (shipperOrder.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
+                User currentShipper = shipperOrder.getShipper();
+                if (currentShipper != null) {
+                    currentShipper.setIsBusy(true);
+                    currentShipper.setIsActive(true);
+                    shipperRepository.save(currentShipper);
+                    System.out.println("Current shipper deactivated: " + currentShipper.getId());
+                }
+
+                if (shipperOrder.getLastAssignedAt() == null || shipperOrder.getLastAssignedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
+                    Store store = shipperOrder.getStore();
+                    Optional<User> newShipperOptional = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
+                            .stream()
+                            .findFirst();
+
+                    if (newShipperOptional.isPresent()) {
+                        User newShipper = newShipperOptional.get();
+                        System.out.println("New shipper assigned: " + newShipper.getId());
+                        newShipper.setIsActive(false);
+                        newShipper.setIsBusy(false);
+                        shipperRepository.save(newShipper);
+
+                        shipperOrder.setShipper(newShipper);
+                        shipperOrder.setLastAssignedAt(LocalDateTime.now());
+                        shipperOrderRepository.save(shipperOrder);
+                    } else {
+                        System.out.println("No available shippers found");
+                    }
+                }
+            }
+        }
+    }
+
     @Transactional
     @Override
     public ResponseEntity<APIRespone> updateQuantityProduct(Long productId, Long comboId, Long storeId, int quantity) {

@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class ShipperOrderResponse {
     private Long shipperId;
-    private Boolean status;
+    private String status;
     private LocalDateTime receivedAt;
     private LocalDateTime deliveredAt;
     private Long storeId;

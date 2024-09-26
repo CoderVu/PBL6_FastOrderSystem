@@ -78,7 +78,7 @@ public class ShipperOrderImpl implements IShipperOrderService {
 
         if (isAccepted) {
             // shipper chấp nhận đơn hàng
-            shipperOrder.setStatus(true);
+            shipperOrder.setStatus("Đang giao hàng");
             shipperOrder.setReceivedAt(LocalDateTime.now());
             shipperOrderRepository.save(shipperOrder);
             // cập nhật trạng thái của shipper
@@ -87,7 +87,8 @@ public class ShipperOrderImpl implements IShipperOrderService {
             return ResponseEntity.ok(new APIRespone(true, "Shipper accepted the order", ""));
         } else {
             // shipper từ chối đơn hàng
-            shipperOrder.setStatus(false);
+            shipperOrder.setStatus("Đã từ chối");
+            shipperOrderRepository.save(shipperOrder);
             // tìm shipper khác thay thế
             Store store = shipperOrder.getStore();
             Optional<User> newShipperOptional = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
@@ -158,7 +159,7 @@ public class ShipperOrderImpl implements IShipperOrderService {
             order.setStatus(orderStatus);
             orderRepository.save(order);
         }
-        shipperOrder.setStatus(false);
+        shipperOrder.setStatus("Đã giao hàng");
         shipperOrder.setReceivedAt(LocalDateTime.now());
         shipperOrderRepository.save(shipperOrder);
         return ResponseEntity.ok(new APIRespone(true, "Order delivered successfully", ""));
