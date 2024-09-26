@@ -19,4 +19,5 @@ public interface IStoreService {
     ResponseEntity <APIRespone>  updateStore(Long id, StoreRequest storeRequest);
 
     ResponseEntity<APIRespone> deleteStore(Long id);
+
 }

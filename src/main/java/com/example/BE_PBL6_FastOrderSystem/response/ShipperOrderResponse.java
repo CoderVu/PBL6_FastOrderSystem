@@ -8,18 +8,45 @@ import java.util.List;
 
 @Data
 public class ShipperOrderResponse {
-    private OrderResponse order;
     private Long shipperId;
-    private String status;
+    private Boolean status;
     private LocalDateTime deliveryTime;
+    private Long storeId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long orderId;
+    private String orderCode;
+    private Long userId;
+    private LocalDateTime orderDate;
+    private Double totalAmount;
+    private String deliveryAddress;
+    private Double longitude;
+    private Double latitude;
+    private List<OrderDetailResponse> orderDetails;
+
 
     public ShipperOrderResponse(ShipperOrder shipperOrder) {
-        this.order = new OrderResponse(shipperOrder.getOrderDetails().get(0).getOrder());
         this.shipperId = shipperOrder.getShipper().getId();
-        this.status = shipperOrder.getDeliveryStatus();
+        this.status = shipperOrder.getStatus();
+        this.deliveryTime = shipperOrder.getDeliveryTime();
+        this.storeId = shipperOrder.getStore().getStoreId();
         this.createdAt = shipperOrder.getCreatedAt();
         this.updatedAt = shipperOrder.getUpdatedAt();
+        this.orderId = shipperOrder.getOrderDetails().get(0).getOrder().getOrderId();
+        this.orderCode = shipperOrder.getOrderDetails().get(0).getOrder().getOrderCode();
+        this.userId = shipperOrder.getOrderDetails().get(0).getOrder().getUser().getId();
+        this.orderDate = shipperOrder.getOrderDetails().get(0).getOrder().getOrderDate();
+        this.totalAmount = shipperOrder.getOrderDetails().stream()
+                .filter(orderDetail -> orderDetail.getStore().getStoreId().equals(this.storeId))
+                .mapToDouble(orderDetail -> orderDetail.getTotalPrice())
+                .sum(); // sum total price of order details of this store
+        this.deliveryAddress = shipperOrder.getOrderDetails().get(0).getOrder().getDeliveryAddress();
+        this.longitude = shipperOrder.getOrderDetails().get(0).getOrder().getLongitude();
+        this.latitude = shipperOrder.getOrderDetails().get(0).getOrder().getLatitude();
+        this.orderDetails = shipperOrder.getOrderDetails().stream()
+                .map(OrderDetailResponse::new)
+                .collect(java.util.stream.Collectors.toList());
+
     }
+
 }

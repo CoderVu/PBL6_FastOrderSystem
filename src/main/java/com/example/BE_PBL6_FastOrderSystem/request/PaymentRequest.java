@@ -24,6 +24,8 @@ public class PaymentRequest {
     private Long order_id;
     private Long userId;
     private String deliveryAddress;
+    private Double longitude;
+    private Double latitude;
     private String orderInfo;
     private String lang;
     private String extraData;

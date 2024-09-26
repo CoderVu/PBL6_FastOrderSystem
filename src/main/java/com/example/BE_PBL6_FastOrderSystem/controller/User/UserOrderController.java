@@ -79,6 +79,8 @@ public class UserOrderController {
         Integer quantity = orderRequest.getQuantity();
         String size = orderRequest.getSize();
         String deliveryAddress = orderRequest.getDeliveryAddress();
+        Double longitude = orderRequest.getLongitude();
+        Double latitude = orderRequest.getLatitude();
         String orderCode = orderService.generateUniqueOrderCode();
         Long userId = FoodUserDetails.getCurrentUserId();
         orderRequest.setOrderId(orderCode);
@@ -105,7 +107,7 @@ public class UserOrderController {
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
                     System.out.println("Payment status response: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, orderCode);
+                        ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, longitude,latitude ,orderCode);
                         System.out.println("Response khi processOrderNow = ZALOPAY: " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
@@ -146,7 +148,7 @@ public class UserOrderController {
                     }
                     ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, orderCode);
+                        ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, longitude,latitude, orderCode);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
                             ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
@@ -171,7 +173,7 @@ public class UserOrderController {
             orderRequest.setOrderInfo("Payment CASH for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-            ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress, orderCode);
+            ResponseEntity<APIRespone> response = orderService.processOrderNow(userId, paymentMethod, productId, comboId, drinkId ,storeId, quantity, size, deliveryAddress,  longitude,latitude, orderCode);
             System.out.println("Response order khi processOrderNow = CASH: " + response);
             if (response.getStatusCode() == HttpStatus.OK) {
                 orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
@@ -191,6 +193,8 @@ public class UserOrderController {
         String paymentMethod = orderRequest.getPaymentMethod();
         List<Long> cartIds = orderRequest.getCartIds();
         String deliveryAddress = orderRequest.getDeliveryAddress();
+        Double longitude = orderRequest.getLongitude();
+        Double latitude = orderRequest.getLatitude();
 
         List<Cart> cartItems = cartIds.stream()
                 .flatMap(cartId -> orderService.getCartItemsByCartId(cartId).stream())
@@ -230,7 +234,7 @@ public class UserOrderController {
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
                     System.out.println("Payment status response: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
+                        ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress,longitude,latitude, orderCode);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             // duyệt qua tất cả các giỏ hàng
                             for (Cart cart : cartItems) {
@@ -286,7 +290,7 @@ public class UserOrderController {
                     }
                     ResponseEntity<APIRespone> statusResponse = checkPaymentMomoStatus(orderRequest);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
+                        ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress,  longitude,latitude, orderCode);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             for (Cart cart : cartItems) {
                                 Long storeId = cart.getStoreId();
@@ -324,7 +328,7 @@ public class UserOrderController {
             orderRequest.setOrderInfo("Payment CASH for order " + orderCode);
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
-            ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress, orderCode);
+            ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress,  longitude,latitude, orderCode);
             if (response.getStatusCode() == HttpStatus.OK) {
                 if (response.getStatusCode() == HttpStatus.OK) {
                     for (Cart cart : cartItems) {

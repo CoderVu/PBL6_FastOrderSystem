@@ -23,7 +23,7 @@ public class ShipperOrder {
     private List<OrderDetail> orderDetails;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String deliveryStatus;
+    private Boolean status;
     private LocalDateTime deliveryTime;
 }
 

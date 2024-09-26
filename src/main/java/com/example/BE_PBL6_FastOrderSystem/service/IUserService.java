@@ -15,6 +15,8 @@ public interface IUserService {
 
     ResponseEntity<APIRespone> getUsers(String role);
 
+    ResponseEntity<APIRespone> getLocations(Long userId);
+
     ResponseEntity<APIRespone> lockUserAccount(Long userId) throws UserNotFoundException;
 
     ResponseEntity<APIRespone> getUserProfile(Long userId);

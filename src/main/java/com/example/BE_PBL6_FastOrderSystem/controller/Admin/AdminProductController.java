@@ -57,4 +57,13 @@ public class AdminProductController {
             @RequestParam("productId") Long productId) {
         return productService.applyProductToAllStores(productId);
     }
+    @PostMapping("/apply-all-products-to-store")
+    public ResponseEntity<APIRespone> applyAllProductsToStore(
+            @RequestParam("storeId") Long storeId) {
+        return productService.applyAllProductsToStore(storeId);
+    }
+    @PostMapping("/apply-all-products-to-all-stores")
+    public ResponseEntity<APIRespone> applyAllProductsToAllStores() {
+        return productService.applyAllProductsToAllStores();
+    }
 }

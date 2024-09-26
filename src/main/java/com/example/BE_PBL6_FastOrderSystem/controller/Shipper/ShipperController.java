@@ -18,14 +18,20 @@ public class ShipperController {
     private Long getCurrentUserId() {
         return FoodUserDetails.getCurrentUserId();
     }
-    @GetMapping("/order")
-    public ResponseEntity<APIRespone> getShipperOrderbyOderDetailId (){
+    @PostMapping("/order/approve/{shipperOrderId}")
+    public ResponseEntity<APIRespone> approveShipperOrder(@PathVariable Long shipperOrderId, @RequestParam Boolean isAccepted){
         Long shipperId= getCurrentUserId();
-        System.out.println(shipperId);
-        return shipperOrderService.getShipperOrderbyOderDetailId(shipperId);
+        return shipperOrderService.approveShipperOrder(shipperId,shipperOrderId,isAccepted);
     }
-  @GetMapping("/order/{shipperOrderId}")
+    @GetMapping("/order/{shipperOrderId}")
     public ResponseEntity<APIRespone> getShipperOrderbyId (@PathVariable Long shipperOrderId){
-        return shipperOrderService.getShipperOrderbyId(shipperOrderId);
+        Long shipperId= getCurrentUserId();
+        return shipperOrderService.getShipperOrderbyId(shipperId,shipperOrderId);
+
+    }
+    @PostMapping("/order/update-status/{shipperOrderId}")
+    public ResponseEntity<APIRespone> updateStatusOrder(@PathVariable Long shipperOrderId, @RequestParam Long OderDetailId){
+        Long shipperId= getCurrentUserId();
+        return shipperOrderService.updateStatusOrderDetail(shipperId,shipperOrderId, OderDetailId);
     }
 }

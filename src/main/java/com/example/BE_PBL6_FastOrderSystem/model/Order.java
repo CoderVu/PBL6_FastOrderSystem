@@ -26,6 +26,10 @@ public class Order {
     @JoinColumn(name = "status_id")
     private StatusOrder status;
     private String deliveryAddress;
+    @Column(name = "longitude", columnDefinition = "DOUBLE")
+    private Double longitude;
+    @Column(name = "latitude", columnDefinition = "DOUBLE")
+    private Double latitude;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @PrePersist
@@ -51,6 +55,8 @@ public class Order {
                 ", totalAmount=" + totalAmount +
                 ", status='" + status + '\'' +
                 ", deliveryAddress='" + deliveryAddress + '\'' +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';

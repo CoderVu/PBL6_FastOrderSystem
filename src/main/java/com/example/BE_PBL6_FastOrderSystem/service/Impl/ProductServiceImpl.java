@@ -76,6 +76,61 @@ public class ProductServiceImpl implements IProductService {
         }
         return (long) (product.get().getPrice() * quantity);
     }
+
+    @Override
+    public ResponseEntity<APIRespone> applyAllProductsToAllStores() {
+        List<Product> products = productRepository.findAll();
+        List<Store> stores = storeRepository.findAll();
+        int initialProductStoreCount = productStoreRepository.findAll().size();
+        for (Product product : products) {
+            for (Store store : stores) {
+                boolean storeHasProduct = store.getProductStores().stream()
+                        .anyMatch(productStore -> productStore.getProduct().getProductId().equals(product.getProductId()));
+                if (!storeHasProduct) {
+                    ProductStore productStore = new ProductStore();
+                    productStore.setProduct(product);
+                    productStore.setStore(store);
+                    productStore.setStockQuantity(0);
+                    product.getProductStores().add(productStore);
+                    store.getProductStores().add(productStore);
+                    productStoreRepository.save(productStore);
+                }
+            }
+        }
+        if (initialProductStoreCount == productStoreRepository.findAll().size()) {
+            return new ResponseEntity<>(new APIRespone(false, "All products already applied to all stores", ""), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new APIRespone(true, "All products applied to all stores successfully", ""), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> applyAllProductsToStore(Long storeId) {
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+        Store store = storeOptional.get();
+        List<Product> products = productRepository.findAll();
+        int initialProductStoreCount = productStoreRepository.findAll().size();
+        for (Product product : products) {
+            boolean storeHasProduct = store.getProductStores().stream()
+                    .anyMatch(productStore -> productStore.getProduct().getProductId().equals(product.getProductId()));
+            if (!storeHasProduct) {
+                ProductStore productStore = new ProductStore();
+                productStore.setProduct(product);
+                productStore.setStore(store);
+                productStore.setStockQuantity(0);
+                product.getProductStores().add(productStore);
+                store.getProductStores().add(productStore);
+                productStoreRepository.save(productStore);
+            }
+        }
+        if (initialProductStoreCount == productStoreRepository.findAll().size()) {
+            return new ResponseEntity<>(new APIRespone(false, "All products already applied to store", ""), HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(new APIRespone(true, "All products applied to store successfully", ""), HttpStatus.OK);
+    }
+
     @Override
     public ResponseEntity<APIRespone> getProductsByCategoryId(Long categoryId) {
         Optional<Category> category = categoryRepository.findById(categoryId);
