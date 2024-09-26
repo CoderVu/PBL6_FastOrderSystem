@@ -18,20 +18,39 @@ public class ShipperController {
     private Long getCurrentUserId() {
         return FoodUserDetails.getCurrentUserId();
     }
+    @GetMapping("/order/all")
+
+    public ResponseEntity<APIRespone> getAllOrder(){
+        return shipperOrderService.getAll();
+    } // lay ra tat ca don hang
+    @GetMapping("/order/all-one-shipper")
+    public ResponseEntity<APIRespone> getAllShipperOrder(){
+        Long shipperId= getCurrentUserId();
+        return shipperOrderService.getAllShipperOrder(shipperId);
+    } // lay ra tat ca don hang cua 1 shipper
+    @PostMapping("/location")
+    public ResponseEntity<APIRespone> updateShipperLocation(@RequestParam Double newLatitude, @RequestParam Double newLongitude){
+        Long shipperId= getCurrentUserId();
+        return shipperOrderService.updateShipperLocation(shipperId,newLatitude,newLongitude);
+    } // cap nhat vi tri cua shipper
+    @GetMapping("/order/{shipperOrderId}")
+    public ResponseEntity<APIRespone> getShipperOrderbyId (@PathVariable Long shipperOrderId){
+        Long shipperId= getCurrentUserId();
+        return shipperOrderService.getShipperOrderbyId(shipperId,shipperOrderId);
+    } // lay ra 1 don hang cu the cua 1 shipper
     @PostMapping("/order/approve/{shipperOrderId}")
     public ResponseEntity<APIRespone> approveShipperOrder(@PathVariable Long shipperOrderId, @RequestParam Boolean isAccepted){
         Long shipperId= getCurrentUserId();
         return shipperOrderService.approveShipperOrder(shipperId,shipperOrderId,isAccepted);
     }
-    @GetMapping("/order/{shipperOrderId}")
-    public ResponseEntity<APIRespone> getShipperOrderbyId (@PathVariable Long shipperOrderId){
-        Long shipperId= getCurrentUserId();
-        return shipperOrderService.getShipperOrderbyId(shipperId,shipperOrderId);
-
-    }
     @PostMapping("/order/update-status/{shipperOrderId}")
     public ResponseEntity<APIRespone> updateStatusOrder(@PathVariable Long shipperOrderId, @RequestParam Long OderDetailId){
         Long shipperId= getCurrentUserId();
         return shipperOrderService.updateStatusOrderDetail(shipperId,shipperOrderId, OderDetailId);
+    }
+    @PostMapping("/order/finish-delivery/{shipperOrderId}")
+    public ResponseEntity<APIRespone> finishDelivery(@PathVariable Long shipperOrderId, @RequestParam Long OderDetailId){
+        Long shipperId= getCurrentUserId();
+        return shipperOrderService.finishDelivery(shipperId,shipperOrderId, OderDetailId);
     }
 }

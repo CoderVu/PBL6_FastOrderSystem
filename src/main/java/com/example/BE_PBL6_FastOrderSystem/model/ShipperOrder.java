@@ -24,6 +24,8 @@ public class ShipperOrder {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean status;
-    private LocalDateTime deliveryTime;
+    private LocalDateTime receivedAt;
+    private LocalDateTime deliveredAt;
+    private String note;
 }
 

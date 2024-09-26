@@ -10,7 +10,8 @@ import java.util.List;
 public class ShipperOrderResponse {
     private Long shipperId;
     private Boolean status;
-    private LocalDateTime deliveryTime;
+    private LocalDateTime receivedAt;
+    private LocalDateTime deliveredAt;
     private Long storeId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -28,7 +29,8 @@ public class ShipperOrderResponse {
     public ShipperOrderResponse(ShipperOrder shipperOrder) {
         this.shipperId = shipperOrder.getShipper().getId();
         this.status = shipperOrder.getStatus();
-        this.deliveryTime = shipperOrder.getDeliveryTime();
+        this.receivedAt = shipperOrder.getReceivedAt();
+        this.deliveredAt = shipperOrder.getDeliveredAt();
         this.storeId = shipperOrder.getStore().getStoreId();
         this.createdAt = shipperOrder.getCreatedAt();
         this.updatedAt = shipperOrder.getUpdatedAt();
