@@ -201,12 +201,14 @@ public class ProductServiceImpl implements IProductService {
         }
         Product product = productOptional.get();
         product.setProductName(productRequest.getProductName());
-        try {
-            InputStream imageInputStream = productRequest.getImage().getInputStream();
-            String base64Image = ImageGeneral.fileToBase64(imageInputStream);
-            product.setImage(base64Image);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (productRequest.getImage() != null) {
+            try {
+                InputStream imageInputStream = productRequest.getImage().getInputStream();
+                String base64Image = ImageGeneral.fileToBase64(imageInputStream);
+                product.setImage(base64Image);
+            } catch (IOException e) {
+                return new ResponseEntity<>(new APIRespone(false, "Error when upload image", ""), HttpStatus.BAD_REQUEST);
+            }
         }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());

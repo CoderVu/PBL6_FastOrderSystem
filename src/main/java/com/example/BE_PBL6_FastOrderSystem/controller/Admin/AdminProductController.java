@@ -36,7 +36,7 @@ public class AdminProductController {
             @RequestParam("price") Double price,
             @RequestParam("description") String description,
             @RequestParam("categoryId") Long categoryId,
-            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "image", required = false) MultipartFile image,
             @RequestParam("stockQuantity") Integer stockQuantity,
             @RequestParam("bestSale") Boolean bestSale) {
         ProductRequest productRequest = new ProductRequest(productName, image, description, price, categoryId, stockQuantity, bestSale);
