@@ -3,6 +3,10 @@ package com.example.BE_PBL6_FastOrderSystem.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 
 public class ImageGeneral {
@@ -36,6 +40,15 @@ public class ImageGeneral {
                 e.printStackTrace();
             }
         }
+    }
+    public static String urlToBase64(String imageUrl) throws Exception {
+        URL url = new URL(imageUrl);
+        InputStream is = url.openStream();
+        Path tempFile = Files.createTempFile(null, null);
+        Files.copy(is, tempFile, StandardCopyOption.REPLACE_EXISTING);
+        byte[] fileContent = Files.readAllBytes(tempFile);
+        String encodedString = Base64.getEncoder().encodeToString(fileContent);
+        return encodedString;
     }
 
     public static byte[] decodeBase64ToImage(String base64String) {

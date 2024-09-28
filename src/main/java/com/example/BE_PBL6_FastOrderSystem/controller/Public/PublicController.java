@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +18,10 @@ public class PublicController {
     private final ICategoryService categoryService;
     private final IPromotionService promotionService;
     private final IStoreService storeService;
+    private final ISizeService sizeService;
+    private final IStatusOrderService statusOrderService;
+    private final IStaffService scheduleService;
+    private final IOrderService orderService;
     @GetMapping("/categories/all")
     public  ResponseEntity<APIRespone> getAllCategories() {
      return categoryService.getAllCategories();
@@ -53,14 +55,23 @@ public class PublicController {
     public ResponseEntity<APIRespone> getBestSaleProducts() {
        return productService.getBestSaleProduct();
     }
-    @GetMapping("/products/combos")
-    public ResponseEntity<?> getCombos() {
-       return comboService.getAllCombos();
-    }
     @GetMapping("/products/combos/{id}")
-    public ResponseEntity<?> getProductsByComboId(@PathVariable("id") Long comboId) {
+    public ResponseEntity<APIRespone> getProductsByComboId(@PathVariable("id") Long comboId) {
        return comboService.getProductsByComboId(comboId);
     }
+    @GetMapping("/combo/all")
+    public ResponseEntity<APIRespone> getCombos() {
+       return comboService.getAllCombos();
+    }
+
+    @GetMapping("/combo/{id}")
+      public ResponseEntity<APIRespone> getComboById(@PathVariable("id") Long comboId) {
+         return comboService.getComboById(comboId);
+      }
+    @GetMapping("/combo/store/{storeId}")
+      public ResponseEntity<APIRespone> getCombosByStoreId(@PathVariable("storeId") Long storeId) {
+         return comboService.getCombosByStoreId(storeId);
+      }
     @GetMapping("/stores/all")
     public ResponseEntity<APIRespone> getStores() {
          return storeService.getAllStores();
@@ -75,8 +86,23 @@ public class PublicController {
 
     }
     @GetMapping("/promotions/{id}")
-    public ResponseEntity<?> getPromotionById(@PathVariable("id") Long promotionId) {
+    public ResponseEntity<APIRespone> getPromotionById(@PathVariable("id") Long promotionId) {
          return promotionService.getPromotionById(promotionId);
     }
-
+    @GetMapping("/sizes/all")
+      public ResponseEntity<APIRespone> getSizes() {
+         return sizeService.getAllSizes();
+      }
+    @GetMapping("/sizes/{id}")
+      public ResponseEntity<APIRespone> getSizeById(@PathVariable("id") Long sizeId) {
+         return sizeService.getSizeById(sizeId);
+      }
+    @GetMapping("/status/all")
+    public ResponseEntity<APIRespone> getStatus() {
+        return statusOrderService.getAllStatus();
+    }
+    @PostMapping("/search/shipper")
+    public ResponseEntity<APIRespone> searchShipper(@RequestParam Double longitude, @RequestParam Double latitude, @RequestParam int limit) {
+        return orderService.findNearestShipper(longitude, latitude, limit);
+    }
 }

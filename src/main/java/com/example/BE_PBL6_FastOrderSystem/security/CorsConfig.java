@@ -21,6 +21,7 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOriginPattern("*"); // Allow all origins
+        config.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000"));
         config.setAllowedHeaders(Arrays.asList(
                 HttpHeaders.AUTHORIZATION,
                 HttpHeaders.CONTENT_TYPE,
@@ -31,7 +32,7 @@ public class CorsConfig {
                 HttpMethod.POST.name(),
                 HttpMethod.PUT.name(),
                 HttpMethod.DELETE.name(),
-                HttpMethod.OPTIONS.name())); // Allow OPTIONS method for preflight requests
+                HttpMethod.OPTIONS.name()));
         config.setMaxAge(MAX_AGE);
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);

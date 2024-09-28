@@ -19,25 +19,31 @@ public class Product {
     private String image;
     private String description;
     private Double price;
-    @ManyToMany(mappedBy = "products") // để tránh việc tạo bảng trung gian
+    private Double discountedPrice;
+    @ManyToMany(mappedBy = "products")
     private Set<Promotion> promotions = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
-    @ManyToMany
-    @JoinTable(
-            name = "product_store",
-            joinColumns = @JoinColumn(name = "product_id"),
-            inverseJoinColumns = @JoinColumn(name = "store_id")
-    )
-    private Set<Store> stores = new HashSet<>();
+    @OneToMany(mappedBy = "product")
+    private Set<ProductStore> productStores = new HashSet<>();
+
+    // Getters and Setters for productStores
+    public Set<ProductStore> getProductStores() {
+        return productStores;
+    }
+
+    public void setProductStores(Set<ProductStore> productStores) {
+        this.productStores = productStores;
+    }
     private Integer stockQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean bestSale;
     @ManyToMany(mappedBy = "products")
-    private Set<Combo> combos;
+    private Set<Combo> combos = new HashSet<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -85,6 +91,12 @@ public class Product {
     public void setPrice(Double price) {
         this.price = price;
     }
+    public Double getDiscountedPrice() {
+        return discountedPrice;
+    }
+    public void setDiscountedPrice(Double discountedPrice) {
+        this.discountedPrice = discountedPrice;
+    }
     public Set<Promotion> getPromotions() {
         return promotions;
     }
@@ -100,13 +112,8 @@ public class Product {
     public void setCategory(Category category) {
         this.category = category;
     }
-
-    public Set<Store> getStores() {
-        return stores;
-    }
-
-    public void setStores(Set<Store> stores) {
-        this.stores = stores;
+    public Set<Promotion> getPromotion() {
+        return promotions;
     }
 
     public Integer getStockQuantity() {

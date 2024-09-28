@@ -1,11 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
-
-import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
-import com.example.BE_PBL6_FastOrderSystem.exception.ResourceNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.Product;
 import com.example.BE_PBL6_FastOrderSystem.model.Promotion;
 import com.example.BE_PBL6_FastOrderSystem.model.Store;
-import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.PromotionRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.StoreRepository;
@@ -33,7 +29,7 @@ public class PromotionServiceImpl implements IPromotionService {
 
     @Override
     public ResponseEntity<APIRespone> getAllPromotion() {
-    if (promotionRepository.findAll().isEmpty()) {
+        if (promotionRepository.findAll().isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "No promotion found", ""), HttpStatus.NOT_FOUND);
         }
         List<PromotionResponse> promotionResponses = promotionRepository.findAll().stream()
@@ -52,7 +48,7 @@ public class PromotionServiceImpl implements IPromotionService {
 
     @Override
     public ResponseEntity<APIRespone> getPromotionById(Long promotionId) {
-       Optional<Promotion> promotion = promotionRepository.findById(promotionId);
+        Optional<Promotion> promotion = promotionRepository.findById(promotionId);
         if (promotion.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Promotion not found", ""), HttpStatus.NOT_FOUND);
         }
@@ -71,6 +67,27 @@ public class PromotionServiceImpl implements IPromotionService {
     }
 
     @Override
+    public ResponseEntity<APIRespone> getAllPromoByStoreId(Long storeId) {
+        Optional<Store> store = storeRepository.findById(storeId);
+        if (store.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+        List<PromotionResponse> promotionResponses = promotionRepository.findAll().stream()
+                .filter(promotion -> promotion.getStores().contains(store.get()))
+                .map(promotion -> new PromotionResponse(
+                        promotion.getId(),
+                        promotion.getName(),
+                        promotion.getDescription(),
+                        promotion.getDiscountPercentage(),
+                        promotion.getStartDate(),
+                        promotion.getEndDate(),
+                        promotion.getStores().stream().map(store1 -> store1.getStoreId()).collect(Collectors.toList())
+                ))
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(new APIRespone(true, "Success", promotionResponses), HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<APIRespone> addPromotion(PromotionRequest promotionRequest) {
         if (promotionRepository.existsByName(promotionRequest.getName())) {
             return new ResponseEntity<>(new APIRespone(false, "Promotion already exists", ""), HttpStatus.BAD_REQUEST);
@@ -82,7 +99,7 @@ public class PromotionServiceImpl implements IPromotionService {
         promotion.setStartDate(promotionRequest.getStartDate());
         promotion.setEndDate(promotionRequest.getEndDate());
         promotionRepository.save(promotion);
-     return new ResponseEntity<>(new APIRespone(true, "Promotion added successfully", promotion), HttpStatus.OK);
+        return new ResponseEntity<>(new APIRespone(true, "Promotion added successfully", promotion), HttpStatus.OK);
 
     }
 
@@ -140,7 +157,7 @@ public class PromotionServiceImpl implements IPromotionService {
     }
 
     @Override
-    public ResponseEntity<APIRespone> applyPromotionToProduct( Long promotionId, Long productId) {
+    public ResponseEntity<APIRespone> applyPromotionToProduct(Long promotionId, Long productId) {
         Optional<Promotion> promotionOptional = promotionRepository.findById(promotionId);
         if (promotionOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Promotion not found with id " + promotionId, ""));
@@ -151,8 +168,8 @@ public class PromotionServiceImpl implements IPromotionService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found with id " + productId, ""));
         }
         Product product = productOptional.get();
-        boolean isPromotionInProductStores = product.getStores().stream()
-                .anyMatch(store -> promotion.getStores().contains(store));
+        boolean isPromotionInProductStores = product.getProductStores().stream()
+                .anyMatch(productStore -> promotion.getStores().contains(productStore.getStore()));
         if (isPromotionInProductStores) {
             product.getPromotions().add(promotion);
             promotion.getProducts().add(product);
@@ -172,8 +189,28 @@ public class PromotionServiceImpl implements IPromotionService {
         }
     }
 
+    @Override
+    public ResponseEntity<APIRespone> DeletePromotion(Long promotionId) {
+        Optional<Promotion> promotion = promotionRepository.findById(promotionId);
+        if (promotion.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Promotion not found", ""), HttpStatus.NOT_FOUND);
+        }
+        promotionRepository.deleteById(promotionId);
+        return new ResponseEntity<>(new APIRespone(true, "Promotion deleted successfully", ""), HttpStatus.OK);
+    }
 
-
-
-
+    @Override
+    public ResponseEntity<APIRespone> updatePromotion(Long promotionId, PromotionRequest promotionRequest) {
+    if (promotionRepository.existsByName(promotionRequest.getName())) {
+        return new ResponseEntity<>(new APIRespone(false, "Promotion already exists", ""), HttpStatus.BAD_REQUEST);
+    }
+    Promotion promotion = promotionRepository.findById(promotionId).get();
+    promotion.setName(promotionRequest.getName());
+    promotion.setDescription(promotionRequest.getDescription());
+    promotion.setDiscountPercentage(promotionRequest.getDiscountPercentage());
+    promotion.setStartDate(promotionRequest.getStartDate());
+    promotion.setEndDate(promotionRequest.getEndDate());
+    promotionRepository.save(promotion);
+    return new ResponseEntity<>(new APIRespone(true, "Promotion updated successfully", promotion), HttpStatus.OK);
+    }
 }

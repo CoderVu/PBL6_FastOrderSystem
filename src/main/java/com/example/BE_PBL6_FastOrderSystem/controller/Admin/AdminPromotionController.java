@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1/admin/promotions")
@@ -20,11 +21,25 @@ public class AdminPromotionController {
             @RequestParam("promotionName") String promotionName,
             @RequestParam("discount") Double discount,
             @RequestParam("description") String description,
-            @RequestParam("startDate") LocalDate startDate,
-            @RequestParam("endDate") LocalDate endDate) {
+            @RequestParam("startDate") LocalDateTime startDate,
+            @RequestParam("endDate") LocalDateTime endDate) {
             PromotionRequest promotionRequest = new PromotionRequest(promotionName, description, discount, startDate, endDate);
             return promotionService.addPromotion(promotionRequest);
-
+    }
+    @PutMapping("/update/{promotionId}")
+    public ResponseEntity<APIRespone> updatePromotion(
+            @PathVariable Long promotionId,
+            @RequestParam("promotionName") String promotionName,
+            @RequestParam("discount") Double discount,
+            @RequestParam("description") String description,
+            @RequestParam("startDate") LocalDateTime startDate,
+            @RequestParam("endDate") LocalDateTime endDate) {
+        PromotionRequest promotionRequest = new PromotionRequest(promotionName, description, discount, startDate, endDate);
+        return promotionService.updatePromotion(promotionId, promotionRequest);
+    }
+    @DeleteMapping("/delete/{promotionId}")
+    public ResponseEntity<APIRespone> deletePromotion(@PathVariable Long promotionId) {
+        return promotionService.DeletePromotion(promotionId);
     }
     @PutMapping("store/apply")
     public ResponseEntity<APIRespone> applyPromotionToStore(

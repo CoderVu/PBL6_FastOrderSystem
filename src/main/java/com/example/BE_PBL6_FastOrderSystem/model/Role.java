@@ -14,6 +14,12 @@ import java.util.HashSet;
 @Setter
 @NoArgsConstructor
 public class Role {
+    public enum name {
+        ROLE_USER,
+        ROLE_ADMIN,
+        ROLE_OWNER,
+        ROLE_SHIPPER,
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

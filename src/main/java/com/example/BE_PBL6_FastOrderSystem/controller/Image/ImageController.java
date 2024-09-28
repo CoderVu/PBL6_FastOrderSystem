@@ -24,12 +24,9 @@ public class ImageController {
         try {
             Path imagePath = new ClassPathResource("static/image/" + imageName).getFile().toPath();
             byte[] imageBytes = Files.readAllBytes(imagePath);
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.IMAGE_JPEG);
-
             return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
-
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found", e);
         }

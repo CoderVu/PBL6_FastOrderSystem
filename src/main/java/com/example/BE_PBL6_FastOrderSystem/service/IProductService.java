@@ -18,5 +18,17 @@ public interface IProductService {
     ResponseEntity<APIRespone> addProduct(ProductRequest productRequest);
     ResponseEntity<APIRespone> updateProduct(Long id, ProductRequest productRequest);
     ResponseEntity<APIRespone> deleteProduct(Long id);
+
+    ResponseEntity<APIRespone> applyProductToStore(Long productId, Long storeId);
+    ResponseEntity<APIRespone> applyProductToAllStores(Long productId);
+
+    ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId);
+
+    ResponseEntity<APIRespone> getAllSoldProducts(Long storeId);
+    Long calculateOrderNowAmountProduct(Long productId, int quantity);
+
+    ResponseEntity<APIRespone> applyAllProductsToAllStores();
+
+    ResponseEntity<APIRespone> applyAllProductsToStore(Long storeId);
 }
 

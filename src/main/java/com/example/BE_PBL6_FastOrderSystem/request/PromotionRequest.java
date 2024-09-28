@@ -1,14 +1,15 @@
 package com.example.BE_PBL6_FastOrderSystem.request;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class PromotionRequest {
     private String name;
     private String description;
     private Double discountPercentage;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    public PromotionRequest(String name, String description, Double discountPercentage, LocalDate startDate, LocalDate endDate) {
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    public PromotionRequest(String name, String description, Double discountPercentage, LocalDateTime startDate, LocalDateTime endDate) {
         this.name = name;
         this.description = description;
         this.discountPercentage = discountPercentage;
@@ -40,19 +41,19 @@ public class PromotionRequest {
         this.discountPercentage = discountPercentage;
     }
 
-    public LocalDate getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDate getEndDate() {
+    public LocalDateTime getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
+    public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
     }
 }

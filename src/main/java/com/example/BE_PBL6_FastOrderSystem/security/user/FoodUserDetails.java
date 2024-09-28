@@ -25,10 +25,14 @@ public class FoodUserDetails implements UserDetails {
     private String fullName;
     private String email;
     private String address;
+    private Double longitude;
+    private Double latitude;
+    private String avatar;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     private boolean accountLocked;
+    private Boolean isActive;
     private Collection<GrantedAuthority> authorities;
 
     public static FoodUserDetails buildUserDetails(User user) {
@@ -40,15 +44,14 @@ public class FoodUserDetails implements UserDetails {
                 user.getFullName(),
                 user.getEmail(),
                 user.getAddress(),
+                user.getLongitude(),
+                user.getLatitude(),
+                user.getAvatar(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
                 user.isAccountLocked(),
+                user.getIsActive(),
                 List.of(authority));
-    }
-
-    public static String getCurrentUserPhoneNumber() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userDetails.getUsername();
     }
 
     public static Long getCurrentUserId() {
@@ -84,7 +87,7 @@ public class FoodUserDetails implements UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
-    }
+    } // Trả về trạng thái hết hạn của thông tin đăng nhập
 
     @Override
     public boolean isEnabled() {
