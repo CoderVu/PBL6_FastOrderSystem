@@ -40,12 +40,14 @@ public class Store {
         return "Store{" +
                 "storeId=" + storeId +
                 ", storeName='" + storeName + '\'' +
+                ", image='" + image + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 ", location='" + location + '\'' +
-                ", latitude=" + latitude +
                 ", longitude=" + longitude +
+                ", latitude=" + latitude +
                 ", openingTime=" + openingTime +
                 ", closingTime=" + closingTime +
-                ", phoneNumber='" + phoneNumber + '\'' +
+                ", manager=" + manager +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';

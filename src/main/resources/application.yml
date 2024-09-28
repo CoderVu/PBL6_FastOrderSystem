@@ -1,6 +1,5 @@
 server:
   port: 8080
-  connection-timeout: 20000
 spring:
   application:
     name: BE_PBL6_FastOrderSystem
@@ -24,19 +23,17 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            client-id: ${google.client.id}
+            client-secret: ${google.client.secret}
             scope: profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/google"
             authorization-grant-type: authorization_code
           facebook:
-            client-id: ${FACEBOOK_CLIENT_ID}
-            client-secret: ${FACEBOOK_CLIENT_SECRET}
+            client-id: ${facebook.client.id}
+            client-secret: ${facebook.client.secret}
             scope: profile, email
             redirect-uri: "{baseUrl}/login/oauth2/code/facebook"
             authorization-grant-type: authorization_code
-
-
   jackson:
     serialization:
       fail-on-empty-beans: false

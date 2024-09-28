@@ -200,6 +200,9 @@ public class ProductServiceImpl implements IProductService {
             return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
         }
         Product product = productOptional.get();
+        if (productRepository.existsByProductName(productRequest.getProductName()) && !product.getProductName().equals(productRequest.getProductName())) {
+            return new ResponseEntity<>(new APIRespone(false, "Product already exists", ""), HttpStatus.BAD_REQUEST);
+        }
         product.setProductName(productRequest.getProductName());
         if (productRequest.getImage() != null) {
             try {
