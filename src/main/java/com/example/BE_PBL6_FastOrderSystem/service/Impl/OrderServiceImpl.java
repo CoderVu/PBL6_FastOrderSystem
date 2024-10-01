@@ -76,7 +76,7 @@ public class OrderServiceImpl implements IOrderService {
                 .map(storeRepository::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toList());
+                .toList();
 
         if (stores.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No stores found in the cart", ""));
@@ -150,7 +150,6 @@ public class OrderServiceImpl implements IOrderService {
                 // Tính phí vận chuyển
                 Double shippingFee = calculateShippingFee(order, store);
                 order.setShippingFee(shippingFee);
-
             }
         }
         // Lưu các order detail
@@ -301,20 +300,21 @@ public class OrderServiceImpl implements IOrderService {
         double shippingFeePerKm = 10000;
         double shippingFee = distance * shippingFeePerKm;
         // bội số của 1000
-        double roundedShippingFee = Math.floor(shippingFee / 1000) * 1000;
-        return roundedShippingFee;
+        return Math.floor(shippingFee / 1000) * 1000;
     }
 
 
+
     @Override
-    public Long calculateOrderNowAmount(Long productId, Long comboId, int quantity) {
+    public Long calculateOrderNowAmount(Long productId, Long comboId, int quantity, Long storeId, Double Latitude, Double Longitude) {
+        long totalAmount = 0L;
         if (productId != null) {
             Optional<Product> productOptional = productRepository.findByProductId(productId);
             if (productOptional.isEmpty()) {
                 return null;
             }
             Product product = productOptional.get();
-            return Math.round(product.getPrice() * quantity);
+            totalAmount += Math.round(product.getPrice() * quantity);
         }
         if (comboId != null) {
             Optional<Combo> comboOptional = comboRepository.findById(comboId);
@@ -322,17 +322,33 @@ public class OrderServiceImpl implements IOrderService {
                 return null;
             }
             Combo combo = comboOptional.get();
-            return Math.round(combo.getComboPrice() * quantity);
+            totalAmount += Math.round(combo.getComboPrice() * quantity);
         }
-        return null;
+        // cong them phi ship
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isPresent()) {
+            Store store = storeOptional.get();
+            // Sử dụng phương thức calculateShippingFee để tính phí ship
+            Order dummyOrder = new Order(); // Tạo đơn hàng tạm thời chỉ để chứa địa chỉ giao hàng
+            dummyOrder.setLatitude(Latitude);
+            dummyOrder.setLongitude(Longitude);
+
+            Double shippingFee = calculateShippingFee(dummyOrder, store);
+            totalAmount += shippingFee.longValue(); // Cộng phí ship vào tổng tiền
+        } else {
+            return null;
+        }
+        return totalAmount;
+
     }
 
     @Scheduled(fixedRate = 10000) // 10 seconds
     public void autoAssignNewShipper() {
-        List<ShipperOrder> unconfirmedShipperOrders = shipperOrderRepository.findAllByStatus("Chưa nhận");
-
+        List<ShipperOrder> unconfirmedShipperOrders = shipperOrderRepository.findAllByStatusIn(Arrays.asList("Chưa nhận", "Đã từ chối"));
+        System.out.println("Unconfirmed shipper orders: " + unconfirmedShipperOrders.size());
         for (ShipperOrder shipperOrder : unconfirmedShipperOrders) {
-            if (shipperOrder.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
+            if (shipperOrder.getCreatedAt().plusMinutes(5).isBefore(LocalDateTime.now())) {
+                // 5 phút chưa nhận đơn hàng thì tự động gán shipper khác
                 User currentShipper = shipperOrder.getShipper();
                 if (currentShipper != null) {
                     currentShipper.setIsBusy(true);
@@ -341,7 +357,7 @@ public class OrderServiceImpl implements IOrderService {
                     System.out.println("Current shipper deactivated: " + currentShipper.getId());
                 }
 
-                if (shipperOrder.getLastAssignedAt() == null || shipperOrder.getLastAssignedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
+                if (shipperOrder.getLastAssignedAt() == null || shipperOrder.getLastAssignedAt().plusMinutes(5).isBefore(LocalDateTime.now())) {
                     Store store = shipperOrder.getStore();
                     Optional<User> newShipperOptional = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
                             .stream()
@@ -440,7 +456,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         List<Order> orders1 = orders.stream()
                 .filter(order -> order.getOrderDetails().stream().anyMatch(orderDetail -> stores.contains(orderDetail.getStore())))
-                .collect(Collectors.toList());
+                .toList();
         if (orders1.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
         }

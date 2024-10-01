@@ -12,6 +12,15 @@ public interface IProductService {
     ResponseEntity<APIRespone> getAllProduct();
     ResponseEntity<APIRespone> getProductById(Long productId);
     ResponseEntity<APIRespone> getProductsByStoreId(Long storeId);
+
+    Long calculateOrderNowAmountProduct(Long productId, int quantity);
+
+    ResponseEntity<APIRespone> applyAllProductsToAllStores(int quantity);
+
+    ResponseEntity<APIRespone> applyAllProductsToStore(Long storeId, int quantity);
+
+    ResponseEntity<APIRespone> applyProductsToStore(List<Long> productIds, Long storeId, int quantity);
+
     ResponseEntity<APIRespone> getProductsByCategoryId(Long categoryId);
     ResponseEntity<APIRespone> getProductByNames(String productName);
     ResponseEntity<APIRespone> getBestSaleProduct();
@@ -19,16 +28,11 @@ public interface IProductService {
     ResponseEntity<APIRespone> updateProduct(Long id, ProductRequest productRequest);
     ResponseEntity<APIRespone> deleteProduct(Long id);
 
-    ResponseEntity<APIRespone> applyProductToStore(Long productId, Long storeId);
-    ResponseEntity<APIRespone> applyProductToAllStores(Long productId);
+    ResponseEntity<APIRespone> applyProductToStore(Long productId, Long storeId, int quantity);
+
+    ResponseEntity<APIRespone> applyProductToAllStores(Long productId, int quantity);
 
     ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId);
 
-    ResponseEntity<APIRespone> getAllSoldProducts(Long storeId);
-    Long calculateOrderNowAmountProduct(Long productId, int quantity);
-
-    ResponseEntity<APIRespone> applyAllProductsToAllStores();
-
-    ResponseEntity<APIRespone> applyAllProductsToStore(Long storeId);
 }
 

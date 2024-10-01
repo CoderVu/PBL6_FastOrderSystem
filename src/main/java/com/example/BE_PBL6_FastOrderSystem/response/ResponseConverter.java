@@ -1,9 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Combo;
-import com.example.BE_PBL6_FastOrderSystem.model.Product;
-import com.example.BE_PBL6_FastOrderSystem.model.Promotion;
-import com.example.BE_PBL6_FastOrderSystem.model.Store;
+import com.example.BE_PBL6_FastOrderSystem.model.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,6 +40,14 @@ public class ResponseConverter {
                     .orElse(0);
             discountedPrice = product.getPrice() * (1 - maxDiscountPercentage / 100);
         }
+        // Calculate average rate if rates = null thi average rate = 0
+        double averageRate = 0.0;
+        if (product.getRates() != null && !product.getRates().isEmpty()) {
+            averageRate = product.getRates().stream()
+                    .mapToDouble(Rate::getRate)
+                    .average()
+                    .orElse(0);
+        }
 
         return new ProductResponse(
                 product.getProductId(),
@@ -51,6 +56,7 @@ public class ResponseConverter {
                 product.getDescription(),
                 product.getPrice(),
                 discountedPrice,
+                averageRate,
                 categoryResponse,
                 storeResponses,
                 product.getStockQuantity(),
@@ -63,11 +69,19 @@ public class ResponseConverter {
         List<ProductResponse> productResponses = combo.getProducts().stream()
                 .map(ResponseConverter::convertToProductResponse)
                 .collect(Collectors.toList());
-
+        // Calculate average rate if rates = null thi average rate = 0
+        double averageRate = 0.0;
+        if (combo.getRates() != null && !combo.getRates().isEmpty()) {
+            averageRate = combo.getRates().stream()
+                    .mapToDouble(Rate::getRate)
+                    .average()
+                    .orElse(0);
+        }
         return new ComboResponse(
                 combo.getComboId(),
                 combo.getComboName(),
                 combo.getComboPrice(),
+                averageRate,
                 combo.getImage(),
                 combo.getDescription(),
                 productResponses

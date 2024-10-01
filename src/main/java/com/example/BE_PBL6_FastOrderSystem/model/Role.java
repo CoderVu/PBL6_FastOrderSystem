@@ -2,16 +2,15 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Collection;
 import java.util.HashSet;
-
+@Data
 @Entity
-@Getter
-@Setter
 @NoArgsConstructor
 public class Role {
     public enum name {

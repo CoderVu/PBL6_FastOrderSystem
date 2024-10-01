@@ -5,9 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Data
@@ -32,9 +30,9 @@ public class Store {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @ManyToMany(mappedBy = "stores")
-    private Set<Promotion> promotions;
+    private List<Promotion> promotions = new ArrayList<>();
     @OneToMany(mappedBy = "store")
-    private Set<ProductStore> productStores = new HashSet<>();
+    private List<ProductStore> productStores = new ArrayList<>();
     @Override
     public String toString() {
         return "Store{" +

@@ -99,7 +99,7 @@ public class CategoryServiceImpl  implements ICategoryService {
         List<Product> products = category.get().getProducts();
         for (Product product : products) {
             productRepository.delete(product);
-            Set<Combo> combos = product.getCombos();
+            List<Combo> combos = product.getCombos();
             for (Combo combo : combos) {
                 combo.getProducts().remove(product);
             }

@@ -20,15 +20,9 @@ public class OwnerProductController {
         return productService.getProductsByStoreId(storeId);
     }
 
-    // Lấy tất cả sản phẩm của cửa hàng đã bán
-//    @GetMapping("/get-all-sold-products")
-//    public ResponseEntity<APIRespone> getAllSoldProducts(@RequestParam Long storeId) {
-//        return productService.getAllSoldProducts(storeId);
-//    }
-
     @PostMapping("/apply-to-store")
-    public ResponseEntity<APIRespone> applyProductToStore(@RequestParam Long storeId, @RequestParam Long productId) {
-        return productService.applyProductToStore(storeId, productId);
+    public ResponseEntity<APIRespone> applyProductToStore(@RequestParam Long storeId, @RequestParam Long productId, @RequestParam int quantity) {
+        return productService.applyProductToStore(storeId, productId, quantity);
     }
 
     @DeleteMapping("/remove-from-store")

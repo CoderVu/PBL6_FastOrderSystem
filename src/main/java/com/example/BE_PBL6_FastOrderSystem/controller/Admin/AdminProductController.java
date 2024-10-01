@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/admin/products")
 @RequiredArgsConstructor
@@ -49,21 +51,32 @@ public class AdminProductController {
     @PostMapping("/apply-to-store")
     public ResponseEntity<APIRespone> applyProductToStore(
             @RequestParam("productId") Long productId,
-            @RequestParam("storeId") Long storeId) {
-        return productService.applyProductToStore(productId, storeId);
+            @RequestParam("storeId") Long storeId,
+            @RequestParam("quantity") Integer quantity) {
+        return productService.applyProductToStore(productId, storeId, quantity);
     }
     @PostMapping("/apply-to-all-stores")
     public ResponseEntity<APIRespone> applyProductToAllStores(
-            @RequestParam("productId") Long productId) {
-        return productService.applyProductToAllStores(productId);
+            @RequestParam("productId") Long productId,
+            @RequestParam("quantity") Integer quantity) {
+        return productService.applyProductToAllStores(productId, quantity);
+    }
+    @PostMapping("/apply-list-products-to-store")
+    public ResponseEntity<APIRespone> applyListProductsToStore(
+            @RequestParam("storeId") Long storeId,
+            @RequestParam("productIds") List<Long> productIds,
+            @RequestParam("quantity") Integer quantity) {
+        return productService.applyProductsToStore(productIds, storeId, quantity);
     }
     @PostMapping("/apply-all-products-to-store")
     public ResponseEntity<APIRespone> applyAllProductsToStore(
-            @RequestParam("storeId") Long storeId) {
-        return productService.applyAllProductsToStore(storeId);
+            @RequestParam("storeId") Long storeId,
+            @RequestParam("quantity") Integer quantity) {
+        return productService.applyAllProductsToStore(storeId, quantity);
     }
     @PostMapping("/apply-all-products-to-all-stores")
-    public ResponseEntity<APIRespone> applyAllProductsToAllStores() {
-        return productService.applyAllProductsToAllStores();
+    public ResponseEntity<APIRespone> applyAllProductsToAllStores(
+            @RequestParam("quantity") Integer quantity) {
+        return productService.applyAllProductsToAllStores(quantity);
     }
 }

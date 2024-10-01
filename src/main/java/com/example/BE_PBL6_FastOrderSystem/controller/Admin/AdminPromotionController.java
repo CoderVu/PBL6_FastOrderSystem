@@ -3,18 +3,21 @@ import com.example.BE_PBL6_FastOrderSystem.request.PromotionRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.IPromotionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/promotions")
 @RequiredArgsConstructor
 public class AdminPromotionController {
-    final IPromotionService promotionService;
+    @Autowired
+    private final IPromotionService promotionService;
 
     @PostMapping("/add")
     public ResponseEntity<APIRespone> addPromotion(
@@ -41,17 +44,23 @@ public class AdminPromotionController {
     public ResponseEntity<APIRespone> deletePromotion(@PathVariable Long promotionId) {
         return promotionService.DeletePromotion(promotionId);
     }
-    @PutMapping("store/apply")
+    @PutMapping("/apply-to-store")
     public ResponseEntity<APIRespone> applyPromotionToStore(
             @RequestParam("promotionId") Long promotionId,
             @RequestParam("storeId") Long storeId) {
          return promotionService.applyPromotionToStore(promotionId, storeId);
     }
-    @PutMapping("/store/apply-to-all")
+    @PutMapping("/apply-to-stores")
+    public ResponseEntity<APIRespone> applyPromotionToStore(
+            @RequestParam("promotionId") Long promotionId,
+            @RequestParam("storeIds") List<Long> storeIds) {
+        return promotionService.applyPromotionToStores(promotionId, storeIds);
+    }
+    @PutMapping("/apply-to-all-stores")
     public ResponseEntity<APIRespone>applyPromotionToAllStores(@RequestParam("promotionId") Long promotionId) {
      return promotionService.applyPromotionToAllStores(promotionId);
     }
-    @PostMapping("/product/apply")
+    @PostMapping("/apply-to-product")
     public ResponseEntity<APIRespone> applyPromotionToProduct(
             @RequestParam("promotionId") Long promotionId,
             @RequestParam("productId") Long productId) {

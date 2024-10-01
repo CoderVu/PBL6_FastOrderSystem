@@ -3,6 +3,9 @@ package com.example.BE_PBL6_FastOrderSystem.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 @Data
 @Entity
@@ -21,5 +24,7 @@ public class Combo {
             joinColumns = @JoinColumn(name = "combo_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private Set<Product> products;
+    private List<Product> products = new ArrayList<>();
+    @OneToMany(mappedBy = "combo", cascade = CascadeType.ALL)
+    private List<Rate> rates = new ArrayList<>();
 }

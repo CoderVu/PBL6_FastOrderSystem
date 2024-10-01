@@ -1,13 +1,14 @@
 package com.example.BE_PBL6_FastOrderSystem.model;
 
 import jakarta.persistence.*;
-import org.springframework.web.multipart.MultipartFile;
-
+import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-
+@Data
 @Entity
 public class Product {
     @Id
@@ -21,28 +22,21 @@ public class Product {
     private Double price;
     private Double discountedPrice;
     @ManyToMany(mappedBy = "products")
-    private Set<Promotion> promotions = new HashSet<>();
+    private List<Promotion> promotions = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
     @OneToMany(mappedBy = "product")
-    private Set<ProductStore> productStores = new HashSet<>();
-
-    // Getters and Setters for productStores
-    public Set<ProductStore> getProductStores() {
-        return productStores;
-    }
-
-    public void setProductStores(Set<ProductStore> productStores) {
-        this.productStores = productStores;
-    }
+    private List<ProductStore> productStores = new ArrayList<>();
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<Rate> rates = new ArrayList<>();
     private Integer stockQuantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean bestSale;
     @ManyToMany(mappedBy = "products")
-    private Set<Combo> combos = new HashSet<>();
+    private List<Combo> combos = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -54,105 +48,5 @@ public class Product {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-    public Long getProductId() {
-        return productId;
-    }
 
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    public String getProductName() {
-        return productName;
-    }
-
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-    public String getImage() {
-        return image;
-    }
-   public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-    public Double getDiscountedPrice() {
-        return discountedPrice;
-    }
-    public void setDiscountedPrice(Double discountedPrice) {
-        this.discountedPrice = discountedPrice;
-    }
-    public Set<Promotion> getPromotions() {
-        return promotions;
-    }
-    public void setPromotions(Set<Promotion> promotions) {
-        this.promotions = promotions;
-    }
-
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-    public Set<Promotion> getPromotion() {
-        return promotions;
-    }
-
-    public Integer getStockQuantity() {
-        return stockQuantity;
-    }
-
-    public void setStockQuantity(Integer stockQuantity) {
-        this.stockQuantity = stockQuantity;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-
-    public Boolean getBestSale() {
-        return bestSale;
-    }
-
-    public void setBestSale(Boolean bestSale) {
-        this.bestSale = bestSale;
-    }
-    public Set<Combo> getCombos() {
-        return combos;
-    }
-
-    public void setCombos(Set<Combo> combos) {
-        this.combos = combos;
-    }
 }

@@ -9,7 +9,6 @@ import java.util.List;
 public interface CartItemRepository extends JpaRepository<Cart, Long> {
     List<Cart> findByUserId(Long userId);
 
-// interface là nơi chứa các phương thức truy vấn dữ liệu từ cơ sở dữ liệu
     List<Cart> findByCartId(Long cartId);
 
 

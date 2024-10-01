@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -85,7 +84,7 @@ public class UserOrderController {
         Long userId = FoodUserDetails.getCurrentUserId();
         orderRequest.setOrderId(orderCode);
         orderRequest.setUserId(userId);
-        orderRequest.setAmount(orderService.calculateOrderNowAmount(productId, comboId, quantity));
+        orderRequest.setAmount(orderService.calculateOrderNowAmount(productId, comboId, quantity, storeId, latitude, longitude));
         if ("ZALOPAY".equalsIgnoreCase(paymentMethod)) {
             orderRequest.setOrderId(orderCode);
             orderRequest.setUserId(userId);
@@ -361,7 +360,7 @@ public class UserOrderController {
                 .collect(Collectors.toList());
         long totalAmount = 0L;
         for (Cart item : cartItems) {
-            totalAmount += item.getTotalPrice();
+            totalAmount += (long) item.getTotalPrice();
         }
         return totalAmount;
     }

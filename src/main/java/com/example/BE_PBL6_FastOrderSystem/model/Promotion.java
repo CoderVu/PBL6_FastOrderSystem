@@ -5,7 +5,9 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -26,13 +28,13 @@ public class Promotion {
             joinColumns = @JoinColumn(name = "promotion_id"),
             inverseJoinColumns = @JoinColumn(name = "store_id")
     )
-    private Set<Store> stores;
+    private List<Store> stores = new ArrayList<>();
     @ManyToMany
     @JoinTable(
             name = "promotion_product",
             joinColumns = @JoinColumn(name = "promotion_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private Set<Product> products = new HashSet<>();
+    private List<Product> products = new ArrayList<>();
 
 }
