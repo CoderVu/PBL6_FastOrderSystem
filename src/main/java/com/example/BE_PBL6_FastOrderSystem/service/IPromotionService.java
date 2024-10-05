@@ -20,9 +20,9 @@ public interface IPromotionService {
 
     ResponseEntity<APIRespone> addPromotion(PromotionRequest promotionRequest);
 
-    ResponseEntity<APIRespone> applyPromotionToStore(Long promotionId, Long storeId);
+    ResponseEntity<APIRespone> applyPromotionsToStore(List<Long> promotionIds, Long storeId);
 
-    ResponseEntity<APIRespone> applyPromotionToStores(Long promotionId, List<Long> storeIds);
+    ResponseEntity<APIRespone> applyPromotionToStore(Long promotionId, Long storeId);
 
     ResponseEntity<APIRespone> applyPromotionToAllStores(Long promotionId);
 

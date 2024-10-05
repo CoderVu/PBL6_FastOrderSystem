@@ -28,8 +28,6 @@ public interface IProductService {
     ResponseEntity<APIRespone> updateProduct(Long id, ProductRequest productRequest);
     ResponseEntity<APIRespone> deleteProduct(Long id);
 
-    ResponseEntity<APIRespone> applyProductToStore(Long productId, Long storeId, int quantity);
-
     ResponseEntity<APIRespone> applyProductToAllStores(Long productId, int quantity);
 
     ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId);

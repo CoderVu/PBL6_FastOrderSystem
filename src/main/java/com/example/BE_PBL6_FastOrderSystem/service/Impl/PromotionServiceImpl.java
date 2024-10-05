@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,9 +101,7 @@ public class PromotionServiceImpl implements IPromotionService {
         promotion.setEndDate(promotionRequest.getEndDate());
         promotionRepository.save(promotion);
         return new ResponseEntity<>(new APIRespone(true, "Promotion added successfully", promotion), HttpStatus.OK);
-
     }
-
     @Override
     public ResponseEntity<APIRespone> applyPromotionToStore(Long promotionId, Long storeId) {
         Optional<Promotion> promotionOptional = promotionRepository.findById(promotionId);
@@ -113,9 +112,6 @@ public class PromotionServiceImpl implements IPromotionService {
         Optional<Store> storeOptional = storeRepository.findById(storeId);
         if (storeOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
-        }
-        if (promotion.getStores().contains(storeOptional.get())) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Promotion already applied to store", ""));
         }
         Store store = storeOptional.get();
         promotion.getStores().add(store);
@@ -134,34 +130,7 @@ public class PromotionServiceImpl implements IPromotionService {
 
         return ResponseEntity.ok(new APIRespone(true, "Promotion applied to store successfully", response));
     }
-    @Override
-    public ResponseEntity<APIRespone> applyPromotionToStores(Long promotionId, List<Long> storeIds) {
-        Optional<Promotion> promotionOptional = promotionRepository.findById(promotionId);
-        if (promotionOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Promotion not found", ""));
-        }
-        if (storeIds.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Store list is empty", ""));
-        }
-        if (storeIds.stream().anyMatch(storeId -> storeRepository.findById(storeId).isEmpty())) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
-        }
-        if (storeIds.stream().anyMatch(storeId -> promotionRepository.findById(promotionId).get().getStores().stream().anyMatch(store -> store.getStoreId().equals(storeId)))) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Promotion already applied to store", ""));
-        }
-        Promotion promotion = promotionOptional.get();
-        storeIds.forEach(id -> applyPromotionToStore(promotionId, id));
-        promotionRepository.save(promotion);
-        return ResponseEntity.ok(new APIRespone(true, "Promotion applied to stores successfully", new PromotionResponse(
-                promotion.getId(),
-                promotion.getName(),
-                promotion.getDescription(),
-                promotion.getDiscountPercentage(),
-                promotion.getStartDate(),
-                promotion.getEndDate(),
-                storeIds
-        )));
-    }
+
     @Override
     public ResponseEntity<APIRespone> applyPromotionToAllStores(Long promotionId) {
         Optional<Promotion> promotionOptional = promotionRepository.findById(promotionId);
@@ -185,6 +154,36 @@ public class PromotionServiceImpl implements IPromotionService {
                 stores.stream().map(Store::getStoreId).collect(Collectors.toList())
         )));
     }
+    @Override
+    public ResponseEntity<APIRespone> applyPromotionsToStore(List<Long> promotionIds, Long storeId) {
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        Store store = storeOptional.get();
+        List<Promotion> promotions = promotionRepository.findAllById(promotionIds);
+        if (promotions.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Promotions not found", ""));
+        }
+        List<String> alreadyAppliedPromotions = new ArrayList<>();
+        int count = 0;
+        for (Promotion promotion : promotions) {
+            if (promotion.getStores().contains(store)) {
+                alreadyAppliedPromotions.add(promotion.getName());
+                count++;
+            } else {
+                promotion.getStores().add(store);
+                store.getPromotions().add(promotion);
+            }
+        }
+        if (count == promotions.size()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Promotions already applied to store", ""));
+        }
+        promotionRepository.saveAll(promotions);
+        storeRepository.save(store);
+        return ResponseEntity.ok(new APIRespone(true, "Promotions applied to store successfully", ""));
+    }
+
 
     @Override
     public ResponseEntity<APIRespone> applyPromotionToProduct(Long promotionId, Long productId) {

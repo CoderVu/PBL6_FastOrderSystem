@@ -46,16 +46,11 @@ public class AdminPromotionController {
     }
     @PutMapping("/apply-to-store")
     public ResponseEntity<APIRespone> applyPromotionToStore(
-            @RequestParam("promotionId") Long promotionId,
+            @RequestParam("promotionId") List<Long> promotionIds,
             @RequestParam("storeId") Long storeId) {
-         return promotionService.applyPromotionToStore(promotionId, storeId);
+         return promotionService.applyPromotionsToStore(promotionIds, storeId);
     }
-    @PutMapping("/apply-to-stores")
-    public ResponseEntity<APIRespone> applyPromotionToStore(
-            @RequestParam("promotionId") Long promotionId,
-            @RequestParam("storeIds") List<Long> storeIds) {
-        return promotionService.applyPromotionToStores(promotionId, storeIds);
-    }
+
     @PutMapping("/apply-to-all-stores")
     public ResponseEntity<APIRespone>applyPromotionToAllStores(@RequestParam("promotionId") Long promotionId) {
      return promotionService.applyPromotionToAllStores(promotionId);

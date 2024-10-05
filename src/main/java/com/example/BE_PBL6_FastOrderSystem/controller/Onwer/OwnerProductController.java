@@ -20,11 +20,6 @@ public class OwnerProductController {
         return productService.getProductsByStoreId(storeId);
     }
 
-    @PostMapping("/apply-to-store")
-    public ResponseEntity<APIRespone> applyProductToStore(@RequestParam Long storeId, @RequestParam Long productId, @RequestParam int quantity) {
-        return productService.applyProductToStore(storeId, productId, quantity);
-    }
-
     @DeleteMapping("/remove-from-store")
     public ResponseEntity<APIRespone> removeProductFromStore(@RequestParam Long storeId, @RequestParam Long productId) {
         return productService.removeProductFromStore(storeId, productId);

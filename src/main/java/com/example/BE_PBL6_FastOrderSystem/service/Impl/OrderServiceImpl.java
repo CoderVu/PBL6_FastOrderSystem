@@ -342,12 +342,12 @@ public class OrderServiceImpl implements IOrderService {
 
     }
 
-    @Scheduled(fixedRate = 10000) // 10 seconds
+    @Scheduled(fixedRate = 300000) // 5 phút
     public void autoAssignNewShipper() {
         List<ShipperOrder> unconfirmedShipperOrders = shipperOrderRepository.findAllByStatusIn(Arrays.asList("Chưa nhận", "Đã từ chối"));
         System.out.println("Unconfirmed shipper orders: " + unconfirmedShipperOrders.size());
         for (ShipperOrder shipperOrder : unconfirmedShipperOrders) {
-            if (shipperOrder.getCreatedAt().plusMinutes(5).isBefore(LocalDateTime.now())) {
+            if (shipperOrder.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
                 // 5 phút chưa nhận đơn hàng thì tự động gán shipper khác
                 User currentShipper = shipperOrder.getShipper();
                 if (currentShipper != null) {
@@ -357,7 +357,7 @@ public class OrderServiceImpl implements IOrderService {
                     System.out.println("Current shipper deactivated: " + currentShipper.getId());
                 }
 
-                if (shipperOrder.getLastAssignedAt() == null || shipperOrder.getLastAssignedAt().plusMinutes(5).isBefore(LocalDateTime.now())) {
+                if (shipperOrder.getLastAssignedAt() == null || shipperOrder.getLastAssignedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
                     Store store = shipperOrder.getStore();
                     Optional<User> newShipperOptional = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
                             .stream()

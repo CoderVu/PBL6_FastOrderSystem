@@ -6,13 +6,17 @@ import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.request.CategoryRequest;
+import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.ResponseConverter;
 import com.example.BE_PBL6_FastOrderSystem.service.ICategoryService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +30,7 @@ public class CategoryServiceImpl  implements ICategoryService {
     private final CartItemRepository cartRepository;
     private final PromotionRepository promotionRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final StoreRepository storeRepository;
 
     @Override
     public ResponseEntity<APIRespone> getAllCategories() {
@@ -47,7 +52,21 @@ public class CategoryServiceImpl  implements ICategoryService {
         return ResponseEntity.ok(new APIRespone(true, "Success", new CategoryResponse(category.getCategoryId(), category.getCategoryName(), category.getImage(), category.getDescription())));
     }
 
-
+    @Override
+    public ResponseEntity<APIRespone> getCategoryByStoreId(Long storeId) {
+        Optional<Store> store = storeRepository.findById(storeId);
+        if (store.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+        Set<CategoryResponse> set = new HashSet<>();
+        List<ProductResponse> productResponses = productRepository.findByStoreId(storeId).stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
+        for(ProductResponse item : productResponses){
+            set.add(item.getCategory());
+        }
+        return new ResponseEntity<>(new APIRespone(true, "Success", set), HttpStatus.OK);
+    }
     @Override
     public ResponseEntity<APIRespone>  addCategory(CategoryRequest categoryRequest) {
          if (categoryRepository.existsByCategoryName(categoryRequest.getCategoryName())) {

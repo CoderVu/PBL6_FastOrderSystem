@@ -13,4 +13,5 @@ public interface ICategoryService {
     ResponseEntity<APIRespone>  addCategory(CategoryRequest categoryRequest);
     ResponseEntity<APIRespone>  updateCategory(Long categoryId, CategoryRequest categoryRequest);
     ResponseEntity<APIRespone>  deleteCategory(Long categoryId);
+    ResponseEntity<APIRespone> getCategoryByStoreId(Long storeId);
 }

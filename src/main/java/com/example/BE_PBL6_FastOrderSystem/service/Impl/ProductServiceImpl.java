@@ -7,6 +7,7 @@ import com.example.BE_PBL6_FastOrderSystem.model.Store;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.request.ProductRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
+import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
@@ -20,14 +21,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements IProductService {
-    private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final StoreRepository storeRepository;
@@ -56,6 +55,7 @@ public class ProductServiceImpl implements IProductService {
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponse), HttpStatus.OK);
     }
 
+
     @Override
     public ResponseEntity<APIRespone> getProductsByStoreId(Long storeId) {
         Optional<Store> store = storeRepository.findById(storeId);
@@ -67,6 +67,7 @@ public class ProductServiceImpl implements IProductService {
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
     }
+
     @Override
     public Long calculateOrderNowAmountProduct(Long productId, int quantity) {
         Optional<Product> product = productRepository.findById(productId);
@@ -106,7 +107,6 @@ public class ProductServiceImpl implements IProductService {
         }
         return new ResponseEntity<>(new APIRespone(true, "All products applied to all stores successfully", ""), HttpStatus.OK);
     }
-
     @Override
     public ResponseEntity<APIRespone> applyAllProductsToStore(Long storeId, int quantity) {
         Optional<Store> storeOptional = storeRepository.findById(storeId);
@@ -145,15 +145,32 @@ public class ProductServiceImpl implements IProductService {
         if (storeOptional.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
         }
+
         Store store = storeOptional.get();
         List<Product> products = productRepository.findAllById(productIds);
+        if (products.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Products not found", ""), HttpStatus.NOT_FOUND);
+        }
+
+        List<String> alreadyAppliedProducts = new ArrayList<>();
         int initialProductStoreCount = productStoreRepository.findAll().size();
+
         for (Product product : products) {
-            if (product.getStockQuantity()<quantity) {
+            if (product.getStockQuantity() < quantity) {
                 return new ResponseEntity<>(new APIRespone(false, "Not enough stock quantity for product: " + product.getProductName(), ""), HttpStatus.BAD_REQUEST);
             }
+
             boolean storeHasProduct = store.getProductStores().stream()
                     .anyMatch(productStore -> productStore.getProduct().getProductId().equals(product.getProductId()));
+
+            boolean productBelongsToAnotherStore = product.getProductStores().stream()
+                    .anyMatch(productStore -> !productStore.getStore().getStoreId().equals(store.getStoreId()));
+
+            if (productBelongsToAnotherStore) {
+                alreadyAppliedProducts.add(product.getProductName());
+                continue;
+            }
+
             if (!storeHasProduct) {
                 ProductStore productStore = new ProductStore();
                 productStore.setProduct(product);
@@ -166,38 +183,18 @@ public class ProductServiceImpl implements IProductService {
             product.setStockQuantity(product.getStockQuantity() - quantity);
             productRepository.save(product);
         }
+
+        if (!alreadyAppliedProducts.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Some products already belong to another store: " + String.join(", ", alreadyAppliedProducts), ""), HttpStatus.BAD_REQUEST);
+        }
+
         if (initialProductStoreCount == productStoreRepository.findAll().size()) {
             return new ResponseEntity<>(new APIRespone(false, "Products already applied to store", ""), HttpStatus.BAD_REQUEST);
         }
+
         return new ResponseEntity<>(new APIRespone(true, "Products applied to store successfully", ""), HttpStatus.OK);
     }
-    @Override
-    public ResponseEntity<APIRespone> applyProductToStore(Long productId, Long storeId, int quantity) {
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isEmpty()) {
-            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
-        }
 
-        Optional<Store> storeOptional = storeRepository.findById(storeId);
-        if (storeOptional.isEmpty()) {
-            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
-        }
-        if (productOptional.get().getProductStores().stream().anyMatch(ps -> ps.getStore().equals(storeOptional.get()))) {
-            return new ResponseEntity<>(new APIRespone(false, "Product already applied to store", ""), HttpStatus.BAD_REQUEST);
-        }
-        Product product = productOptional.get();
-        Store store = storeOptional.get();
-
-        ProductStore productStore = new ProductStore();
-        productStore.setProduct(product);
-        productStore.setStore(store);
-        productStore.setStockQuantity(quantity);
-        product.getProductStores().add(productStore);
-        store.getProductStores().add(productStore);
-        productStoreRepository.save(productStore);
-        productRepository.save(product);
-        return new ResponseEntity<>(new APIRespone(true, "Product applied to store successfully", ""), HttpStatus.OK);
-    }
     @Override
     public ResponseEntity<APIRespone> applyProductToAllStores(Long productId, int quantity) {
         Optional<Product> productOptional = productRepository.findById(productId);
@@ -310,7 +307,7 @@ public class ProductServiceImpl implements IProductService {
         }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
-        Optional<Category> category = categoryRepository.findById(productRequest.getCategoryId()); // Optional laf 1 kieu du lieu giup kiem tra xem co ton tai hay khong
+        Optional<Category> category = categoryRepository.findById(productRequest.getCategoryId());
         if (category.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Category not found", ""), HttpStatus.NOT_FOUND);
         }

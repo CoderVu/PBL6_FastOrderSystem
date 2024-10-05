@@ -18,6 +18,11 @@ public interface IPaymentService {
     Map<String, Object> createOrderZaloPay(PaymentRequest orderRequest) throws IOException;
     Map<String, Object> getStatusMomo(PaymentRequest requestDTO) throws IOException;
     Map<String, Object> getStatusZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException;
-    
 
+
+    ResponseEntity<APIRespone> getAllPayment();
+
+    ResponseEntity<APIRespone> getPaymentById(Long paymentId);
+
+    ResponseEntity<APIRespone> getPaymentDetailByPaymentId(Long paymentId);
 }

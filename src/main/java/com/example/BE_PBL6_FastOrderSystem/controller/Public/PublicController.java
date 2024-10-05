@@ -33,7 +33,10 @@ public class PublicController {
     @GetMapping("/products/all")
     public ResponseEntity<APIRespone> getAllProducts() throws SQLException {
        return productService.getAllProduct();
-
+    }
+    @GetMapping("/product/{storeid}/{categoryid}")
+    public ResponseEntity<APIRespone> getProduct_ByStoreAndCategoryById(@PathVariable("storeid") Long storeId,@PathVariable("categoryid") Long categoryid) {
+        return categoryService.getCategoryByStoreId(storeId);
     }
     @GetMapping("/products/{id}")
     public ResponseEntity<APIRespone> getProductById(@PathVariable("id") Long productId) {
@@ -80,6 +83,11 @@ public class PublicController {
     public ResponseEntity<APIRespone> getStoreById(@PathVariable("id") Long storeId) {
         return storeService.getStoreById(storeId);
     }
+    @GetMapping("/category/story/{id}")
+    public ResponseEntity<APIRespone> getCategoryByStoreId(@PathVariable("id") Long storeId) {
+        return categoryService.getCategoryByStoreId(storeId);
+    }
+
     @GetMapping("/promotions/all")
     public ResponseEntity<APIRespone> getPromotions() {
        return promotionService.getAllPromotion();

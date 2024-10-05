@@ -7,7 +7,8 @@ import com.example.BE_PBL6_FastOrderSystem.repository.PaymentMethodRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.PaymentRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
-import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.PaymentDetailResponse;
+import com.example.BE_PBL6_FastOrderSystem.response.PaymentResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IPaymentService;
 import com.example.BE_PBL6_FastOrderSystem.utils.Helper.HelperHmacSHA256;
 import com.example.BE_PBL6_FastOrderSystem.utils.constants.MoMoConstant;
@@ -313,6 +314,74 @@ public class PaymentServiceImpl implements IPaymentService {
 
 		return response;
 	}
+    @Override
+    public ResponseEntity<APIRespone> getAllPayment(){
+          if (paymentRepository.findAll().isEmpty()) {
+              return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "No payment found", ""));
+          }
+            List<PaymentResponse> paymentResponses = paymentRepository.findAll().stream()
+                    .map(payment -> {
+                        PaymentResponse paymentResponse = new PaymentResponse();
+                        paymentResponse.setPaymentId(payment.getPaymentId());
+                        paymentResponse.setUserId(payment.getUserId());
+                        paymentResponse.setOrderId(payment.getOrder().getOrderId());
+                        paymentResponse.setPaymentMethod(payment.getPaymentMethod().getName());
+                        paymentResponse.setTotal(payment.getAmountPaid());
+                        paymentResponse.setStatus(payment.getStatus());
+                        paymentResponse.setCreatedAt(payment.getCreatedAt());
+                        paymentResponse.setPaymentDate(payment.getPaymentDate());
+                        paymentResponse.setOrderCode(payment.getOrderCode());
+                        paymentResponse.setOrderInfo(payment.getOrderInfo());
+                        return paymentResponse;
+                    })
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(new APIRespone(true, "Success", paymentResponses));
+    }
+    @Override
+    public ResponseEntity<APIRespone> getPaymentById(Long paymentId) {
+        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
+        if (optionalPayment.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Payment not found", ""));
+        }
+        List<PaymentResponse> paymentResponses = paymentRepository.findById(paymentId).stream()
+                .map(payment -> {
+                    PaymentResponse paymentResponse = new PaymentResponse();
+                    paymentResponse.setPaymentId(payment.getPaymentId());
+                    paymentResponse.setUserId(payment.getUserId());
+                    paymentResponse.setOrderId(payment.getOrder().getOrderId());
+                    paymentResponse.setPaymentMethod(payment.getPaymentMethod().getName());
+                    paymentResponse.setTotal(payment.getAmountPaid());
+                    paymentResponse.setStatus(payment.getStatus());
+                    paymentResponse.setCreatedAt(payment.getCreatedAt());
+                    paymentResponse.setPaymentDate(payment.getPaymentDate());
+                    paymentResponse.setOrderCode(payment.getOrderCode());
+                    paymentResponse.setOrderInfo(payment.getOrderInfo());
+                    return paymentResponse;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", paymentResponses));
+    }
+    @Override
+    public ResponseEntity<APIRespone> getPaymentDetailByPaymentId(Long paymentId) {
+        Optional<Payment> optionalPayment = paymentRepository.findById(paymentId);
+        if (optionalPayment.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "Payment not found", ""));
+        }
+        List<PaymentDetailResponse> paymentDetailResponses = paymentDetailRepository.findByPaymentId(paymentId).stream()
+                .map(paymentDetail -> {
+                    PaymentDetailResponse paymentDetailResponse = new PaymentDetailResponse();
+                    paymentDetailResponse.setPaymentDetailId(paymentDetail.getId());
+                    paymentDetailResponse.setPaymentId(paymentDetail.getPayment().getPaymentId());
+                    paymentDetailResponse.setTotal(paymentDetail.getTotalAmount());
+                    paymentDetailResponse.setStatus(paymentDetail.getPaymentStatus());
+                    paymentDetailResponse.setOrderId(paymentDetail.getOrder().getOrderId());
+                    paymentDetailResponse.setStoreId(paymentDetail.getStore().getStoreId());
+                    return paymentDetailResponse;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", paymentDetailResponses));
+    }
+
 
 }
 

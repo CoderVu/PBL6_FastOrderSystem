@@ -23,10 +23,9 @@ public class Store {
     private Double latitude;
     private LocalDateTime openingTime;
     private LocalDateTime closingTime;
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "manager_id")
     private User manager;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     @ManyToMany(mappedBy = "stores")
