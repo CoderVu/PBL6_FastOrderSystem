@@ -26,6 +26,10 @@ public class AdminAuthController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
+    @PostMapping("/approve-shippers/{userId}")
+    public ResponseEntity<APIRespone> approveShipper(@PathVariable Long userId) {
+        return authService.approveShipper(userId);
+    }
     @GetMapping("/all_roles")
     public ResponseEntity<APIRespone> getUsers(@RequestParam String role) {
         return userService.getUsers(role);

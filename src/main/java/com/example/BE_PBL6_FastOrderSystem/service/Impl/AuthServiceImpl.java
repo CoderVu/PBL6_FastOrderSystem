@@ -18,6 +18,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -50,7 +51,7 @@ public class AuthServiceImpl implements IAuthService {
         if (user.getPassword() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Password is required", ""));
         }
-        if (user.isAccountLocked()) {
+        if (user.getAccountLocked()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Account is locked", ""));
         }
         try {
@@ -133,6 +134,7 @@ public class AuthServiceImpl implements IAuthService {
         }
         Role userRole = optionalRole.get();
         user.setRole(userRole);
+        user.setIsApproved(Boolean.valueOf(false));
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
     }
@@ -169,6 +171,20 @@ public class AuthServiceImpl implements IAuthService {
         user.setRole(adminRole);
         userRepository.save(user);
         return ResponseEntity.ok(new APIRespone(true, "Success", ""));
+    }
+    @Override
+    public ResponseEntity<APIRespone> approveShipper(Long userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "User not found", ""));
+        }
+        User user = optionalUser.get();
+        if (user.getRole().getName().equals("ROLE_SHIPPER")) {
+            user.setIsApproved(true);
+            userRepository.save(user);
+            return ResponseEntity.ok(new APIRespone(true, "Success", ""));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "User is not a shipper", ""));
     }
 
     private final Set<String> invalidTokens = new HashSet<>();
@@ -250,7 +266,7 @@ public class AuthServiceImpl implements IAuthService {
                 user.getAvatar(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
-                user.isAccountLocked(),
+                user.getAccountLocked(),
                 user.getIsActive(),
                 jwt,
                 roles
@@ -269,7 +285,8 @@ public class AuthServiceImpl implements IAuthService {
         } else {
             user = new User();
             user.setFullName(name);
-            user.setFacebookId(facebookId); // Set Facebook ID
+            user.setFacebookId(facebookId);
+            user.setAccountLocked(false);
             user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
             userRepository.save(user);
         }
@@ -290,10 +307,91 @@ public class AuthServiceImpl implements IAuthService {
                 user.getAvatar(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
-                user.isAccountLocked(),
+                user.getAccountLocked(),
                 user.getIsActive(),
                 jwt,
                 roles
         )));
     }
+    @Override
+    public ResponseEntity<APIRespone> loginSuccess(@AuthenticationPrincipal OAuth2User oAuth2User) throws Exception {
+        if (oAuth2User == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Login failed", ""));
+        }
+        String email = oAuth2User.getAttribute("email");
+        String facebookId = oAuth2User.getAttribute("id");
+        String name = oAuth2User.getAttribute("name");
+        String picture = oAuth2User.getAttribute("picture");
+        // check if it's a facebook login or google login
+        if (email != null) {
+            return handleGoogleLogin(oAuth2User, email, name, picture);
+        } else if (facebookId != null) {
+            return handleFacebookLogin(oAuth2User, facebookId, name);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "Invalid login", ""));
+    }
+
+    private ResponseEntity<APIRespone> handleGoogleLogin(OAuth2User oauth2User, String email, String name, String picture) throws Exception {
+        String base64Image = ImageGeneral.urlToBase64(picture);
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmail(email));
+        User user;
+
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+        } else {
+            user = new User();
+            user.setEmail(email);
+            user.setFullName(name);
+            user.setAvatar(base64Image);
+            user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
+            userRepository.save(user);
+        }
+
+        return buildJwtResponse(user);
+    }
+    private ResponseEntity<APIRespone> handleFacebookLogin(OAuth2User oauth2User, String facebookId, String name) throws Exception {
+        Optional<User> optionalUser = Optional.ofNullable((User) userRepository.findByFacebookId(facebookId));
+        User user;
+
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+        } else {
+            user = new User();
+            user.setFullName(name);
+            user.setFacebookId(facebookId);
+            user.setAccountLocked(false);
+            user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
+            userRepository.save(user);
+        }
+
+        return buildJwtResponse(user);
+    }
+    private ResponseEntity<APIRespone> buildJwtResponse(User user) throws Exception {
+        // Convert User to FoodUserDetails
+        FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        String jwt = jwtUtils.generateToken(authentication);
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        return ResponseEntity.ok(new APIRespone(true, "Success", new JwtResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getPhoneNumber(),
+                user.getAddress(),
+                user.getLongitude(),
+                user.getLatitude(),
+                user.getAvatar(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.getAccountLocked(),
+                user.getIsActive(),
+                jwt,
+                roles
+        )));
+    }
+
 }

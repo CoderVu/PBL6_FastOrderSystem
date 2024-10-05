@@ -25,21 +25,39 @@ spring:
           google:
             client-id: ${google.client.id}
             client-secret: ${google.client.secret}
-            scope: profile, email
-            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            scope:
+              - email
+              - profile
+            redirect-uri: "${BASE_URL}/login/oauth2/code/google"
             authorization-grant-type: authorization_code
+            client-name: google
           facebook:
             client-id: ${facebook.client.id}
             client-secret: ${facebook.client.secret}
-            scope: profile, email
-            redirect-uri: "{baseUrl}/login/oauth2/code/facebook"
+            scope:
+              - email
+              - public_profile
+            redirect-uri: "${BASE_URL}/login/oauth2/code/facebook"
             authorization-grant-type: authorization_code
+            client-name: facebook
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://accounts.google.com/o/oauth2/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+          facebook:
+            authorization-uri: https://www.facebook.com/v2.8/dialog/oauth
+            token-uri: https://graph.facebook.com/v2.8/oauth/access_token
+            user-info-uri: https://graph.facebook.com/me?fields=id,name,email,first_name,last_name
+            user-name-attribute: id
   jackson:
     serialization:
       fail-on-empty-beans: false
 logging:
   level:
     org.springframework.security: DEBUG
+BASE_URL: http://localhost:8080
       
 #docker run --name mysql -e MYSQL_DATABASE=db -e MYSQL_ROOT_PASSWORD=123456789 -p 3306:3306 -v mysql-data:/var/lib/mysql --network dockervu -d mysql:8.0.38
 #docker run --name springboot -p 8080:8080 -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db -e SPRING_DATASOURCE_USERNAME=root -e SPRING_DATASOURCE_PASSWORD=123456789 --network dockervu -d vunguyen2901/pbl6-app:latest

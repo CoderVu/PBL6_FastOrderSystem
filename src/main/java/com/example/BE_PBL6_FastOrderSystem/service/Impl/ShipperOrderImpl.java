@@ -83,7 +83,7 @@ public class ShipperOrderImpl implements IShipperOrderService {
             shipperOrderRepository.save(shipperOrder);
             // cập nhật trạng thái của shipper
             User shipper = shipperOrder.getShipper();
-            shipper.setIsActive(false);
+            shipper.setIsActive(true);
             return ResponseEntity.ok(new APIRespone(true, "Shipper accepted the order", ""));
         } else {
             // shipper từ chối đơn hàng

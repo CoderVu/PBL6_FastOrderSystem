@@ -49,7 +49,7 @@ public class FoodUserDetails implements UserDetails {
                 user.getAvatar(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
-                user.isAccountLocked(),
+                user.getAccountLocked(),
                 user.getIsActive(),
                 List.of(authority));
     }

@@ -1,6 +1,5 @@
 package com.example.BE_PBL6_FastOrderSystem.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,13 +25,15 @@ public class User {
     private Double longitude;
     @Column(name = "latitude", columnDefinition = "DOUBLE")
     private Double latitude;
+    @Column(name = "is_approved")
+    private Boolean isApproved = (Boolean) false;
     @Column(name = "is_active")
     private Boolean isActive;
     @Column(name = "is_busy")
-    private Boolean isBusy = false;
+    private Boolean isBusy = (Boolean) false;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private boolean accountLocked;
+    private Boolean accountLocked;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;

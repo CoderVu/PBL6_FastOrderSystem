@@ -126,4 +126,8 @@ public class AuthController {
         }
         return authService.loginFacebook(oauth2User);
     }
+    @GetMapping("/oauth2/callback")
+    public ResponseEntity<APIRespone> loginSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
+        return authService.loginSuccess(oauth2User);
+    }
 }

@@ -115,9 +115,9 @@ public class OrderServiceImpl implements IOrderService {
             } else if (cartItem.getCombo() != null) {
                 orderDetail.setCombo(cartItem.getCombo());
             }
-            orderDetail.setQuantity(cartItem.getQuantity());
-            orderDetail.setUnitPrice(cartItem.getUnitPrice());
-            orderDetail.setTotalPrice(cartItem.getTotalPrice());
+            orderDetail.setQuantity(Integer.valueOf(cartItem.getQuantity()));
+            orderDetail.setUnitPrice(Double.valueOf(cartItem.getUnitPrice()));
+            orderDetail.setTotalPrice(Double.valueOf(cartItem.getTotalPrice()));
             orderDetail.setSize(cartItem.getSize());
             Store store = storeRepository.findById(cartItem.getStoreId()).orElseThrow(() -> new EntityNotFoundException("Store not found"));
             orderDetail.setStore(store);
@@ -154,7 +154,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         // Lưu các order detail
         order.setOrderDetails(orderDetails);
-        order.setTotalAmount(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum());
+        order.setTotalAmount(Double.valueOf(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum()));
         orderRepository.save(order);
         cartItemRepository.deleteAll(cartItems);
 
@@ -226,10 +226,10 @@ public class OrderServiceImpl implements IOrderService {
 
         if (product != null) {
             orderDetail.setUnitPrice(product.getPrice());
-            orderDetail.setTotalPrice(product.getPrice() * quantity);
+            orderDetail.setTotalPrice(Double.valueOf(product.getPrice() * quantity));
         } else if (combo != null) {
             orderDetail.setUnitPrice(combo.getComboPrice());
-            orderDetail.setTotalPrice(combo.getComboPrice() * quantity);
+            orderDetail.setTotalPrice(Double.valueOf(combo.getComboPrice() * quantity));
         }
         // Thiết lập thông tin nước uống nếu có
         if (drinkId != null) {
@@ -300,7 +300,7 @@ public class OrderServiceImpl implements IOrderService {
         double shippingFeePerKm = 10000;
         double shippingFee = distance * shippingFeePerKm;
         // bội số của 1000
-        return Math.floor(shippingFee / 1000) * 1000;
+        return (Double) (Math.floor(shippingFee / 1000) * 1000);
     }
 
 

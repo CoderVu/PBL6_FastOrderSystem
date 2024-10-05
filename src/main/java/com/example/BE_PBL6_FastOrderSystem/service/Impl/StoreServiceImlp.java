@@ -25,6 +25,35 @@ import java.util.stream.Collectors;
 public class StoreServiceImlp implements IStoreService {
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    @Override
+    public ResponseEntity<APIRespone> getStoreByUserId(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
+        }
+        User user = userOptional.get();
+        List<Store> stores = storeRepository.findAllByManagerId(user.getId());
+        if (stores.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No store found for this user", ""));
+        }
+        List<StoreResponse> storeResponses = stores.stream()
+                .map(store -> new StoreResponse(
+                        store.getStoreId(),
+                        store.getStoreName(),
+                        store.getImage(),
+                        store.getLocation(),
+                        store.getLatitude(),
+                        store.getLongitude(),
+                        store.getPhoneNumber(),
+                        store.getOpeningTime(),
+                        store.getClosingTime(),
+                        store.getManager().getFullName(),
+                        store.getCreatedAt(),
+                        store.getUpdatedAt()
+                ))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", storeResponses));
+    }
 
     @Override
     public ResponseEntity<APIRespone> getStoreById(Long storeId) {

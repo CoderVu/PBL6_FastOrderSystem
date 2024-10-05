@@ -5,6 +5,7 @@ import com.example.BE_PBL6_FastOrderSystem.request.RefreshRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -15,6 +16,9 @@ public interface IAuthService {
     ResponseEntity<APIRespone> registerShipper(User user);
 
     ResponseEntity<APIRespone> registerAdmin(User user);
+
+    ResponseEntity<APIRespone> approveShipper(Long id);
+
     void logout(String token);
     boolean isTokenInvalid(String token);
     void invalidateToken(String refreshToken);
@@ -24,4 +28,5 @@ public interface IAuthService {
 
     ResponseEntity<APIRespone> loginFacebook(OAuth2User oauth2User) throws Exception;
 
+    ResponseEntity<APIRespone> loginSuccess(@AuthenticationPrincipal OAuth2User oAuth2User) throws Exception;
 }
