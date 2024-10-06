@@ -7,14 +7,11 @@ import com.example.BE_PBL6_FastOrderSystem.model.Store;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.request.ProductRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
-import com.example.BE_PBL6_FastOrderSystem.response.CategoryResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import com.example.BE_PBL6_FastOrderSystem.response.ResponseConverter;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -66,6 +63,24 @@ public class ProductServiceImpl implements IProductService {
                 .map(ResponseConverter::convertToProductResponse)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
+    }
+    @Override
+    public ResponseEntity<APIRespone> getProductsByStore_CategoryId(Long storeId,Long categoryId) {
+        Optional<Store> store = storeRepository.findById(storeId);
+        if (store.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+        List<ProductResponse> productResponses = productRepository.findByStoreId(storeId).stream()
+                .map(ResponseConverter::convertToProductResponse)
+                .collect(Collectors.toList());
+        List<ProductResponse> product_storeAndcategory = new ArrayList<>();
+        for(ProductResponse item : productResponses){
+            if(item.getCategory().getCategoryId() == categoryId){
+                product_storeAndcategory.add(item);
+            }
+        }
+
+        return new ResponseEntity<>(new APIRespone(true, "Success", product_storeAndcategory), HttpStatus.OK);
     }
 
     @Override
@@ -159,41 +174,35 @@ public class ProductServiceImpl implements IProductService {
             if (product.getStockQuantity() < quantity) {
                 return new ResponseEntity<>(new APIRespone(false, "Not enough stock quantity for product: " + product.getProductName(), ""), HttpStatus.BAD_REQUEST);
             }
-
             boolean storeHasProduct = store.getProductStores().stream()
                     .anyMatch(productStore -> productStore.getProduct().getProductId().equals(product.getProductId()));
-
-            boolean productBelongsToAnotherStore = product.getProductStores().stream()
-                    .anyMatch(productStore -> !productStore.getStore().getStoreId().equals(store.getStoreId()));
-
-            if (productBelongsToAnotherStore) {
+            if (storeHasProduct) {
                 alreadyAppliedProducts.add(product.getProductName());
                 continue;
             }
+            ProductStore productStore = new ProductStore();
+            productStore.setProduct(product);
+            productStore.setStore(store);
+            productStore.setStockQuantity(quantity);
+            product.getProductStores().add(productStore);
+            store.getProductStores().add(productStore);
+            productStoreRepository.save(productStore);
 
-            if (!storeHasProduct) {
-                ProductStore productStore = new ProductStore();
-                productStore.setProduct(product);
-                productStore.setStore(store);
-                productStore.setStockQuantity(quantity);
-                product.getProductStores().add(productStore);
-                store.getProductStores().add(productStore);
-                productStoreRepository.save(productStore);
-            }
             product.setStockQuantity(product.getStockQuantity() - quantity);
             productRepository.save(product);
         }
 
         if (!alreadyAppliedProducts.isEmpty()) {
-            return new ResponseEntity<>(new APIRespone(false, "Some products already belong to another store: " + String.join(", ", alreadyAppliedProducts), ""), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new APIRespone(false, "Some products already belong to this store: " + String.join(", ", alreadyAppliedProducts), ""), HttpStatus.BAD_REQUEST);
         }
 
         if (initialProductStoreCount == productStoreRepository.findAll().size()) {
-            return new ResponseEntity<>(new APIRespone(false, "Products already applied to store", ""), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new APIRespone(false, "No new products were applied to store", ""), HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<>(new APIRespone(true, "Products applied to store successfully", ""), HttpStatus.OK);
     }
+
 
     @Override
     public ResponseEntity<APIRespone> applyProductToAllStores(Long productId, int quantity) {
@@ -236,24 +245,55 @@ public class ProductServiceImpl implements IProductService {
         if (storeOptional.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
         }
-
         Optional<Product> productOptional = productRepository.findById(productId);
         if (productOptional.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
         }
-
         Store store = storeOptional.get();
         Product product = productOptional.get();
-
-        store.getProductStores().removeIf(ps -> ps.getProduct().equals(product));
-        product.getProductStores().removeIf(ps -> ps.getStore().equals(store));
-
+        List<ProductStore> productStores = product.getProductStores().stream()
+                .filter(productStore -> productStore.getStore().getStoreId().equals(store.getStoreId()))
+                .collect(Collectors.toList());
+        if (productStores.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found in store", ""), HttpStatus.NOT_FOUND);
+        }
+        product.getProductStores().removeAll(productStores);
+        store.getProductStores().removeAll(productStores);
+        productStoreRepository.deleteAll(productStores);
+        productRepository.save(product);
         storeRepository.save(store);
-        productRepository.save(product);
-        product.setStockQuantity(product.getStockQuantity() + product.getProductStores().stream().mapToInt(ProductStore::getStockQuantity).sum());
-        productRepository.save(product);
-
         return new ResponseEntity<>(new APIRespone(true, "Product removed from store successfully", ""), HttpStatus.OK);
+    }
+    @Override
+    public ResponseEntity<APIRespone> removeProductsFromStore(List<Long> productIds, Long storeId) {
+        Optional<Store> storeOptional = storeRepository.findById(storeId);
+        if (storeOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+        Store store = storeOptional.get();
+        List<Product> products = productRepository.findAllById(productIds);
+        if (products.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Products not found", ""), HttpStatus.NOT_FOUND);
+        }
+        List<String> notFoundProducts = new ArrayList<>();
+        for (Product product : products) {
+            List<ProductStore> productStores = product.getProductStores().stream()
+                    .filter(productStore -> productStore.getStore().getStoreId().equals(store.getStoreId()))
+                    .collect(Collectors.toList());
+            if (productStores.isEmpty()) {
+                notFoundProducts.add(product.getProductName());
+                continue;
+            }
+            product.getProductStores().removeAll(productStores);
+            store.getProductStores().removeAll(productStores);
+            productStoreRepository.deleteAll(productStores);
+            productRepository.save(product);
+            storeRepository.save(store);
+        }
+        if (!notFoundProducts.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Some products not found in store: " + String.join(", ", notFoundProducts), ""), HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(new APIRespone(true, "Products removed from store successfully", ""), HttpStatus.OK);
     }
 
     @Override

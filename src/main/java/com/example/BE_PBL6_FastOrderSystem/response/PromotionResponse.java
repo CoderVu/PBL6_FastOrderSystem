@@ -9,16 +9,18 @@ public class PromotionResponse {
     private Long id;
     private String name;
     private String description;
+    private String image;
     private double discountPercentage;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private List<Long> storeIds;
 
 
-    public PromotionResponse(Long id, String name, String description, double discountPercentage, LocalDateTime startDate, LocalDateTime endDate, List<Long> storeIds) {
+    public PromotionResponse(Long id, String name, String description, String image, double discountPercentage, LocalDateTime startDate, LocalDateTime endDate, List<Long> storeIds) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.image = image;
         this.discountPercentage = discountPercentage;
         this.startDate = startDate;
         this.endDate = endDate;

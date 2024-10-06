@@ -14,12 +14,15 @@ public interface IProductService {
     ResponseEntity<APIRespone> getProductsByStoreId(Long storeId);
 
     Long calculateOrderNowAmountProduct(Long productId, int quantity);
+    ResponseEntity<APIRespone> getProductsByStore_CategoryId(Long storeId,Long categoryId);
 
     ResponseEntity<APIRespone> applyAllProductsToAllStores(int quantity);
 
     ResponseEntity<APIRespone> applyAllProductsToStore(Long storeId, int quantity);
 
     ResponseEntity<APIRespone> applyProductsToStore(List<Long> productIds, Long storeId, int quantity);
+
+    ResponseEntity<APIRespone> removeProductsFromStore(List<Long> productIds, Long storeId);
 
     ResponseEntity<APIRespone> getProductsByCategoryId(Long categoryId);
     ResponseEntity<APIRespone> getProductByNames(String productName);

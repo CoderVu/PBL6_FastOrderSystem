@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,9 +25,10 @@ public class AdminPromotionController {
             @RequestParam("promotionName") String promotionName,
             @RequestParam("discount") Double discount,
             @RequestParam("description") String description,
+            @RequestParam("image") MultipartFile image,
             @RequestParam("startDate") LocalDateTime startDate,
             @RequestParam("endDate") LocalDateTime endDate) {
-            PromotionRequest promotionRequest = new PromotionRequest(promotionName, description, discount, startDate, endDate);
+            PromotionRequest promotionRequest = new PromotionRequest(promotionName, description, image, discount, startDate, endDate);
             return promotionService.addPromotion(promotionRequest);
     }
     @PutMapping("/update/{promotionId}")
@@ -35,9 +37,10 @@ public class AdminPromotionController {
             @RequestParam("promotionName") String promotionName,
             @RequestParam("discount") Double discount,
             @RequestParam("description") String description,
+            @RequestParam("image") MultipartFile image,
             @RequestParam("startDate") LocalDateTime startDate,
             @RequestParam("endDate") LocalDateTime endDate) {
-        PromotionRequest promotionRequest = new PromotionRequest(promotionName, description, discount, startDate, endDate);
+        PromotionRequest promotionRequest = new PromotionRequest(promotionName, description,image, discount, startDate, endDate);
         return promotionService.updatePromotion(promotionId, promotionRequest);
     }
     @DeleteMapping("/delete/{promotionId}")
@@ -60,6 +63,24 @@ public class AdminPromotionController {
             @RequestParam("promotionId") Long promotionId,
             @RequestParam("productId") Long productId) {
         return promotionService.applyPromotionToProduct(promotionId, productId);
+    }
+    @PostMapping("/apply-to-list-products")
+    public ResponseEntity<APIRespone> applyPromotionToListProducts(
+            @RequestParam("promotionId") Long promotionId,
+            @RequestParam("productIds") List<Long> productIds) {
+        return promotionService.applyPromotionToListProducts(promotionId, productIds);
+    }
+    @PostMapping("/remove-from-store")
+    public ResponseEntity<APIRespone> removePromotionsFromStore(
+            @RequestParam("promotionIds") List<Long> promotionIds,
+            @RequestParam("storeId") Long storeId) {
+        return promotionService.removePromotionsFromStore(promotionIds, storeId);
+    }
+    @PostMapping("/remove-from-product")
+    public ResponseEntity<APIRespone> removePromotionFromProduct(
+            @RequestParam("promotionId") Long promotionId,
+            @RequestParam("productId") Long productId) {
+        return promotionService.removePromotionFromProduct(promotionId, productId);
     }
 }
 

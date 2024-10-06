@@ -72,4 +72,17 @@ public class AdminProductController {
             @RequestParam("quantity") Integer quantity) {
         return productService.applyAllProductsToAllStores(quantity);
     }
+
+    @PostMapping("/remove-from-store")
+    public ResponseEntity<APIRespone> removeProductFromStore(
+            @RequestParam("storeId") Long storeId,
+            @RequestParam("productId") Long productId) {
+        return productService.removeProductFromStore(storeId, productId);
+    }
+    @PostMapping("/remove-list-products-from-store")
+    public ResponseEntity<APIRespone> removeListProductsFromStore(
+            @RequestParam("storeId") Long storeId,
+            @RequestParam("productIds") List<Long> productIds) {
+        return productService.removeProductsFromStore(productIds, storeId);
+    }
 }

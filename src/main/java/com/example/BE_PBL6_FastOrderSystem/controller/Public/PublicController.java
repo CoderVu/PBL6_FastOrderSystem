@@ -21,6 +21,7 @@ public class PublicController {
     private final ISizeService sizeService;
     private final IStatusOrderService statusOrderService;
     private final IStaffService scheduleService;
+
     private final IOrderService orderService;
     @GetMapping("/categories/all")
     public  ResponseEntity<APIRespone> getAllCategories() {
@@ -34,9 +35,9 @@ public class PublicController {
     public ResponseEntity<APIRespone> getAllProducts() throws SQLException {
        return productService.getAllProduct();
     }
-    @GetMapping("/product/{storeid}/{categoryid}")
+    @GetMapping("/products/{storeid}/{categoryid}")
     public ResponseEntity<APIRespone> getProduct_ByStoreAndCategoryById(@PathVariable("storeid") Long storeId,@PathVariable("categoryid") Long categoryid) {
-        return categoryService.getCategoryByStoreId(storeId);
+        return productService.getProductsByStore_CategoryId(storeId,categoryid);
     }
     @GetMapping("/products/{id}")
     public ResponseEntity<APIRespone> getProductById(@PathVariable("id") Long productId) {
@@ -83,7 +84,7 @@ public class PublicController {
     public ResponseEntity<APIRespone> getStoreById(@PathVariable("id") Long storeId) {
         return storeService.getStoreById(storeId);
     }
-    @GetMapping("/category/story/{id}")
+    @GetMapping("/category/stores/{id}")
     public ResponseEntity<APIRespone> getCategoryByStoreId(@PathVariable("id") Long storeId) {
         return categoryService.getCategoryByStoreId(storeId);
     }

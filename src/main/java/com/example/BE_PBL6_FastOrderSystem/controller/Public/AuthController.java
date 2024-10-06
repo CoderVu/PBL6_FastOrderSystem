@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.controller.Public;
 
 import com.example.BE_PBL6_FastOrderSystem.repository.RoleRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
+import com.example.BE_PBL6_FastOrderSystem.request.FormRequest;
 import com.example.BE_PBL6_FastOrderSystem.request.RefreshRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
@@ -11,6 +12,7 @@ import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
+import com.example.BE_PBL6_FastOrderSystem.service.IFormService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import org.springframework.http.HttpHeaders;
 
@@ -30,6 +32,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,23 +50,20 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final IFormService formService;
 
 
     @PostMapping("/register-user")
     public ResponseEntity<APIRespone> registerUser(@RequestBody User user) {
         return authService.registerUser(user);
     }
-    @PostMapping("/register-owner")
-    public ResponseEntity<APIRespone>registerOwner(@RequestBody User user) {
-        return authService.registerAdmin(user);
-    }
     @PostMapping("/register-shipper")
     public ResponseEntity<APIRespone> registerShipper(@RequestBody User user) {
         return authService.registerShipper(user);
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<APIRespone> authenticateUser(@Valid @RequestBody LoginRequest request) {
@@ -129,5 +129,21 @@ public class AuthController {
     @GetMapping("/oauth2/callback")
     public ResponseEntity<APIRespone> loginSuccess(@AuthenticationPrincipal OAuth2User oauth2User) throws Exception {
         return authService.loginSuccess(oauth2User);
+    }
+    @PostMapping("/shipper-registration")
+    public ResponseEntity<APIRespone> addForm(
+            @RequestParam("name") String name,
+            @RequestParam("citizenID") int citizenID,
+            @RequestParam("imageCitizenFront") MultipartFile imageCitizenFront,
+            @RequestParam("imageCitizenBack") MultipartFile imageCitizenBack,
+            @RequestParam("email") String email,
+            @RequestParam("phone") String phone,
+            @RequestParam("address") String address,
+            @RequestParam("age") Integer age,
+            @RequestParam("vehicle") String vehicle,
+            @RequestParam("licensePlate") String licensePlate,
+            @RequestParam("driverLicense") String driverLicense) {
+            FormRequest formRequest = new FormRequest(name, citizenID, imageCitizenFront, imageCitizenBack, email, phone, address, age, vehicle, licensePlate, driverLicense);
+            return formService.addForm(formRequest);
     }
 }
