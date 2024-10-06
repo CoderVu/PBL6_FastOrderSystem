@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 public class FormRequest {
     private String name;
-    private int CitizenID;
+    private String CitizenID;
     private MultipartFile imageCitizenFront;
     private MultipartFile imageCitizenBack;
     private String email;
@@ -16,7 +16,7 @@ public class FormRequest {
     private String vehicle;
     private String licensePlate;
     private String DriverLicense;
-    public FormRequest(String name, int CitizenID, MultipartFile imageCitizenFront, MultipartFile imageCitizenBack, String email, String phone, String address, int age, String vehicle, String licensePlate, String DriverLicense) {
+    public FormRequest(String name, String CitizenID, MultipartFile imageCitizenFront, MultipartFile imageCitizenBack, String email, String phone, String address, int age, String vehicle, String licensePlate, String DriverLicense) {
         this.name = name;
         this.CitizenID = CitizenID;
         this.imageCitizenFront = imageCitizenFront;

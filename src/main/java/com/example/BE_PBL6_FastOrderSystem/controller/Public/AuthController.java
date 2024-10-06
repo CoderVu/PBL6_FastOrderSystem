@@ -133,7 +133,7 @@ public class AuthController {
     @PostMapping("/shipper-registration")
     public ResponseEntity<APIRespone> addForm(
             @RequestParam("name") String name,
-            @RequestParam("citizenID") int citizenID,
+            @RequestParam("citizenID") String citizenID,
             @RequestParam("imageCitizenFront") MultipartFile imageCitizenFront,
             @RequestParam("imageCitizenBack") MultipartFile imageCitizenBack,
             @RequestParam("email") String email,

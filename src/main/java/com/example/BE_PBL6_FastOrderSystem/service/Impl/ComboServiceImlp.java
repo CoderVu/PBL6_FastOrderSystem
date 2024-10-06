@@ -72,6 +72,7 @@ public class ComboServiceImlp implements IComboService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        combo.setDescription(comboRequest.getDescription());
         comboRepository.save(combo);
        return ResponseEntity.status(HttpStatus.CREATED).body(new APIRespone(true, "Combo added successfully", ""));
     }
@@ -91,6 +92,7 @@ public class ComboServiceImlp implements IComboService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        combo.setDescription(comboRequest.getDescription());
         comboRepository.save(combo);
         return ResponseEntity.ok(new APIRespone(true, "Combo updated successfully", ""));
     }
@@ -119,6 +121,24 @@ public class ComboServiceImlp implements IComboService {
         combo.getProducts().add(productRepository.findById(productId).get());
         comboRepository.save(combo);
         return ResponseEntity.ok(new APIRespone(true, "Product added to combo successfully", ""));
+    }
+    @Override
+    public ResponseEntity<APIRespone> addProducts(Long comboId, List<Long> productIds) {
+        if (comboRepository.findById(comboId).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
+        }
+        Combo combo = comboRepository.findById(comboId).get();
+        for (Long productId : productIds) {
+            if (combo.getProducts().stream().anyMatch(product -> product.getProductId().equals(productId))) {
+                continue;
+            }
+            if (productRepository.findById(productId).isEmpty()) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
+            }
+            combo.getProducts().add(productRepository.findById(productId).get());
+        }
+        comboRepository.save(combo);
+        return ResponseEntity.ok(new APIRespone(true, "Products added to combo successfully", ""));
     }
     @Override
     public ResponseEntity<APIRespone> getComboById(Long comboId) {

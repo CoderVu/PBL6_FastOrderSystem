@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/combo")
@@ -39,6 +41,10 @@ public class AdminComboController {
     @PostMapping("/addProduct/{comboId}")
     ResponseEntity<APIRespone> addProduct(@PathVariable Long comboId, @RequestParam Long productId){
         return comboService.addProduct(comboId, productId);
+    }
+    @PostMapping("/addListProduct/{comboId}")
+    ResponseEntity<APIRespone> addListProduct(@PathVariable Long comboId, @RequestParam List<Long> productIds){
+        return comboService.addProducts(comboId, productIds);
     }
 
 
