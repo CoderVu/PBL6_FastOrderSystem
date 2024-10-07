@@ -7,6 +7,7 @@ import com.example.BE_PBL6_FastOrderSystem.model.Size;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -23,9 +24,16 @@ public interface IOrderService {
     ResponseEntity<APIRespone> updateQuantityProduct(Long productId, Long comboId, Long storeId, int quantity);
     ResponseEntity<APIRespone> updateOrderStatus(String orderCode, String status);
 
-    ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long storeId);
+    ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10") int size);
 
     ResponseEntity<APIRespone> getOrderDetailOfStore(Long ownerId, String orderCode);
+
+    ResponseEntity<APIRespone> getAllOrderDetailsByUser(
+            Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size);
 
     ResponseEntity<APIRespone> getOrderDetailByUserId(Long userId, String orderCode);
 
@@ -35,5 +43,4 @@ public interface IOrderService {
     ResponseEntity<APIRespone> findOrderByOrderCode(String orderCode);
     ResponseEntity<APIRespone> getOrdersByStatusAndUserId(String status, Long userId);
     ResponseEntity<APIRespone>  findOrderByOrderCodeAndUserId(String orderCode, Long userId);
-    ResponseEntity<APIRespone> getAllOrderDetailsByUser(Long userId);
 }

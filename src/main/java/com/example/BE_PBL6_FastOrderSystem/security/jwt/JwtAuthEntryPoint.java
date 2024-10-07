@@ -56,7 +56,7 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
 
     private ResponseEntity<APIRespone> buildResponseEntity(int status, String error, String message, String path) {
         APIRespone apiResponse = APIRespone.builder()
-                .status(false)
+                .success(false)
                 .message(message)
                 .data(Map.of(
                         "status", status,

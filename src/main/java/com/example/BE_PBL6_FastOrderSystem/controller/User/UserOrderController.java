@@ -370,11 +370,16 @@ public class UserOrderController {
         Long userId = FoodUserDetails.getCurrentUserId();
         return orderService.cancelOrder(orderCode, userId);
     }
-    @GetMapping("/history/all")
-    public ResponseEntity<APIRespone> getAllOrders() {
+    @GetMapping("/history")
+    public ResponseEntity<APIRespone> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
         Long userId = FoodUserDetails.getCurrentUserId();
-        return orderService.getAllOrderDetailsByUser(userId);
+        return orderService.getAllOrderDetailsByUser(userId, page, size);
     }
+
+
     @GetMapping("/history/{orderCode}")
     public ResponseEntity<APIRespone> findOrderByOrderIdAndUserId(@PathVariable String orderCode) {
         Long userId = FoodUserDetails.getCurrentUserId();

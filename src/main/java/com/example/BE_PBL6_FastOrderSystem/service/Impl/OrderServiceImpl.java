@@ -17,6 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Service
 @RequiredArgsConstructor
@@ -443,28 +448,28 @@ public class OrderServiceImpl implements IOrderService {
         orderRepository.save(order);
         return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully", new OrderResponse(order)));
     }
-
     @Override
-    public ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId) {
-        List<Order> orders = orderRepository.findAll();
-        if (orders.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
-        }
+    public ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId,
+                                                               int page,
+                                                               int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
         List<Store> stores = storeRepository.findAllByManagerId(ownerId);
         if (stores.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
         }
-        List<Order> orders1 = orders.stream()
-                .filter(order -> order.getOrderDetails().stream().anyMatch(orderDetail -> stores.contains(orderDetail.getStore())))
-                .toList();
-        if (orders1.isEmpty()) {
+        List<Long> storeIds = stores.stream().map(Store::getStoreId).collect(Collectors.toList());
+        Page<Order> orders = orderRepository.findAllByStoreIds(storeIds, pageable);
+
+        if (orders.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
         }
-        List<OrderResponse> orderResponses = orders1.stream()
+        List<OrderResponse> orderResponses = orders.stream()
                 .map(OrderResponse::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
     }
+
     @Override
     public ResponseEntity<APIRespone> getOrderDetailOfStore(Long ownerId, String orderCode) {
         Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
@@ -481,21 +486,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
     }
-    @Override
-    public ResponseEntity<APIRespone> getOrderDetailByUserId(Long userId, String orderCode) {
-        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
-        if (orderOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
-        }
-        Order order = orderOptional.get();
-        if (!order.getUser().getId().equals(userId)) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
-        }
-        if (order.getOrderDetails().stream().noneMatch(orderDetail -> order.getUser().getId().equals(userId))) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
-        }
-        return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
-    }
+
 
     @Override
     public ResponseEntity<APIRespone> updateStatusDetail(String orderCode, Long OwnerId, String Status) {
@@ -589,16 +580,50 @@ public class OrderServiceImpl implements IOrderService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order not found", ""));
         }
         Order order = orderOptional.get();
-        return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
+        OrderResponse orderResponse = new OrderResponse(order);
+        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponse));
     }
+
+
     @Override
-    public ResponseEntity<APIRespone> getAllOrderDetailsByUser(Long userId) {
-        List<Order> orders = orderRepository.findAllByUserId(userId);
-        if (orders.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
+    public ResponseEntity<APIRespone> getAllOrderDetailsByUser(
+            Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        if (userId == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "User ID is missing", ""));
         }
-        List<OrderResponse> orderResponses = orders.stream().map(OrderResponse::new).collect(Collectors.toList());
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> orders = orderRepository.findAllByUserId(userId, pageable);
+
+        if (orders.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new APIRespone(false, "No order found", ""));
+        }
+
+        List<OrderResponse> orderResponses = orders.stream()
+                .map(OrderResponse::new)
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> getOrderDetailByUserId(Long userId, String orderCode) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
+        }
+        Order order = orderOptional.get();
+        if (!order.getUser().getId().equals(userId)) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
+        }
+        if (order.getOrderDetails().stream().noneMatch(orderDetail -> order.getUser().getId().equals(userId))) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
+        }
+        return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
     }
     
 

@@ -31,8 +31,6 @@ public class OrderResponse {
         this.deliveryAddress = order.getDeliveryAddress();
         this.createdAt = order.getCreatedAt();
         this.updatedAt = order.getUpdatedAt();
-        this.orderDetails = order.getOrderDetails().stream()
-                .map(OrderDetailResponse::new)
-                .collect(Collectors.toList());
+        this.orderDetails = order.getOrderDetails().stream().map(OrderDetailResponse::new).collect(Collectors.toList());
     }
 }

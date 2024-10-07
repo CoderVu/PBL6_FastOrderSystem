@@ -52,9 +52,12 @@ public class Order {
         return "Order{" +
                 "orderId=" + orderId +
                 ", orderCode='" + orderCode + '\'' +
+                ", user=" + user +
+                ", orderDetails=" + orderDetails +
                 ", orderDate=" + orderDate +
                 ", totalAmount=" + totalAmount +
-                ", status='" + status + '\'' +
+                ", shippingFee=" + shippingFee +
+                ", status=" + status +
                 ", deliveryAddress='" + deliveryAddress + '\'' +
                 ", longitude=" + longitude +
                 ", latitude=" + latitude +
