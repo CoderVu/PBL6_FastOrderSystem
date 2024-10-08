@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class OrderDetailComboResponse {
     private Long orderDetailId;
-    private ComboResponse combo;
+    private Long comboId;
     private Integer quantity;
     private Double unitPrice;
     private Double totalPrice;
@@ -17,7 +17,7 @@ public class OrderDetailComboResponse {
 
     public OrderDetailComboResponse(OrderDetail orderDetail) {
         this.orderDetailId = orderDetail.getOrderDetailId();
-        this.combo = ResponseConverter.convertToComboResponse(orderDetail.getCombo());
+        this.comboId = orderDetail.getCombo().getComboId();
         this.quantity = orderDetail.getQuantity();
         this.unitPrice = orderDetail.getUnitPrice();
         this.totalPrice = orderDetail.getTotalPrice();

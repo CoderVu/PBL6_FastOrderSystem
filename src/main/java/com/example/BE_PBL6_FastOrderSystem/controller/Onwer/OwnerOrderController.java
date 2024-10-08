@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.*;
 public class OwnerOrderController {
     private final IOrderService orderService;
     @GetMapping("")
-    public ResponseEntity<APIRespone> getAllOrder(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "2") int size) {
+    public ResponseEntity<APIRespone> getAllOrder() {
         Long OwnerId = FoodUserDetails.getCurrentUserId();
-        return orderService.getAllOrderDetailOfStore(OwnerId, page, size);
+        return orderService.getAllOrderDetailOfStore(OwnerId);
     }
     @GetMapping("/get-by-code")
     public ResponseEntity<APIRespone> getOrderByCode(@RequestParam String orderCode) {

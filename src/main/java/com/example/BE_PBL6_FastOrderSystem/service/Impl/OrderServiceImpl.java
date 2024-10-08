@@ -17,11 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Service
 @RequiredArgsConstructor
@@ -446,25 +441,25 @@ public class OrderServiceImpl implements IOrderService {
         Order order = orderOptional.get();
         order.setStatus(statusOrder);
         orderRepository.save(order);
-        return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully", new OrderResponse(order)));
+        return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully",""));
     }
     @Override
-    public ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId,
-                                                               int page,
-                                                               int size) {
-        Pageable pageable = PageRequest.of(page, size);
-
+    public ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId) {
+        List<Order> orders = orderRepository.findAll();
+        if (orders.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
+        }
         List<Store> stores = storeRepository.findAllByManagerId(ownerId);
         if (stores.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
         }
-        List<Long> storeIds = stores.stream().map(Store::getStoreId).collect(Collectors.toList());
-        Page<Order> orders = orderRepository.findAllByStoreIds(storeIds, pageable);
-
-        if (orders.isEmpty()) {
+        List<Order> orders1 = orders.stream()
+                .filter(order -> order.getOrderDetails().stream().anyMatch(orderDetail -> stores.contains(orderDetail.getStore())))
+                .toList();
+        if (orders1.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
         }
-        List<OrderResponse> orderResponses = orders.stream()
+        List<OrderResponse> orderResponses = orders1.stream()
                 .map(OrderResponse::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
@@ -586,27 +581,12 @@ public class OrderServiceImpl implements IOrderService {
 
 
     @Override
-    public ResponseEntity<APIRespone> getAllOrderDetailsByUser(
-            Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-
-        if (userId == null) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "User ID is missing", ""));
-        }
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Order> orders = orderRepository.findAllByUserId(userId, pageable);
-
+    public ResponseEntity<APIRespone> getAllOrderDetailsByUser(Long userId) {
+        List<Order> orders = orderRepository.findAllByUserId(userId);
         if (orders.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body(new APIRespone(false, "No order found", ""));
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
         }
-
-        List<OrderResponse> orderResponses = orders.stream()
-                .map(OrderResponse::new)
-                .collect(Collectors.toList());
-
+        List<OrderResponse> orderResponses = orders.stream().map(OrderResponse::new).collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
     }
 

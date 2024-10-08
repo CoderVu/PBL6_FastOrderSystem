@@ -24,16 +24,12 @@ public interface IOrderService {
     ResponseEntity<APIRespone> updateQuantityProduct(Long productId, Long comboId, Long storeId, int quantity);
     ResponseEntity<APIRespone> updateOrderStatus(String orderCode, String status);
 
-    ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId,
-                                                        @RequestParam(defaultValue = "0") int page,
-                                                        @RequestParam(defaultValue = "10") int size);
+    ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId);
 
     ResponseEntity<APIRespone> getOrderDetailOfStore(Long ownerId, String orderCode);
 
-    ResponseEntity<APIRespone> getAllOrderDetailsByUser(
-            Long userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size);
+
+    ResponseEntity<APIRespone> getAllOrderDetailsByUser(Long userId);
 
     ResponseEntity<APIRespone> getOrderDetailByUserId(Long userId, String orderCode);
 
