@@ -3,6 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.controller.User;
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequest;
+import com.example.BE_PBL6_FastOrderSystem.request.UserRequestV2;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
@@ -37,6 +38,11 @@ public class UserAuthController {
         Long userId = FoodUserDetails.getCurrentUserId();
         UserRequest userResquest = new UserRequest(fullName, avatar, email, address);
         return userService.updateUser(userId, userResquest);
+    }
+    @PutMapping("/profiles/update")
+    public ResponseEntity<APIRespone> updateUsers(@RequestBody UserRequestV2 userRequest) {
+        Long userId = FoodUserDetails.getCurrentUserId();
+        return userService.updateUserV2(userId, userRequest);
     }
 
     @PutMapping("/profile/add-phone")

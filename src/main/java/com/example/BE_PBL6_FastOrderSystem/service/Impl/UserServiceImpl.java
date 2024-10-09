@@ -4,6 +4,7 @@ import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
 import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequest;
+import com.example.BE_PBL6_FastOrderSystem.request.UserRequestV2;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetailsService;
@@ -108,6 +109,25 @@ public class UserServiceImpl implements IUserService {
         userRepository.save(existingUser);
         return ResponseEntity.ok(new APIRespone(true, "User updated susccessfully", ""));
     }
+    @Override
+    public ResponseEntity<APIRespone> updateUserV2(Long id, UserRequestV2 userRequest) {
+
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new APIRespone(false, "User not found", ""));
+        }
+        User existingUser = optionalUser.get();
+        existingUser.setFullName(userRequest.getFullName());
+        if(userRequest.getAvatar() != null) {
+            existingUser.setAvatar(userRequest.getAvatar());
+        }
+        existingUser.setEmail(userRequest.getEmail());
+        existingUser.setAddress(userRequest.getAddress());
+        userRepository.save(existingUser);
+        return ResponseEntity.ok(new APIRespone(true, "User updated susccessfully", ""));
+    }
+
 
     private ResponseEntity<APIRespone> validateUserRequest(UserRequest userRequest) {
         if (userRequest.getFullName() == null || userRequest.getFullName().isEmpty() || !userRequest.getFullName().matches("^[\\p{L}\\s]+$")) {

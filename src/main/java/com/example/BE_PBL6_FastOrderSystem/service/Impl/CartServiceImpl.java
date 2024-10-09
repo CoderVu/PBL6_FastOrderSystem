@@ -50,20 +50,26 @@ public class CartServiceImpl implements ICartService {
         if (store == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Product does not belong to the specified store", ""));
         }
-        Cart cartItem = new Cart();
-        cartItem.setUser(user);
-        cartItem.setProduct(product);
-        cartItem.setQuantity(cartProductRequest.getQuantity());
-        cartItem.setUnitPrice(product.getPrice());
-        cartItem.setTotalPrice(product.getPrice() * cartProductRequest.getQuantity());
+        Cart cartItem = cartItemRepository.findByUserIdAndProductIdAndSizeAndStoreId(userId, cartProductRequest.getProductId(), cartProductRequest.getSize(), cartProductRequest.getStoreId());
+        if (cartItem != null) {
+            cartItem.setQuantity(cartItem.getQuantity() + cartProductRequest.getQuantity());
+            cartItem.setTotalPrice(cartItem.getUnitPrice() * cartItem.getQuantity());
+        } else {
+            cartItem = new Cart();
+            cartItem.setUser(user);
+            cartItem.setProduct(product);
+            cartItem.setQuantity(cartProductRequest.getQuantity());
+            cartItem.setUnitPrice(product.getPrice());
+            cartItem.setTotalPrice(product.getPrice() * cartProductRequest.getQuantity());
 
-        Size size = sizeRepository.findByName(cartProductRequest.getSize());
-        if (size == null) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found", ""));
+            Size size = sizeRepository.findByName(cartProductRequest.getSize());
+            if (size == null) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found", ""));
+            }
+            cartItem.setSize(size);
+            cartItem.setStoreId(cartProductRequest.getStoreId());
+            cartItem.setStatus(cartProductRequest.getStatus());
         }
-        cartItem.setSize(size);
-        cartItem.setStoreId(cartProductRequest.getStoreId());
-        cartItem.setStatus(cartProductRequest.getStatus());
         cartItemRepository.save(cartItem);
         return ResponseEntity.ok(new APIRespone(true, "Add to cart successfully", cartItem.getCartId().toString()));
     }
@@ -114,21 +120,27 @@ public class CartServiceImpl implements ICartService {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Product " + product.getProductName() + " does not belong to the specified store", ""));
             }
         }
-        // Them combo vao cart
-        Cart cartItem = new Cart();
-        cartItem.setUser(user);
-        cartItem.setCombo(combo);
-        cartItem.setDrinkProduct(drinkProduct);
-        cartItem.setQuantity(cartComboRequest.getQuantity());
-        cartItem.setUnitPrice(combo.getComboPrice());
-        cartItem.setTotalPrice(combo.getComboPrice() * cartComboRequest.getQuantity());
-        Size size = sizeRepository.findByName(cartComboRequest.getSize());
-        if (size == null) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found", ""));
+        Cart cartItem = cartItemRepository.findByUserIdAndComboIdAndSizeAndStoreId(userId, cartComboRequest.getComboId(), cartComboRequest.getSize(), cartComboRequest.getStoreId());
+        if (cartItem != null) {
+            cartItem.setQuantity(cartItem.getQuantity() + cartComboRequest.getQuantity());
+            cartItem.setTotalPrice(cartItem.getUnitPrice() * cartItem.getQuantity());
         }
-        cartItem.setSize(size);
-        cartItem.setStoreId(cartComboRequest.getStoreId());
-        cartItem.setStatus(cartComboRequest.getStatus());
+        else {
+            cartItem = new Cart();
+            cartItem.setUser(user);
+            cartItem.setCombo(combo);
+            cartItem.setDrinkProduct(drinkProduct);
+            cartItem.setQuantity(cartComboRequest.getQuantity());
+            cartItem.setUnitPrice(combo.getComboPrice());
+            cartItem.setTotalPrice(combo.getComboPrice() * cartComboRequest.getQuantity());
+            Size size = sizeRepository.findByName(cartComboRequest.getSize());
+            if (size == null) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Size not found", ""));
+            }
+            cartItem.setSize(size);
+            cartItem.setStoreId(cartComboRequest.getStoreId());
+            cartItem.setStatus(cartComboRequest.getStatus());
+        }
         cartItemRepository.save(cartItem);
 
         return ResponseEntity.ok(new APIRespone(true, "Add combo to cart successfully", ""));
