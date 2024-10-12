@@ -16,4 +16,6 @@ public interface OrderDetailRepository  extends JpaRepository<OrderDetail, Long>
     @Query("SELECT od FROM OrderDetail od WHERE od.store.manager.id = ?1")
     Optional<OrderDetail> findByStoreManagerId(Long ownerId);
 
+    @Query("SELECT od FROM OrderDetail od WHERE od.status.statusName = ?1")
+    List<OrderDetail> findAllByStatus(String status);
 }

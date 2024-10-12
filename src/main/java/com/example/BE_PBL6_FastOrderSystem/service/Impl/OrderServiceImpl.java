@@ -124,34 +124,34 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
             return orderDetail;
         }).collect(Collectors.toList());
-        // Nhóm các order detail theo cửa hàng
-       if (!deliveryAddress.equalsIgnoreCase("Mua tại cửa hàng")) {
-            Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
-                    .collect(Collectors.groupingBy(OrderDetail::getStore));
-            for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
-                Store store = entry.getKey();
-                List<OrderDetail> orderDetailList = entry.getValue();
-                // Tìm shipper gần nhất nhưng không phải shipper đang bận
-                User nearestShipper = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
-                        .stream()
-                        .findFirst()
-                        .orElseThrow(() -> new EntityNotFoundException("No available shippers found nearby"));
-                ShipperOrder newShipperOrder = new ShipperOrder();
-                newShipperOrder.setStore(store);
-                newShipperOrder.setShipper(nearestShipper);
-                newShipperOrder.setCreatedAt(LocalDateTime.now());
-                newShipperOrder.setStatus("Chưa nhận");
-                // set the shipper to inactive
-                nearestShipper.setIsActive(false);
-                shipperRepository.save(nearestShipper);
-                shipperOrderRepository.save(newShipperOrder);
-                // Gán ShipperOrder cho tất cả các OrderDetail của store này
-                orderDetailList.forEach(orderDetail -> orderDetail.setShipperOrder(newShipperOrder));
-                // Tính phí vận chuyển
-                Double shippingFee = calculateShippingFee(order, store);
-                order.setShippingFee(shippingFee);
-            }
-        }
+//        // Nhóm các order detail theo cửa hàng
+//       if (!deliveryAddress.equalsIgnoreCase("Mua tại cửa hàng")) {
+//            Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
+//                    .collect(Collectors.groupingBy(OrderDetail::getStore));
+//            for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
+//                Store store = entry.getKey();
+//                List<OrderDetail> orderDetailList = entry.getValue();
+//                // Tìm shipper gần nhất nhưng không phải shipper đang bận
+//                User nearestShipper = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
+//                        .stream()
+//                        .findFirst()
+//                        .orElseThrow(() -> new EntityNotFoundException("No available shippers found nearby"));
+//                ShipperOrder newShipperOrder = new ShipperOrder();
+//                newShipperOrder.setStore(store);
+//                newShipperOrder.setShipper(nearestShipper);
+//                newShipperOrder.setCreatedAt(LocalDateTime.now());
+//                newShipperOrder.setStatus("Chưa nhận");
+//                // set the shipper to inactive
+//                nearestShipper.setIsActive(false);
+//                shipperRepository.save(nearestShipper);
+//                shipperOrderRepository.save(newShipperOrder);
+//                // Gán ShipperOrder cho tất cả các OrderDetail của store này
+//                orderDetailList.forEach(orderDetail -> orderDetail.setShipperOrder(newShipperOrder));
+//                // Tính phí vận chuyển
+//                Double shippingFee = calculateShippingFee(order, store);
+//                order.setShippingFee(shippingFee);
+//            }
+//        }
         // Lưu các order detail
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(Double.valueOf(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum()));
@@ -255,23 +255,23 @@ public class OrderServiceImpl implements IOrderService {
                     .collect(Collectors.groupingBy(OrderDetail::getStore));
             for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
                 Store store = entry.getKey();
-                List<OrderDetail> orderDetailList = entry.getValue();
-                // Tìm shipper gần nhất nhưng không phải shipper đang bận
-                User nearestShipper = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
-                        .stream()
-                        .findFirst()
-                        .orElseThrow(() -> new EntityNotFoundException("No available shippers found nearby"));
-                ShipperOrder newShipperOrder = new ShipperOrder();
-                newShipperOrder.setStore(store);
-                newShipperOrder.setShipper(nearestShipper);
-                newShipperOrder.setCreatedAt(LocalDateTime.now());
-                newShipperOrder.setStatus("Chưa nhận");
-                // set the shipper to inactive
-                nearestShipper.setIsActive(false);
-                shipperRepository.save(nearestShipper);
-                shipperOrderRepository.save(newShipperOrder);
+//                List<OrderDetail> orderDetailList = entry.getValue();
+//                // Tìm shipper gần nhất nhưng không phải shipper đang bận
+//                User nearestShipper = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
+//                        .stream()
+//                        .findFirst()
+//                        .orElseThrow(() -> new EntityNotFoundException("No available shippers found nearby"));
+//                ShipperOrder newShipperOrder = new ShipperOrder();
+//                newShipperOrder.setStore(store);
+//                newShipperOrder.setShipper(nearestShipper);
+//                newShipperOrder.setCreatedAt(LocalDateTime.now());
+//                newShipperOrder.setStatus("Chưa nhận");
+//                // set the shipper to inactive
+//                nearestShipper.setIsActive(false);
+//                shipperRepository.save(nearestShipper);
+//                shipperOrderRepository.save(newShipperOrder);
                 // Gán ShipperOrder cho tất cả các OrderDetail của store này
-                orderDetailList.forEach(orderDetail1 -> orderDetail1.setShipperOrder(newShipperOrder));
+                //orderDetailList.forEach(orderDetail1 -> orderDetail1.setShipperOrder(newShipperOrder));
                 // tính phí vận chuyển
                 Double shippingFee = calculateShippingFee(order, store);
                 order.setShippingFee(shippingFee);
@@ -340,45 +340,6 @@ public class OrderServiceImpl implements IOrderService {
         }
         return totalAmount;
 
-    }
-
-    @Scheduled(fixedRate = 300000) // 5 phút
-    public void autoAssignNewShipper() {
-        List<ShipperOrder> unconfirmedShipperOrders = shipperOrderRepository.findAllByStatusIn(Arrays.asList("Chưa nhận", "Đã từ chối"));
-        System.out.println("Unconfirmed shipper orders: " + unconfirmedShipperOrders.size());
-        for (ShipperOrder shipperOrder : unconfirmedShipperOrders) {
-            if (shipperOrder.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
-                // 5 phút chưa nhận đơn hàng thì tự động gán shipper khác
-                User currentShipper = shipperOrder.getShipper();
-                if (currentShipper != null) {
-                    currentShipper.setIsBusy(true);
-                    currentShipper.setIsActive(true);
-                    shipperRepository.save(currentShipper);
-                    System.out.println("Current shipper deactivated: " + currentShipper.getId());
-                }
-
-                if (shipperOrder.getLastAssignedAt() == null || shipperOrder.getLastAssignedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
-                    Store store = shipperOrder.getStore();
-                    Optional<User> newShipperOptional = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
-                            .stream()
-                            .findFirst();
-
-                    if (newShipperOptional.isPresent()) {
-                        User newShipper = newShipperOptional.get();
-                        System.out.println("New shipper assigned: " + newShipper.getId());
-                        newShipper.setIsActive(false);
-                        newShipper.setIsBusy(false);
-                        shipperRepository.save(newShipper);
-
-                        shipperOrder.setShipper(newShipper);
-                        shipperOrder.setLastAssignedAt(LocalDateTime.now());
-                        shipperOrderRepository.save(shipperOrder);
-                    } else {
-                        System.out.println("No available shippers found");
-                    }
-                }
-            }
-        }
     }
 
     @Transactional

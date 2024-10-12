@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ShipperRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT USER.*, \n" +
-            "ROUND(( 6371 * acos( cos( radians(:latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(:longitude) ) + sin( radians(:latitude) ) * sin( radians( latitude ) ) )), 4) AS distance \n" +
+            "ROUND(( 6371 * acos( cos( radians(:latitude) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(:longitude) ) + sin( radians(:latitude) ) * sin( radians( latitude ) ) )), 20) AS distance \n" +
             "FROM USER \n" +
             "WHERE is_active = true \n" +
             "AND is_approved = true \n" +

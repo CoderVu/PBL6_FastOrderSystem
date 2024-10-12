@@ -19,7 +19,6 @@ public class ShipperController {
         return FoodUserDetails.getCurrentUserId();
     }
     @GetMapping("/order/all")
-
     public ResponseEntity<APIRespone> getAllOrder(){
         return shipperOrderService.getAll();
     } // lay ra tat ca don hang
@@ -28,6 +27,11 @@ public class ShipperController {
         Long shipperId= getCurrentUserId();
         return shipperOrderService.getAllShipperOrder(shipperId);
     } // lay ra tat ca don hang cua 1 shipper
+    @GetMapping("/order/sorted-by-distance")
+    public ResponseEntity<APIRespone> getOrdersSortedByDistance(@RequestParam int page, @RequestParam int size){
+        Long shipperId= getCurrentUserId();
+        return shipperOrderService.getOrdersSortedByDistance(shipperId,page,size);
+    } // lay ra tat ca don hang co the nhan
     @PostMapping("/location")
     public ResponseEntity<APIRespone> updateShipperLocation(@RequestParam Double newLatitude, @RequestParam Double newLongitude){
         Long shipperId= getCurrentUserId();
