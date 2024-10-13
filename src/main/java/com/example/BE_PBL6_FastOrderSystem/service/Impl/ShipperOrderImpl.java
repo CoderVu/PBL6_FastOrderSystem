@@ -10,11 +10,13 @@ import com.example.BE_PBL6_FastOrderSystem.service.IShipperOrderService;
 import com.example.BE_PBL6_FastOrderSystem.service.IStatusOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -50,6 +52,16 @@ public class ShipperOrderImpl implements IShipperOrderService {
         shipperOrderResponse.setOrderDetails(orderDetailResponses);
         return ResponseEntity.ok(new APIRespone(true, "Success", shipperOrderResponse));
     }
+    @Override
+    public ResponseEntity<APIRespone> getAllShipperOrderByStatus(Long shipperId, String status) {
+        List<ShipperOrder> shipperOrders = shipperOrderRepository.findAllByShipperIdAndStatus(shipperId, status);
+        System.out.println(shipperOrders);
+        List<ShipperOrderResponse> shipperOrderResponses = shipperOrders.stream()
+                .map(ShipperOrderResponse::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", shipperOrderResponses));
+    }
+
 
     @Override
     public ResponseEntity<APIRespone> getAllShipperOrder(Long shipperId) {
@@ -70,44 +82,7 @@ public class ShipperOrderImpl implements IShipperOrderService {
         shipperRepository.save(shipper);
         return ResponseEntity.ok(new APIRespone(true, "Shipper location updated successfully", ""));
     }
-//    @Scheduled(fixedRate = 300000) // 5 phút
-//    public void autoAssignNewShipper() {
-//        List<ShipperOrder> unconfirmedShipperOrders = shipperOrderRepository.findAllByStatusIn(Arrays.asList("Chưa nhận", "Đã từ chối"));
-//        System.out.println("Unconfirmed shipper orders: " + unconfirmedShipperOrders.size());
-//        for (ShipperOrder shipperOrder : unconfirmedShipperOrders) {
-//            if (shipperOrder.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
-//                // 5 phút chưa nhận đơn hàng thì tự động gán shipper khác
-//                User currentShipper = shipperOrder.getShipper();
-//                if (currentShipper != null) {
-//                    currentShipper.setIsBusy(true);
-//                    currentShipper.setIsActive(true);
-//                    shipperRepository.save(currentShipper);
-//                    System.out.println("Current shipper deactivated: " + currentShipper.getId());
-//                }
-//
-//                if (shipperOrder.getLastAssignedAt() == null || shipperOrder.getLastAssignedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
-//                    Store store = shipperOrder.getStore();
-//                    Optional<User> newShipperOptional = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
-//                            .stream()
-//                            .findFirst();
-//
-//                    if (newShipperOptional.isPresent()) {
-//                        User newShipper = newShipperOptional.get();
-//                        System.out.println("New shipper assigned: " + newShipper.getId());
-//                        newShipper.setIsActive(false);
-//                        newShipper.setIsBusy(false);
-//                        shipperRepository.save(newShipper);
-//
-//                        shipperOrder.setShipper(newShipper);
-//                        shipperOrder.setLastAssignedAt(LocalDateTime.now());
-//                        shipperOrderRepository.save(shipperOrder);
-//                    } else {
-//                        System.out.println("No available shippers found");
-//                    }
-//                }
-//            }
-//        }
-//    } // 10 giây
+
 @Override
 public ResponseEntity<APIRespone> getOrdersSortedByDistance(Long shipperId, int page, int size) {
     User shipper = shipperRepository.findById(shipperId).orElse(null);
@@ -129,15 +104,81 @@ public ResponseEntity<APIRespone> getOrdersSortedByDistance(Long shipperId, int 
     return ResponseEntity.ok(new APIRespone(true, "Success", sortedOrderDetails));
 }
 
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371; // Radius of the earth in km
-        double latDistance = Math.toRadians(lat2 - lat1);
-        double lonDistance = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in km
+private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    final int R = 6371; // Radius of the earth in km
+    double latDistance = Math.toRadians(lat2 - lat1);
+    double lonDistance = Math.toRadians(lon2 - lon1);
+    double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+            * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+}
+    @Scheduled(fixedRate = 30000) // 30 giây
+    public void autoAssignShipper() {
+        List<OrderDetail> orderDetails = orderDetailRepository.findAllByStatus("Đơn hàng mới");
+        Map<Store, Map<Long, List<OrderDetail>>> groupedOrderDetails = orderDetails.stream()
+                .collect(Collectors.groupingBy(OrderDetail::getStore,
+                        Collectors.groupingBy(orderDetail -> orderDetail.getOrder().getOrderId())));
+
+        for (Map.Entry<Store, Map<Long, List<OrderDetail>>> storeGroup : groupedOrderDetails.entrySet()) {
+            Store store = storeGroup.getKey();
+            Map<Long, List<OrderDetail>> orderIdGroups = storeGroup.getValue();
+
+            for (Map.Entry<Long, List<OrderDetail>> orderGroup : orderIdGroups.entrySet()) {
+                List<OrderDetail> storeOrderDetails = orderGroup.getValue();
+                Optional<User> newShipperOptional = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
+                        .stream()
+                        .findFirst();
+                if (newShipperOptional.isPresent()) {
+                    User newShipper = newShipperOptional.get();
+                    newShipper.setIsActive(false);
+                    shipperRepository.save(newShipper);
+                    for (OrderDetail orderDetail : storeOrderDetails) {
+                        ShipperOrder shipperOrder = new ShipperOrder();
+                        shipperOrder.setShipper(newShipper);
+                        shipperOrder.setStore(store);
+                        shipperOrder.setCreatedAt(LocalDateTime.now());
+                        shipperOrder.setStatus("Chưa nhận");
+                        shipperOrderRepository.save(shipperOrder);
+                        orderDetail.setShipperOrder(shipperOrder);
+                        orderDetailRepository.save(orderDetail);
+                        // cập nhật trạng thái của orderDetail
+                        StatusOrder statusOrder = statusOrderRepository.findByStatusName("Đơn hàng đã chọn được người giao");
+                        orderDetail.setStatus(statusOrder);
+                        orderDetailRepository.save(orderDetail);
+                    }
+                }
+            }
+        }
+    }
+    @Scheduled(fixedRate = 100000) // 100 giây
+    public void autoAssignShipperOrder() {
+        List<ShipperOrder> ListShipperOrders = shipperOrderRepository.findAllByStatusIn(List.of("Chưa nhận", "Đã từ chối"));
+        for (ShipperOrder shipperOrder : ListShipperOrders ) {
+            if (shipperOrder.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
+                // 10 phút chưa nhận đơn hàng thì tự động gán shipper khác
+                User currentShipper = shipperOrder.getShipper();
+                if (currentShipper != null) {
+                    currentShipper.setIsActive(true);
+                    currentShipper.setIsBusy(true);
+                    shipperRepository.save(currentShipper);  // cập nhật trạng thái của shipper cũ
+                }
+                Store store = shipperOrder.getStore();
+                Optional<User> newShipperOptional = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
+                        .stream()
+                        .findFirst();
+                if (newShipperOptional.isPresent()) {
+                    User newShipper = newShipperOptional.get();
+                    newShipper.setIsActive(false);
+                    shipperRepository.save(newShipper);
+                    shipperOrder.setShipper(newShipper);
+                    shipperOrder.setCreatedAt(LocalDateTime.now());
+                    shipperOrder.setStatus("Chưa nhận");
+                    shipperOrderRepository.save(shipperOrder);
+                }
+            }
+        }
     }
     @Override
     public ResponseEntity<APIRespone> approveShipperOrder(Long shipperId, Long shipperOrderId, Boolean isAccepted) {
@@ -145,10 +186,9 @@ public ResponseEntity<APIRespone> getOrdersSortedByDistance(Long shipperId, int 
         if (shipperOrder == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No orders found for the specified shipper", ""));
         }
-
         if (isAccepted) {
             // shipper chấp nhận đơn hàng
-            shipperOrder.setStatus("Đang giao hàng");
+            shipperOrder.setStatus("Đã nhận");
             shipperOrder.setReceivedAt(LocalDateTime.now());
             shipperOrderRepository.save(shipperOrder);
             // cập nhật trạng thái của shipper
@@ -167,13 +207,13 @@ public ResponseEntity<APIRespone> getOrdersSortedByDistance(Long shipperId, int 
 
             if (newShipperOptional.isPresent()) {
                 User newShipper = newShipperOptional.get();
-                newShipper.setIsActive(true);
+                newShipper.setIsActive(false);
                 shipperRepository.save(newShipper);
                 shipperOrder.setShipper(newShipper);
                 shipperOrderRepository.save(shipperOrder);
-                return ResponseEntity.ok(new APIRespone(true, "Shipper declined. New shipper assigned.", ""));
+                return ResponseEntity.ok(new APIRespone(true, "Shipper đã từ chối, hệ thống đã tìm thấy shipper khác", ""));
             } else {
-                return ResponseEntity.badRequest().body(new APIRespone(false, "No available shippers found", ""));
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Không tìm thấy shipper khác", ""));
             }
         }
     }

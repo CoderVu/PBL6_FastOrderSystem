@@ -24,7 +24,6 @@ public class ShipperOrder {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String status;
-    private LocalDateTime lastAssignedAt;
     private LocalDateTime receivedAt;
     private LocalDateTime deliveredAt;
     private String note;

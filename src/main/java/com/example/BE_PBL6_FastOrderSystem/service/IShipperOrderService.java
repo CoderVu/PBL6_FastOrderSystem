@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 public interface IShipperOrderService {
     ResponseEntity<APIRespone> getAll();
     ResponseEntity<APIRespone> getShipperOrderbyId(Long shipperId, Long shipperOrderId);
+
+    ResponseEntity<APIRespone> getAllShipperOrderByStatus(Long shipperId, String status);
+
     ResponseEntity<APIRespone> getAllShipperOrder(Long shipperId);
 
     ResponseEntity<APIRespone> updateShipperLocation(Long shipperId, Double newLatitude, Double newLongitude);

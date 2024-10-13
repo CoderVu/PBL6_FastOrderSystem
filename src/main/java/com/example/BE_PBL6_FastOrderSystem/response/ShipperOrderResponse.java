@@ -20,6 +20,7 @@ public class ShipperOrderResponse {
     private Long userId;
     private LocalDateTime orderDate;
     private Double totalAmount;
+    private Double shippingFee;
     private String deliveryAddress;
     private Double longitude;
     private Double latitude;
@@ -42,6 +43,7 @@ public class ShipperOrderResponse {
                 .filter(orderDetail -> orderDetail.getStore().getStoreId().equals(this.storeId))
                 .mapToDouble(orderDetail -> orderDetail.getTotalPrice())
                 .sum(); // sum total price of order details of this store
+        this.shippingFee = shipperOrder.getOrderDetails().get(0).getOrder().getShippingFee();
         this.deliveryAddress = shipperOrder.getOrderDetails().get(0).getOrder().getDeliveryAddress();
         this.longitude = shipperOrder.getOrderDetails().get(0).getOrder().getLongitude();
         this.latitude = shipperOrder.getOrderDetails().get(0).getOrder().getLatitude();

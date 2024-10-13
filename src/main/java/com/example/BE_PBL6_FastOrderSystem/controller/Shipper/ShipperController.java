@@ -22,6 +22,13 @@ public class ShipperController {
     public ResponseEntity<APIRespone> getAllOrder(){
         return shipperOrderService.getAll();
     } // lay ra tat ca don hang
+    @GetMapping("/order/status")
+    public ResponseEntity<APIRespone> getOrderByStatus(@RequestParam String status) {
+        Long shipperId = getCurrentUserId();
+        return shipperOrderService.getAllShipperOrderByStatus(shipperId, status);
+    }
+    // lay ra tat ca don hang theo trang thai
+
     @GetMapping("/order/all-one-shipper")
     public ResponseEntity<APIRespone> getAllShipperOrder(){
         Long shipperId= getCurrentUserId();
