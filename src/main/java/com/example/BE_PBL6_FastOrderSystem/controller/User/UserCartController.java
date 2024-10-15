@@ -35,4 +35,14 @@ public class UserCartController {
         Long userId = getCurrentUserId();
         return cartService.getHistoryCart(userId);
     }
+    @DeleteMapping("/delete/{cartId}")
+    public ResponseEntity<APIRespone> deleteCart(@PathVariable Long cartId) {
+        Long userId = getCurrentUserId();
+        return cartService.deleteCart(userId, cartId);
+    }
+    @PutMapping("/update")
+    public ResponseEntity<APIRespone> updateCart(@RequestParam Long cartId, @RequestParam Integer quantity) {
+        Long userId = getCurrentUserId();
+        return cartService.updateCart(userId, cartId, quantity);
+    }
 }

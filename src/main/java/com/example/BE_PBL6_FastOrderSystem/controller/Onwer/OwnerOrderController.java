@@ -31,14 +31,19 @@ public class OwnerOrderController {
             Long ownerId = FoodUserDetails.getCurrentUserId();
             return orderService.updateStatusDetail(orderCode, ownerId, status);
     }
-    @PutMapping("/update-quantity")
-    public ResponseEntity<APIRespone> updateQuantityProduct(
-            @RequestParam(required = false) Long productId,
-            @RequestParam(required = false) Long comboId,
-            @RequestParam Long storeId,
-            @RequestParam int quantity) {
-        return orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
+    @GetMapping("/status")
+    public ResponseEntity<APIRespone> getOrderByStatus(@RequestParam String status) {
+        Long ownerId = FoodUserDetails.getCurrentUserId();
+        return orderService.getOrderByStatus(ownerId, status);
     }
+//    @PutMapping("/update-quantity")
+//    public ResponseEntity<APIRespone> updateQuantityProduct(
+//            @RequestParam(required = false) Long productId,
+//            @RequestParam(required = false) Long comboId,
+//            @RequestParam Long storeId,
+//            @RequestParam int quantity) {
+//        return orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
+//    }
 
 
 }

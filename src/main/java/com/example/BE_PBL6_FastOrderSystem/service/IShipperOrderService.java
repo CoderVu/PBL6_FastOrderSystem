@@ -100,5 +100,5 @@ public interface IShipperOrderService {
     ResponseEntity<APIRespone> finishDelivery(Long shipperId, Long shipperOrderId, Long orderDetailId);
 
 
-
+    ResponseEntity<APIRespone> updateBusyStatus(Long shipperId);
 }

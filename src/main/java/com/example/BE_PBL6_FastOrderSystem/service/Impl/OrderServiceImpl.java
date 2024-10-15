@@ -124,35 +124,6 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
             return orderDetail;
         }).collect(Collectors.toList());
-//        // Nhóm các order detail theo cửa hàng
-//       if (!deliveryAddress.equalsIgnoreCase("Mua tại cửa hàng")) {
-//            Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
-//                    .collect(Collectors.groupingBy(OrderDetail::getStore));
-//            for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
-//                Store store = entry.getKey();
-//                List<OrderDetail> orderDetailList = entry.getValue();
-//                // Tìm shipper gần nhất nhưng không phải shipper đang bận
-//                User nearestShipper = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
-//                        .stream()
-//                        .findFirst()
-//                        .orElseThrow(() -> new EntityNotFoundException("No available shippers found nearby"));
-//                ShipperOrder newShipperOrder = new ShipperOrder();
-//                newShipperOrder.setStore(store);
-//                newShipperOrder.setShipper(nearestShipper);
-//                newShipperOrder.setCreatedAt(LocalDateTime.now());
-//                newShipperOrder.setStatus("Chưa nhận");
-//                // set the shipper to inactive
-//                nearestShipper.setIsActive(false);
-//                shipperRepository.save(nearestShipper);
-//                shipperOrderRepository.save(newShipperOrder);
-//                // Gán ShipperOrder cho tất cả các OrderDetail của store này
-//                orderDetailList.forEach(orderDetail -> orderDetail.setShipperOrder(newShipperOrder));
-//                // Tính phí vận chuyển
-//                Double shippingFee = calculateShippingFee(order, store);
-//                order.setShippingFee(shippingFee);
-//            }
-//        }
-        // Lưu các order detail
         order.setOrderDetails(orderDetails);
         order.setTotalAmount(Double.valueOf(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum()));
         orderRepository.save(order);
@@ -255,24 +226,6 @@ public class OrderServiceImpl implements IOrderService {
                     .collect(Collectors.groupingBy(OrderDetail::getStore));
             for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
                 Store store = entry.getKey();
-//                List<OrderDetail> orderDetailList = entry.getValue();
-//                // Tìm shipper gần nhất nhưng không phải shipper đang bận
-//                User nearestShipper = shipperRepository.findNearestShippers(store.getLatitude(), store.getLongitude(), 1)
-//                        .stream()
-//                        .findFirst()
-//                        .orElseThrow(() -> new EntityNotFoundException("No available shippers found nearby"));
-//                ShipperOrder newShipperOrder = new ShipperOrder();
-//                newShipperOrder.setStore(store);
-//                newShipperOrder.setShipper(nearestShipper);
-//                newShipperOrder.setCreatedAt(LocalDateTime.now());
-//                newShipperOrder.setStatus("Chưa nhận");
-//                // set the shipper to inactive
-//                nearestShipper.setIsActive(false);
-//                shipperRepository.save(nearestShipper);
-//                shipperOrderRepository.save(newShipperOrder);
-                // Gán ShipperOrder cho tất cả các OrderDetail của store này
-                //orderDetailList.forEach(orderDetail1 -> orderDetail1.setShipperOrder(newShipperOrder));
-                // tính phí vận chuyển
                 Double shippingFee = calculateShippingFee(order, store);
                 order.setShippingFee(shippingFee);
             }
@@ -521,6 +474,32 @@ public class OrderServiceImpl implements IOrderService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Order does not belong to the specified user", ""));
         }
         return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> getOrderByStatus(Long ownerId, String status) {
+        StatusOrder statusOrder = statusOrderRepository.findByStatusName(status);
+        if (statusOrder == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Status not found", ""));
+        }
+        List<Order> orders = orderRepository.findAllByStatus(statusOrder);
+        if (orders.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
+        }
+        List<Store> stores = storeRepository.findAllByManagerId(ownerId);
+        if (stores.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
+        }
+        List<Order> orders1 = orders.stream()
+                .filter(order -> order.getOrderDetails().stream().anyMatch(orderDetail -> stores.contains(orderDetail.getStore())))
+                .toList();
+        if (orders1.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
+        }
+        List<OrderResponse> orderResponses = orders1.stream()
+                .map(OrderResponse::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
     }
 
 

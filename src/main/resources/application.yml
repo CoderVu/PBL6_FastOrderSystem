@@ -1,6 +1,6 @@
 server:
   port: 8080
-  address: 192.168.1.57
+  address: localhost
   servlet:
     multipart:
       max-file-size: 10MB

@@ -11,4 +11,8 @@ public interface ICartService {
     ResponseEntity<APIRespone> addComboToCart(Long userId, CartComboRequest cartComboRequest);
 
     ResponseEntity<APIRespone> getHistoryCart(Long userId);
+
+    ResponseEntity<APIRespone> deleteCart(Long userId, Long cartId);
+
+    ResponseEntity<APIRespone> updateCart(Long userId, Long cartId, Integer quantity);
 }

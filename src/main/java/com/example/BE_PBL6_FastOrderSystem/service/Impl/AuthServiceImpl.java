@@ -323,7 +323,7 @@ public class AuthServiceImpl implements IAuthService {
         String name = oAuth2User.getAttribute("name");
         String picture = oAuth2User.getAttribute("picture");
         // check if it's a facebook login or google login
-        if (email != null) {
+        if (facebookId == null) {
             return handleGoogleLogin(oAuth2User, email, name, picture);
         } else if (facebookId != null) {
             return handleFacebookLogin(oAuth2User, facebookId, name);

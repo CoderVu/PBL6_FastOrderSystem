@@ -44,10 +44,10 @@ public class ShipperController {
         Long shipperId= getCurrentUserId();
         return shipperOrderService.updateShipperLocation(shipperId,newLatitude,newLongitude);
     } // cap nhat vi tri cua shipper
-    @GetMapping("/order/{shipperOrderId}")
-    public ResponseEntity<APIRespone> getShipperOrderbyId (@PathVariable Long shipperOrderId){
+    @GetMapping("/order/{ShipperOrderId}")
+    public ResponseEntity<APIRespone> getShipperOrderbyId (@PathVariable Long ShipperOrderId){
         Long shipperId= getCurrentUserId();
-        return shipperOrderService.getShipperOrderbyId(shipperId,shipperOrderId);
+        return shipperOrderService.getShipperOrderbyId(shipperId,ShipperOrderId);
     } // lay ra 1 don hang cu the cua 1 shipper
     @PostMapping("/order/approve/{shipperOrderId}")
     public ResponseEntity<APIRespone> approveShipperOrder(@PathVariable Long shipperOrderId, @RequestParam Boolean isAccepted){
@@ -63,5 +63,10 @@ public class ShipperController {
     public ResponseEntity<APIRespone> finishDelivery(@PathVariable Long shipperOrderId, @RequestParam Long OderDetailId){
         Long shipperId= getCurrentUserId();
         return shipperOrderService.finishDelivery(shipperId,shipperOrderId, OderDetailId);
+    }
+    @PostMapping("/busy")
+    public ResponseEntity<APIRespone> setShipperBusy(){
+        Long shipperId= getCurrentUserId();
+        return shipperOrderService.updateBusyStatus(shipperId);
     }
 }

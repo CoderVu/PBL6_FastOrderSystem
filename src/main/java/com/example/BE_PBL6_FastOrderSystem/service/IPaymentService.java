@@ -20,6 +20,8 @@ public interface IPaymentService {
     Map<String, Object> getStatusZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException;
 
 
+    ResponseEntity<APIRespone> refundPaymentZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException;
+
     ResponseEntity<APIRespone> getAllPayment();
 
     ResponseEntity<APIRespone> getPaymentById(Long paymentId);

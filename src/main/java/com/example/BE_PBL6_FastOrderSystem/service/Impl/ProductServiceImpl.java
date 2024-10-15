@@ -155,7 +155,7 @@ public class ProductServiceImpl implements IProductService {
         return new ResponseEntity<>(new APIRespone(true, "All products applied to store successfully", ""), HttpStatus.OK);
     }
     @Override
-    public ResponseEntity<APIRespone> applyProductsToStore(List<Long> productIds, Long storeId, int quantity) {
+    public ResponseEntity<APIRespone> applyProductsToStore(List<Long> productIds, Long storeId, List<Integer> quantity) {
         Optional<Store> storeOptional = storeRepository.findById(storeId);
         if (storeOptional.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
@@ -170,26 +170,27 @@ public class ProductServiceImpl implements IProductService {
         List<String> alreadyAppliedProducts = new ArrayList<>();
         int initialProductStoreCount = productStoreRepository.findAll().size();
 
-        for (Product product : products) {
-            if (product.getStockQuantity() < quantity) {
-                return new ResponseEntity<>(new APIRespone(false, "Not enough stock quantity for product: " + product.getProductName(), ""), HttpStatus.BAD_REQUEST);
+        for (int i=0;i<products.size();i++) {
+            if (products.get(i).getStockQuantity() < quantity.get(i)) {
+                return new ResponseEntity<>(new APIRespone(false, "Not enough stock quantity for product: " + products.get(i).getProductName(), ""), HttpStatus.BAD_REQUEST);
             }
+            int finalI = i;
             boolean storeHasProduct = store.getProductStores().stream()
-                    .anyMatch(productStore -> productStore.getProduct().getProductId().equals(product.getProductId()));
+                    .anyMatch(productStore -> productStore.getProduct().getProductId().equals(products.get(finalI).getProductId()));
             if (storeHasProduct) {
-                alreadyAppliedProducts.add(product.getProductName());
+                alreadyAppliedProducts.add(products.get(i).getProductName());
                 continue;
             }
             ProductStore productStore = new ProductStore();
-            productStore.setProduct(product);
+            productStore.setProduct(products.get(i));
             productStore.setStore(store);
-            productStore.setStockQuantity(quantity);
-            product.getProductStores().add(productStore);
+            productStore.setStockQuantity(quantity.get(i));
+            products.get(i).getProductStores().add(productStore);
             store.getProductStores().add(productStore);
             productStoreRepository.save(productStore);
 
-            product.setStockQuantity(product.getStockQuantity() - quantity);
-            productRepository.save(product);
+            products.get(i).setStockQuantity(products.get(i).getStockQuantity() - quantity.get(i));
+            productRepository.save(products.get(i));
         }
 
         if (!alreadyAppliedProducts.isEmpty()) {
@@ -205,39 +206,41 @@ public class ProductServiceImpl implements IProductService {
 
 
     @Override
-    public ResponseEntity<APIRespone> applyProductToAllStores(Long productId, int quantity) {
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (productOptional.isEmpty()) {
+    public ResponseEntity<APIRespone> applyProductToAllStores(List<Long> productId, List<Integer> quantity) {
+        List<Product> productList = productRepository.findAll();
+        if (productList.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
         }
-        Product product = productOptional.get();
-        List<Store> stores = storeRepository.findAll();
-        int initialProductStoreCount = product.getProductStores().size();
-        if (product.getStockQuantity()<quantity) {
-            return new ResponseEntity<>(new APIRespone(false, "Not enough stock quantity for product: " + product.getProductName(), ""), HttpStatus.BAD_REQUEST);
-        }
-
-        for (Store store : stores) {
-            boolean storeHasProduct = store.getProductStores().stream()
-                    .anyMatch(productStore -> productStore.getProduct().getProductId().equals(productId));
-            if (!storeHasProduct) {
-                ProductStore productStore = new ProductStore();
-                productStore.setProduct(product);
-                productStore.setStore(store);
-                productStore.setStockQuantity(quantity);
-                product.getProductStores().add(productStore);
-                store.getProductStores().add(productStore);
-                productStoreRepository.save(productStore);
+        List<String> notFoundProducts = new ArrayList<>();
+        for (int i = 0; i < productId.size(); i++) {
+            Optional<Product> productOptional = productRepository.findById(productId.get(i));
+            if (productOptional.isEmpty()) {
+                notFoundProducts.add("Product id: " + productId.get(i));
+                continue;
             }
-            product.setStockQuantity(product.getStockQuantity() - quantity);
+            Product product = productOptional.get();
+            for (Store store : storeRepository.findAll()) {
+                boolean storeHasProduct = store.getProductStores().stream()
+                        .anyMatch(productStore -> productStore.getProduct().getProductId().equals(product.getProductId()));
+                if (!storeHasProduct) {
+                    ProductStore productStore = new ProductStore();
+                    productStore.setProduct(product);
+                    productStore.setStore(store);
+                    productStore.setStockQuantity(quantity.get(i));
+                    product.getProductStores().add(productStore);
+                    store.getProductStores().add(productStore);
+                    productStoreRepository.save(productStore);
+                }
+            }
+            product.setStockQuantity(product.getStockQuantity() - quantity.get(i));
             productRepository.save(product);
         }
-
-        if (initialProductStoreCount == product.getProductStores().size()) {
-            return new ResponseEntity<>(new APIRespone(false, "Product already applied to all stores", ""), HttpStatus.BAD_REQUEST);
+        if (!notFoundProducts.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Some products not found: " + String.join(", ", notFoundProducts), ""), HttpStatus.NOT_FOUND);
         }
-        productRepository.save(product);
-        return new ResponseEntity<>(new APIRespone(true, "Product applied to all stores successfully", ""), HttpStatus.OK);
+        return new ResponseEntity<>(new APIRespone(true, "Products applied to all stores successfully", ""), HttpStatus.OK);
+
+
     }
     @Override
     public ResponseEntity<APIRespone> removeProductFromStore(Long storeId, Long productId) {
@@ -400,6 +403,58 @@ public class ProductServiceImpl implements IProductService {
         productRepository.deleteById(id);
         return new ResponseEntity<>(new APIRespone(true, "Product deleted successfully", ""), HttpStatus.OK);
 
+    }
+    @Override
+    public ResponseEntity<APIRespone> applyProductsToStoreOfOwner(Long managerId, Long storeId, List<Long> productIds, List<Integer> quantity) {
+        List<Store> stores = storeRepository.findAllByManagerId(managerId);
+        if (stores.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Manager does not manage any stores", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Store> storeOptional = stores.stream()
+                .filter(store -> store.getStoreId().equals(storeId))
+                .findFirst();
+
+        if (storeOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found or not managed by this manager", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Store store = storeOptional.get();
+        return applyProductsToStore(productIds, store.getStoreId(), quantity);
+    }
+    @Override
+    public ResponseEntity<APIRespone> updateQuantityProductOfOwner(Long managerId, Long storeId, Long productId, int quantity) {
+        List<Store> stores = storeRepository.findAllByManagerId(managerId);
+        if (stores.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Manager does not manage any stores", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Store> storeOptional = stores.stream()
+                .filter(store -> store.getStoreId().equals(storeId))
+                .findFirst();
+
+        if (storeOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found or not managed by this manager", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Store store = storeOptional.get();
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+
+        Product product = productOptional.get();
+        List<ProductStore> productStores = product.getProductStores().stream()
+                .filter(productStore -> productStore.getStore().getStoreId().equals(store.getStoreId()))
+                .collect(Collectors.toList());
+        if (productStores.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Product not found in store", ""), HttpStatus.NOT_FOUND);
+        }
+
+        ProductStore productStore = productStores.get(0);
+        productStore.setStockQuantity(quantity);
+        productStoreRepository.save(productStore);
+        return new ResponseEntity<>(new APIRespone(true, "Product quantity updated successfully", ""), HttpStatus.OK);
     }
 
 

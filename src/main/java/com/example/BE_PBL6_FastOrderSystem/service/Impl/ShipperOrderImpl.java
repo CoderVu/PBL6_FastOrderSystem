@@ -39,6 +39,7 @@ public class ShipperOrderImpl implements IShipperOrderService {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", shipperOrderResponses));
     }
+
     @Override
     public ResponseEntity<APIRespone> getShipperOrderbyId(Long shipperId, Long shipperOrderId) {
         ShipperOrder shipperOrder = shipperOrderRepository.findByIdAndShipperId(shipperOrderId, shipperId);
@@ -52,6 +53,7 @@ public class ShipperOrderImpl implements IShipperOrderService {
         shipperOrderResponse.setOrderDetails(orderDetailResponses);
         return ResponseEntity.ok(new APIRespone(true, "Success", shipperOrderResponse));
     }
+
     @Override
     public ResponseEntity<APIRespone> getAllShipperOrderByStatus(Long shipperId, String status) {
         List<ShipperOrder> shipperOrders = shipperOrderRepository.findAllByShipperIdAndStatus(shipperId, status);
@@ -71,6 +73,7 @@ public class ShipperOrderImpl implements IShipperOrderService {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", shipperOrderResponses));
     }
+
     @Override
     public ResponseEntity<APIRespone> updateShipperLocation(Long shipperId, Double newLatitude, Double newLongitude) {
         User shipper = shipperRepository.findById(shipperId).orElse(null);
@@ -83,39 +86,40 @@ public class ShipperOrderImpl implements IShipperOrderService {
         return ResponseEntity.ok(new APIRespone(true, "Shipper location updated successfully", ""));
     }
 
-@Override
-public ResponseEntity<APIRespone> getOrdersSortedByDistance(Long shipperId, int page, int size) {
-    User shipper = shipperRepository.findById(shipperId).orElse(null);
-    if (shipper == null) {
-        return ResponseEntity.badRequest().body(new APIRespone(false, "No shipper found with the specified ID", ""));
+    @Override
+    public ResponseEntity<APIRespone> getOrdersSortedByDistance(Long shipperId, int page, int size) {
+        User shipper = shipperRepository.findById(shipperId).orElse(null);
+        if (shipper == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No shipper found with the specified ID", ""));
+        }
+
+        List<OrderDetail> orderDetails = orderDetailRepository.findAllByStatus("Đơn hàng mới");
+        List<OrderDetailResponse> sortedOrderDetails = orderDetails.stream()
+                .sorted(Comparator.comparingDouble(orderDetail -> calculateDistance(
+                        shipper.getLatitude(), shipper.getLongitude(),
+                        orderDetail.getStore().getLatitude(),
+                        orderDetail.getStore().getLongitude())))
+                .skip(page * size)
+                .limit(size)
+                .map(OrderDetailResponse::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new APIRespone(true, "Success", sortedOrderDetails));
     }
 
-    List<OrderDetail> orderDetails = orderDetailRepository.findAllByStatus("Đơn hàng mới");
-    List<OrderDetailResponse> sortedOrderDetails = orderDetails.stream()
-            .sorted(Comparator.comparingDouble(orderDetail -> calculateDistance(
-                    shipper.getLatitude(), shipper.getLongitude(),
-                    orderDetail.getStore().getLatitude(),
-                    orderDetail.getStore().getLongitude())))
-            .skip(page * size)
-            .limit(size)
-            .map(OrderDetailResponse::new)
-            .collect(Collectors.toList());
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radius of the earth in km
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance in km
+    }
 
-    return ResponseEntity.ok(new APIRespone(true, "Success", sortedOrderDetails));
-}
-
-private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    final int R = 6371; // Radius of the earth in km
-    double latDistance = Math.toRadians(lat2 - lat1);
-    double lonDistance = Math.toRadians(lon2 - lon1);
-    double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-            * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in km
-}
     @Scheduled(fixedRate = 30000) // 30 giây
-    public void autoAssignShipper() {
+    public ResponseEntity<APIRespone> autoAssignShipper() {
         List<OrderDetail> orderDetails = orderDetailRepository.findAllByStatus("Đơn hàng mới");
         Map<Store, Map<Long, List<OrderDetail>>> groupedOrderDetails = orderDetails.stream()
                 .collect(Collectors.groupingBy(OrderDetail::getStore,
@@ -131,6 +135,7 @@ private double calculateDistance(double lat1, double lon1, double lat2, double l
                         .stream()
                         .findFirst();
                 if (newShipperOptional.isPresent()) {
+                    System.out.println("Tìm thấy shipper");
                     User newShipper = newShipperOptional.get();
                     newShipper.setIsActive(false);
                     shipperRepository.save(newShipper);
@@ -149,13 +154,20 @@ private double calculateDistance(double lat1, double lon1, double lat2, double l
                         orderDetailRepository.save(orderDetail);
                     }
                 }
+                else {
+                    System.out.println("Không tìm thấy shipper");
+                    return ResponseEntity.badRequest().body(new APIRespone(false, "Không tìm thấy shipper", ""));
+                }
             }
         }
+        System.out.println("Gán shipper thành công");
+        return ResponseEntity.ok(new APIRespone(true, "Shipper đã được gán", ""));
     }
+
     @Scheduled(fixedRate = 100000) // 100 giây
     public void autoAssignShipperOrder() {
         List<ShipperOrder> ListShipperOrders = shipperOrderRepository.findAllByStatusIn(List.of("Chưa nhận", "Đã từ chối"));
-        for (ShipperOrder shipperOrder : ListShipperOrders ) {
+        for (ShipperOrder shipperOrder : ListShipperOrders) {
             if (shipperOrder.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
                 // 10 phút chưa nhận đơn hàng thì tự động gán shipper khác
                 User currentShipper = shipperOrder.getShipper();
@@ -180,6 +192,7 @@ private double calculateDistance(double lat1, double lon1, double lat2, double l
             }
         }
     }
+
     @Override
     public ResponseEntity<APIRespone> approveShipperOrder(Long shipperId, Long shipperOrderId, Boolean isAccepted) {
         ShipperOrder shipperOrder = shipperOrderRepository.findByIdAndShipperId(shipperOrderId, shipperId);
@@ -217,6 +230,7 @@ private double calculateDistance(double lat1, double lon1, double lat2, double l
             }
         }
     }
+
     @Override
     public ResponseEntity<APIRespone> updateStatusOrderDetail(Long shipperId, Long shipperOrderId, Long orderDetailId) {
         ShipperOrder shipperOrder = shipperOrderRepository.findByIdAndShipperId(shipperOrderId, shipperId);
@@ -239,8 +253,9 @@ private double calculateDistance(double lat1, double lon1, double lat2, double l
         orderDetailRepository.save(orderDetail);
         return ResponseEntity.ok(new APIRespone(true, "OrderDetail status updated successfully", ""));
     }
+
     @Override
-    public ResponseEntity<APIRespone> finishDelivery(Long shipperId, Long shipperOrderId, Long orderDetailId)  {
+    public ResponseEntity<APIRespone> finishDelivery(Long shipperId, Long shipperOrderId, Long orderDetailId) {
         ShipperOrder shipperOrder = shipperOrderRepository.findByIdAndShipperId(shipperOrderId, shipperId);
         if (shipperOrder == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "No orders found for the specified shipper", ""));
@@ -270,8 +285,19 @@ private double calculateDistance(double lat1, double lon1, double lat2, double l
             orderRepository.save(order);
         }
         shipperOrder.setStatus("Đã giao hàng");
-        shipperOrder.setReceivedAt(LocalDateTime.now());
+        shipperOrder.setDeliveredAt(LocalDateTime.now());
         shipperOrderRepository.save(shipperOrder);
         return ResponseEntity.ok(new APIRespone(true, "Order delivered successfully", ""));
+    }
+@Override
+public ResponseEntity<APIRespone> updateBusyStatus(Long shipperId) {
+        User shipper = shipperRepository.findById(shipperId).orElse(null);
+        if (shipper == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "No shipper found with the specified ID", ""));
+        }
+        shipper.setIsBusy(false);
+        shipperRepository.save(shipper);
+        return ResponseEntity.ok(new APIRespone(true, "Shipper is not busy", ""));
+
     }
 }

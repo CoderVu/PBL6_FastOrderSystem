@@ -50,15 +50,15 @@ public class AdminProductController {
     }
     @PostMapping("/apply-to-all-stores")
     public ResponseEntity<APIRespone> applyProductToAllStores(
-            @RequestParam("productId") Long productId,
-            @RequestParam("quantity") Integer quantity) {
+            @RequestParam("productId") List<Long> productId,
+            @RequestParam("quantity") List<Integer> quantity) {
         return productService.applyProductToAllStores(productId, quantity);
     }
     @PostMapping("/apply-list-products-to-store")
     public ResponseEntity<APIRespone> applyListProductsToStore(
             @RequestParam("storeId") Long storeId,
             @RequestParam("productIds") List<Long> productIds,
-            @RequestParam("quantity") Integer quantity) {
+            @RequestParam("quantity") List<Integer> quantity) {
         return productService.applyProductsToStore(productIds, storeId, quantity);
     }
     @PostMapping("/apply-all-products-to-store")

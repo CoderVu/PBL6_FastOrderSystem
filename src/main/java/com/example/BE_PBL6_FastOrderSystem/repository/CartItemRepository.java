@@ -13,8 +13,6 @@ public interface CartItemRepository extends JpaRepository<Cart, Long> {
     List<Cart> findByCartId(Long cartId);
 
 
-    List<Cart> findByCombo_ComboId(Long comboId);
-
     List<Cart> findByProductIn(List<Product> products);
 
 
@@ -22,4 +20,6 @@ public interface CartItemRepository extends JpaRepository<Cart, Long> {
     Cart findByUserIdAndProductIdAndSizeAndStoreId(Long userId, Long productId, String size, Long storeId);
     @Query("SELECT c FROM Cart c WHERE c.user.id = ?1 AND c.combo.comboId = ?2 AND c.size.name= ?3 AND c.storeId = ?4")
     Cart findByUserIdAndComboIdAndSizeAndStoreId(Long userId, Long comboId, String size, Long storeId);
+    @Query("SELECT c FROM Cart c WHERE c.user.id = ?1 AND c.cartId = ?2")
+    Cart findByUserIdAndCartId(Long userId, Long cartId);
 }

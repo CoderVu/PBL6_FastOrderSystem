@@ -17,6 +17,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -392,6 +393,10 @@ public class UserOrderController {
     @GetMapping("/find")
     public ResponseEntity<APIRespone> findOrderByOrderCode(@RequestParam String orderCode) {
         return orderService.findOrderByOrderCode(orderCode);
+    }
+    @PostMapping("/refund/payment/zalo")
+    public ResponseEntity<APIRespone> refundPaymentZaloPay(@RequestBody PaymentRequest request) throws IOException, URISyntaxException {
+        return paymentService.refundPaymentZaloPay(request);
     }
 
 

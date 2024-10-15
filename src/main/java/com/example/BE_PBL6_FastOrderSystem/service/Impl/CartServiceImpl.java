@@ -155,4 +155,40 @@ public class CartServiceImpl implements ICartService {
         List<CartResponse> cartResponses = CartResponse.convertListCartToCartResponse(cartItems);
         return ResponseEntity.ok(new APIRespone(true, "Get history cart successfully", cartResponses));
     }
+    @Override
+    public ResponseEntity<APIRespone> deleteCart(Long userId, Long cartId) {
+        Cart cartItem = cartItemRepository.findByUserIdAndCartId(userId, cartId);
+        if (cartItem == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Cart item not found", ""));
+        }
+        cartItemRepository.delete(cartItem);
+        return ResponseEntity.ok(new APIRespone(true, "Delete cart item successfully", ""));
+    }
+    @Override
+    public ResponseEntity<APIRespone> updateCart(Long userId, Long cartId, Integer quantity) {
+        Cart cartItem = cartItemRepository.findByUserIdAndCartId(userId, cartId);
+        if (cartItem == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Cart item not found", ""));
+        }
+        if (quantity <= 0) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Quantity must be greater than 0", ""));
+        }
+        if (cartItem.getProduct() != null) {
+            if (cartItem.getProduct().getStockQuantity() < quantity) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Product not enough", ""));
+            }
+        }
+        if (cartItem.getCombo() != null) {
+            for (Product product : cartItem.getCombo().getProducts()) {
+                if (product.getStockQuantity() < quantity) {
+                    return ResponseEntity.badRequest().body(new APIRespone(false, "Product " + product.getProductName() + " not enough", ""));
+                }
+            }
+        }
+        Integer currentQuantity = cartItem.getQuantity();
+        cartItem.setQuantity(currentQuantity+quantity);
+        cartItem.setTotalPrice(cartItem.getUnitPrice() * quantity);
+        cartItemRepository.save(cartItem);
+        return ResponseEntity.ok(new APIRespone(true, "Update cart item successfully", ""));
+    }
 }
