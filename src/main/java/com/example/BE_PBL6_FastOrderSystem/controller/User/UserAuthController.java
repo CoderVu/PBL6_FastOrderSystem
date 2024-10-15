@@ -11,6 +11,7 @@ import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetailsService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -29,17 +30,18 @@ public class UserAuthController {
         return userService.getUserProfile(userId);
     }
 
-    @PutMapping("/profile/update")
-    public ResponseEntity<APIRespone> updateUser(@RequestBody UserRequest userRequest) {
+    @PutMapping(value = "/profile/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<APIRespone> updateUser(@ModelAttribute UserRequest userRequest) {
         String fullName = userRequest.getFullName();
         MultipartFile avatar = userRequest.getAvatar();
         String email = userRequest.getEmail();
         String address = userRequest.getAddress();
         Long userId = FoodUserDetails.getCurrentUserId();
-        UserRequest userResquest = new UserRequest(fullName, avatar, email, address);
-        return userService.updateUser(userId, userResquest);
+        UserRequest userRequest1 = new UserRequest(fullName, avatar, email, address);
+        return userService.updateUser(userId, userRequest1);
     }
-    @PutMapping("/profiles/update")
+
+    @PutMapping("/profiles/updates")
     public ResponseEntity<APIRespone> updateUsers(@RequestBody UserRequestV2 userRequest) {
         Long userId = FoodUserDetails.getCurrentUserId();
         return userService.updateUserV2(userId, userRequest);

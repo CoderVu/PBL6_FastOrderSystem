@@ -31,4 +31,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByUserId(Long userId);
 
     List<Order> findAllByStatus(StatusOrder statusOrder);
+    @Query("SELECT o FROM Order o WHERE o.status = ?1")
+    List<Order> findAllByOrderCode(String orderCode);
 }

@@ -10,7 +10,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -358,6 +357,38 @@ public class OrderServiceImpl implements IOrderService {
         return ResponseEntity.ok(new APIRespone(true, "Order status updated successfully",""));
     }
     @Override
+    public ResponseEntity<APIRespone> updateOrderDetailStatus(String orderCode, Long storeId, String status) {
+        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
+        }
+        Order order = orderOptional.get();
+        List<OrderDetail> orderDetails = orderDetailRepository.findByOrder_OrderCode_AndStoreId(orderCode, storeId);
+        if (orderDetails.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Order detail not found", ""));
+        }
+        StatusOrder statusOrder = statusOrderRepository.findByStatusName(status);
+        if (statusOrder == null) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Status not found", ""));
+        }
+        orderDetails.forEach(orderDetail -> orderDetail.setStatus(statusOrder));
+        orderDetailRepository.saveAll(orderDetails);
+
+        // Check if all order details have the status "Đơn hàng đã hoàn thành"
+        StatusOrder completedStatus = statusOrderRepository.findByStatusName("Đơn hàng đã hoàn thành");
+        boolean allCompleted = orderDetails.stream()
+                .allMatch(orderDetail -> orderDetail.getStatus().equals(completedStatus));
+
+        if (allCompleted) {
+            order.setStatus(completedStatus);
+            orderRepository.save(order);
+        }
+
+        return ResponseEntity.ok(new APIRespone(true, "Order detail status updated successfully", ""));
+
+    }
+
+    @Override
     public ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId) {
         List<Order> orders = orderRepository.findAll();
         if (orders.isEmpty()) {
@@ -397,39 +428,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
 
-    @Override
-    public ResponseEntity<APIRespone> updateStatusDetail(String orderCode, Long OwnerId, String Status) {
-        Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);
-        if (orderOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Order code not found", ""));
-        }
-        // update status order detail
-        Order order = orderOptional.get();
-        List<OrderDetail> orderDetails = order.getOrderDetails();
-        StatusOrder statusOrder = statusOrderRepository.findByStatusName(Status);
-        if (statusOrder == null) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Status not found", ""));
-        }
-        // tim tat ca store cua StoreId
-        List<Store> stores = storeRepository.findAllByManagerId(OwnerId);
-        if (stores.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
-        }
-        if (orderDetails.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Order detail not found", ""));
-        }
-        // tim tat ca order detail cua store
-        List<OrderDetail> orderDetails1 = orderDetails.stream()
-                .filter(orderDetail -> stores.contains(orderDetail.getStore()))
-                .collect(Collectors.toList());
-        if (orderDetails1.isEmpty()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Order detail not found", ""));
-        }
-        orderDetails1.forEach(orderDetail -> orderDetail.setStatus(statusOrder));
-        orderDetailRepository.saveAll(orderDetails1);
-        orderRepository.save(order);
-        return ResponseEntity.ok(new APIRespone(true, "Status OrderDetail updated successfully", ""));
-    }
+
     @Override
     public ResponseEntity<APIRespone> cancelOrder(String orderCode, Long userId) {
         Optional<Order> orderOptional = orderRepository.findByOrderCode(orderCode);

@@ -1,7 +1,8 @@
 package com.example.BE_PBL6_FastOrderSystem.request;
 
+import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
-
+@Data
 public class UserRequest {
     private String fullName;
     private MultipartFile avatar;

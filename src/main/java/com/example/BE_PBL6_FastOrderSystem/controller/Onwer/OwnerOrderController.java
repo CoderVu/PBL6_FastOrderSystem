@@ -27,9 +27,9 @@ public class OwnerOrderController {
     @PutMapping("/update-status")
     public ResponseEntity<APIRespone> updateOrderStatus(
             @RequestParam String orderCode,
-            @RequestParam String status) {
-            Long ownerId = FoodUserDetails.getCurrentUserId();
-            return orderService.updateStatusDetail(orderCode, ownerId, status);
+            @RequestParam String status,
+            @RequestParam Long storeId ) {
+            return orderService.updateOrderDetailStatus(orderCode, storeId, status);
     }
     @GetMapping("/status")
     public ResponseEntity<APIRespone> getOrderByStatus(@RequestParam String status) {

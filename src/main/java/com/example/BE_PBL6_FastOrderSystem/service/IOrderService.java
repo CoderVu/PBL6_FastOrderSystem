@@ -24,6 +24,9 @@ public interface IOrderService {
     ResponseEntity<APIRespone> updateQuantityProduct(Long productId, Long comboId, Long storeId, int quantity);
     ResponseEntity<APIRespone> updateOrderStatus(String orderCode, String status);
 
+
+    ResponseEntity<APIRespone> updateOrderDetailStatus(String orderCode, Long storeId, String status);
+
     ResponseEntity<APIRespone> getAllOrderDetailOfStore(Long ownerId);
 
     ResponseEntity<APIRespone> getOrderDetailOfStore(Long ownerId, String orderCode);
@@ -33,7 +36,6 @@ public interface IOrderService {
 
     ResponseEntity<APIRespone> getOrderDetailByUserId(Long userId, String orderCode);
 
-    ResponseEntity<APIRespone> updateStatusDetail(String orderCode, Long storeId, String Status);
     ResponseEntity<APIRespone> cancelOrder(String orderCode, Long serId);
     List<Cart> getCartItemsByCartId(Long cartId);
     ResponseEntity<APIRespone> findOrderByOrderCode(String orderCode);

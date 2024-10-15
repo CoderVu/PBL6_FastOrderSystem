@@ -3,6 +3,7 @@ server:
   address: localhost
   servlet:
     multipart:
+      multipart-enabled: true
       max-file-size: 10MB
       max-request-size: 10MB
 spring:

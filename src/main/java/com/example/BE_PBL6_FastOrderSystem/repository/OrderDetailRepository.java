@@ -14,8 +14,11 @@ public interface OrderDetailRepository  extends JpaRepository<OrderDetail, Long>
     @Query("SELECT od FROM OrderDetail od WHERE od.order.orderId = ?1")
     List<OrderDetail> findByOrderId(Long orderId);
     @Query("SELECT od FROM OrderDetail od WHERE od.store.manager.id = ?1")
-    Optional<OrderDetail> findByStoreManagerId(Long ownerId);
+    List<OrderDetail> findByStoreManagerId(Long ownerId);
 
     @Query("SELECT od FROM OrderDetail od WHERE od.status.statusName = ?1")
     List<OrderDetail> findAllByStatus(String status);
+    @Query("SELECT od FROM OrderDetail od WHERE od.order.orderCode = ?1 and od.store.storeId = ?2")
+
+    List<OrderDetail> findByOrder_OrderCode_AndStoreId(String orderCode, Long storeId);
 }
