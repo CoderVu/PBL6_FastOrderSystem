@@ -1,11 +1,8 @@
-package com.example.BE_PBL6_FastOrderSystem.model;
+package com.example.BE_PBL6_FastOrderSystem.entity;
 
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.Instant;
 @Data

@@ -1,10 +1,9 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
-import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.entity.User;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Data
 public class UserResponse {

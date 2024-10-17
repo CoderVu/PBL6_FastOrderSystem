@@ -1,12 +1,11 @@
-package com.example.BE_PBL6_FastOrderSystem.model;
+package com.example.BE_PBL6_FastOrderSystem.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
 @Data
 @Entity
 public class Combo {

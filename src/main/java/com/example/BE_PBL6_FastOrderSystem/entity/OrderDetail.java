@@ -1,6 +1,5 @@
-package com.example.BE_PBL6_FastOrderSystem.model;
+package com.example.BE_PBL6_FastOrderSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 

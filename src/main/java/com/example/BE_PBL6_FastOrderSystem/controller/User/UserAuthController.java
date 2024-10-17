@@ -1,19 +1,13 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.User;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
-import com.example.BE_PBL6_FastOrderSystem.model.User;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequest;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequestV2;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
-import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
-import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetailsService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

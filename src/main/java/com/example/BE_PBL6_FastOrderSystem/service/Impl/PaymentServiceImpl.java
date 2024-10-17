@@ -1,5 +1,5 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
-import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.entity.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.OrderDetailRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.OrderRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.PaymentDetailRepository;

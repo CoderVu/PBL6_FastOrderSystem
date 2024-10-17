@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.entity.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
@@ -89,10 +89,11 @@ public class OrderServiceImpl implements IOrderService {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
         }
         User user = userOptional.get();
-
         Order order = new Order();
         order.setOrderDate(LocalDateTime.now());
-        order.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
+        StatusOrder statusOrder = statusOrderRepository.findByStatusName("Đơn hàng mới");
+        System.out.println(statusOrder);
+        order.setStatus(statusOrder);
         order.setOrderCode(orderCode);
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
@@ -120,7 +121,7 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setSize(cartItem.getSize());
             Store store = storeRepository.findById(cartItem.getStoreId()).orElseThrow(() -> new EntityNotFoundException("Store not found"));
             orderDetail.setStore(store);
-            orderDetail.setStatus(statusOrderRepository.findByStatusName("Đơn hàng mới"));
+            orderDetail.setStatus(statusOrder);
             return orderDetail;
         }).collect(Collectors.toList());
         order.setOrderDetails(orderDetails);

@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.repository;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Combo;
+import com.example.BE_PBL6_FastOrderSystem.entity.Combo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

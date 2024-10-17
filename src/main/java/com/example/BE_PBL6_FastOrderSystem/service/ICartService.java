@@ -15,4 +15,10 @@ public interface ICartService {
     ResponseEntity<APIRespone> deleteCart(Long userId, Long cartId);
 
     ResponseEntity<APIRespone> updateCart(Long userId, Long cartId, Integer quantity);
+
+    ResponseEntity<APIRespone> getAllStoreCart(Long userId);
+
+    ResponseEntity<APIRespone> getCartByStore(Long userId, Long storeId);
+
+    ResponseEntity<APIRespone> getCartById(Long userId, Long cartid);
 }

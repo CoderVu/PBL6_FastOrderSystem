@@ -1,8 +1,8 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Combo;
-import com.example.BE_PBL6_FastOrderSystem.model.Product;
-import com.example.BE_PBL6_FastOrderSystem.model.Rate;
+import com.example.BE_PBL6_FastOrderSystem.entity.Combo;
+import com.example.BE_PBL6_FastOrderSystem.entity.Product;
+import com.example.BE_PBL6_FastOrderSystem.entity.Rate;
 import com.example.BE_PBL6_FastOrderSystem.repository.ComboRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.RateRepository;

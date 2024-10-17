@@ -45,4 +45,19 @@ public class UserCartController {
         Long userId = getCurrentUserId();
         return cartService.updateCart(userId, cartId, quantity);
     }
+    @GetMapping("/allstore")
+    public ResponseEntity<APIRespone> getAllStoreCart() {
+        Long userId = getCurrentUserId();
+        return cartService.getAllStoreCart(userId);
+    }
+    @GetMapping("/store/{storeid}")
+    public ResponseEntity<APIRespone> getCartByStore(@PathVariable Long storeid) {
+        Long userId = getCurrentUserId();
+        return cartService.getCartByStore(userId,storeid);
+    }
+    @GetMapping("/{cartid}")
+    public ResponseEntity<APIRespone> getCartById(@PathVariable Long cartid) {
+        Long userId = getCurrentUserId();
+        return cartService.getCartById(userId,cartid);
+    }
 }

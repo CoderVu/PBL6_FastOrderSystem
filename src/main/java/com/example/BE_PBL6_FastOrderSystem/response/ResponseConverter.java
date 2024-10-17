@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
-import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.entity.*;
 
 import java.util.List;
 import java.util.stream.Collectors;

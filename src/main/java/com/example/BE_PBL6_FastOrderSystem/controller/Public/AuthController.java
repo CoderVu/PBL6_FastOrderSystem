@@ -6,14 +6,11 @@ import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.FormRequest;
 import com.example.BE_PBL6_FastOrderSystem.request.RefreshRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
-import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.entity.User;
 import com.example.BE_PBL6_FastOrderSystem.request.LoginRequest;
-import com.example.BE_PBL6_FastOrderSystem.response.JwtResponse;
 import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
-import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.service.IFormService;
-import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import org.springframework.http.HttpHeaders;
 
 import jakarta.validation.Valid;
@@ -22,24 +19,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @CrossOrigin
 @RestController

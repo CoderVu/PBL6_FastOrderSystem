@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.OTP;
+import com.example.BE_PBL6_FastOrderSystem.entity.OTP;
 import com.example.BE_PBL6_FastOrderSystem.repository.OTPRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IOTPService;
 import com.example.BE_PBL6_FastOrderSystem.utils.OTPGenerator;

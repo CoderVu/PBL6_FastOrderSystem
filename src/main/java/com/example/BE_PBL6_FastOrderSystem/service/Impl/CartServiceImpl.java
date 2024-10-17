@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.entity.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.request.CartComboRequest;
 import com.example.BE_PBL6_FastOrderSystem.request.CartProductRequest;
@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -124,8 +125,7 @@ public class CartServiceImpl implements ICartService {
         if (cartItem != null) {
             cartItem.setQuantity(cartItem.getQuantity() + cartComboRequest.getQuantity());
             cartItem.setTotalPrice(cartItem.getUnitPrice() * cartItem.getQuantity());
-        }
-        else {
+        } else {
             cartItem = new Cart();
             cartItem.setUser(user);
             cartItem.setCombo(combo);
@@ -155,6 +155,7 @@ public class CartServiceImpl implements ICartService {
         List<CartResponse> cartResponses = CartResponse.convertListCartToCartResponse(cartItems);
         return ResponseEntity.ok(new APIRespone(true, "Get history cart successfully", cartResponses));
     }
+
     @Override
     public ResponseEntity<APIRespone> deleteCart(Long userId, Long cartId) {
         Cart cartItem = cartItemRepository.findByUserIdAndCartId(userId, cartId);
@@ -164,6 +165,7 @@ public class CartServiceImpl implements ICartService {
         cartItemRepository.delete(cartItem);
         return ResponseEntity.ok(new APIRespone(true, "Delete cart item successfully", ""));
     }
+
     @Override
     public ResponseEntity<APIRespone> updateCart(Long userId, Long cartId, Integer quantity) {
         Cart cartItem = cartItemRepository.findByUserIdAndCartId(userId, cartId);
@@ -186,9 +188,48 @@ public class CartServiceImpl implements ICartService {
             }
         }
         Integer currentQuantity = cartItem.getQuantity();
-        cartItem.setQuantity(currentQuantity+quantity);
+        cartItem.setQuantity(currentQuantity + quantity);
         cartItem.setTotalPrice(cartItem.getUnitPrice() * quantity);
         cartItemRepository.save(cartItem);
         return ResponseEntity.ok(new APIRespone(true, "Update cart item successfully", ""));
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> getAllStoreCart(Long userId) {
+        List<Cart> cartItems = cartItemRepository.findByUserId(userId);
+        ArrayList<Long> storeIds = new ArrayList<>();
+        for (Cart cart : cartItems) {
+            if (!storeIds.contains(cart.getStoreId())) {
+                storeIds.add(cart.getStoreId());
+            }
+        }
+        return ResponseEntity.ok(new APIRespone(true, "Get liststore successfully", storeIds));
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> getCartByStore(Long userId, Long storeId) {
+        List<Cart> cartItems = cartItemRepository.findByUserId(userId);
+        List<Cart> cartByStoreId = new ArrayList<>();
+        for (Cart cart : cartItems) {
+            if (cart.getStoreId().equals(storeId)) {
+                cartByStoreId.add(cart);
+            }
+        }
+        List<CartResponse> cartResponses = CartResponse.convertListCartToCartResponse(cartByStoreId);
+        return ResponseEntity.ok(new APIRespone(true, "Get history cart successfully", cartResponses));
+    }
+
+    @Override
+    public ResponseEntity<APIRespone> getCartById(Long userId, Long cartid) {
+        List<Cart> cartItems = cartItemRepository.findByUserId(userId);
+        List<Cart> cartList = new ArrayList<>();
+        for (Cart cart : cartItems) {
+            if (cart.getCartId().equals(cartid)) {
+                cartList.add(cart);
+                break;
+            }
+        }
+        List<CartResponse> cartResponses = CartResponse.convertListCartToCartResponse(cartList);
+        return ResponseEntity.ok(new APIRespone(true, "Get history cart successfully", cartResponses));
     }
 }

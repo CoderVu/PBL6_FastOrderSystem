@@ -1,7 +1,5 @@
-package com.example.BE_PBL6_FastOrderSystem.model;
+package com.example.BE_PBL6_FastOrderSystem.entity;
 
-import com.example.BE_PBL6_FastOrderSystem.response.OrderDetailResponse;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -33,6 +31,7 @@ public class Order {
     private Double latitude;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private boolean isFeedBack;
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -63,6 +62,7 @@ public class Order {
                 ", latitude=" + latitude +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
+                ", isFeedBack=" + isFeedBack +
                 '}';
     }
 }

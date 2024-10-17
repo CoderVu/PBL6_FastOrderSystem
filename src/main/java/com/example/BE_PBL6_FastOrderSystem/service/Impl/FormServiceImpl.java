@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.ShipperRegistrationForm;
+import com.example.BE_PBL6_FastOrderSystem.entity.ShipperRegistrationForm;
 import com.example.BE_PBL6_FastOrderSystem.repository.ShipperRegistrationFormReponsitory;
 import com.example.BE_PBL6_FastOrderSystem.request.FormRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;

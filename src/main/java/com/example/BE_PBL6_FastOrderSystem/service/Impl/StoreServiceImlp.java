@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Store;
-import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.entity.Store;
+import com.example.BE_PBL6_FastOrderSystem.entity.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.StoreRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.StoreRequest;

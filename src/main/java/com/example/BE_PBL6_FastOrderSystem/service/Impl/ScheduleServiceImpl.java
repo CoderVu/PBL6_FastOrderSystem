@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Schedule;
-import com.example.BE_PBL6_FastOrderSystem.model.Staff;
+import com.example.BE_PBL6_FastOrderSystem.entity.Schedule;
+import com.example.BE_PBL6_FastOrderSystem.entity.Staff;
 import com.example.BE_PBL6_FastOrderSystem.repository.ScheduleRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.StaffRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.StoreRepository;

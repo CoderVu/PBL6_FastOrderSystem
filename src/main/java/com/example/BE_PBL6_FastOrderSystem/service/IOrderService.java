@@ -1,13 +1,8 @@
 package com.example.BE_PBL6_FastOrderSystem.service;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Cart;
-import com.example.BE_PBL6_FastOrderSystem.model.Order;
-import com.example.BE_PBL6_FastOrderSystem.model.OrderDetail;
-import com.example.BE_PBL6_FastOrderSystem.model.Size;
+import com.example.BE_PBL6_FastOrderSystem.entity.Cart;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
-import com.example.BE_PBL6_FastOrderSystem.response.OrderResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 

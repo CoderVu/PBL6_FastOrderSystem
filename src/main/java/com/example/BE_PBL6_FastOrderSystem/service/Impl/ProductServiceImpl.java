@@ -1,9 +1,9 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Category;
-import com.example.BE_PBL6_FastOrderSystem.model.Product;
-import com.example.BE_PBL6_FastOrderSystem.model.ProductStore;
-import com.example.BE_PBL6_FastOrderSystem.model.Store;
+import com.example.BE_PBL6_FastOrderSystem.entity.Category;
+import com.example.BE_PBL6_FastOrderSystem.entity.Product;
+import com.example.BE_PBL6_FastOrderSystem.entity.ProductStore;
+import com.example.BE_PBL6_FastOrderSystem.entity.Store;
 import com.example.BE_PBL6_FastOrderSystem.repository.*;
 import com.example.BE_PBL6_FastOrderSystem.request.ProductRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;

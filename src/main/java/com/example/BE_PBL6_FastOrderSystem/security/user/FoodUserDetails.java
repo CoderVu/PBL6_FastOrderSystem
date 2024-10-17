@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.security.user;
 
-import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

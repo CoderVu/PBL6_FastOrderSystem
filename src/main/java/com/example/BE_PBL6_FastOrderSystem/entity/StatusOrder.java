@@ -1,4 +1,4 @@
-package com.example.BE_PBL6_FastOrderSystem.model;
+package com.example.BE_PBL6_FastOrderSystem.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

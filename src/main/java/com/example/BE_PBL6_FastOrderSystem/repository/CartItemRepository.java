@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.repository;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Cart;
-import com.example.BE_PBL6_FastOrderSystem.model.Product;
+import com.example.BE_PBL6_FastOrderSystem.entity.Cart;
+import com.example.BE_PBL6_FastOrderSystem.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
-import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.entity.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequest;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequestV2;

@@ -1,12 +1,8 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Cart;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.example.BE_PBL6_FastOrderSystem.entity.Cart;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 

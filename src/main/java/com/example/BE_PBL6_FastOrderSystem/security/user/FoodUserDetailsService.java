@@ -1,9 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.security.user;
 
-import com.example.BE_PBL6_FastOrderSystem.exception.CustomAuthenticationException;
-import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.entity.User;
 import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
-import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

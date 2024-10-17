@@ -3,7 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.ComboRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.*;
-import com.example.BE_PBL6_FastOrderSystem.model.Combo;
+import com.example.BE_PBL6_FastOrderSystem.entity.Combo;
 import com.example.BE_PBL6_FastOrderSystem.repository.ComboRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IComboService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
