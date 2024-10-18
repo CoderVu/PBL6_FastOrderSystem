@@ -116,7 +116,7 @@ public class UserOrderController {
 
                             System.out.println("data: " + data);
                             paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-//                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                         //  orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         }
                         scheduler.shutdown();
                     } else {
@@ -153,7 +153,7 @@ public class UserOrderController {
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
                             ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                             OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
-//                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                           orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         }
                         scheduler.shutdown();
@@ -180,7 +180,7 @@ public class UserOrderController {
                 ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                 OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                 paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-//                orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+              orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
             }
             return response;
         } else {
@@ -234,8 +234,8 @@ public class UserOrderController {
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
                     System.out.println("Payment status response: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
-                        System.out.println("fhdsjkhfjdskh");
                         ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress,longitude,latitude, orderCode);
+                        System.out.println("Check zalo " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             // duyệt qua tất cả các giỏ hàng
                             for (Cart cart : cartItems) {
@@ -255,7 +255,7 @@ public class UserOrderController {
                         OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                         System.out.println("data: " + data);
                         paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-//                        orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                    //   orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         scheduler.shutdown();
                     } else {
                         System.out.println("Payment status is not OK. Retrying...");
@@ -310,7 +310,7 @@ public class UserOrderController {
                         ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                         OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                         paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-//                        orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                       //orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         scheduler.shutdown();
                     } else {
                         System.out.println("Payment status is not OK. Retrying...");
@@ -330,6 +330,7 @@ public class UserOrderController {
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
             ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress,  longitude,latitude, orderCode);
+            System.out.println("Check 1 " + response);
             if (response.getStatusCode() == HttpStatus.OK) {
                 if (response.getStatusCode() == HttpStatus.OK) {
                     for (Cart cart : cartItems) {

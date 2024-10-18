@@ -53,10 +53,10 @@ public class OrderServiceImpl implements IOrderService {
         return ResponseEntity.ok(new APIRespone(true, "Success", userResponses));
     }
 
-
+    @Transactional
     @Override
     public ResponseEntity<APIRespone> processOrder(Long userId, String paymentMethod, List<Long> cartIds, String deliveryAddress, Double longitude, Double latitude, String orderCode) {
-
+        System.out.println("Vao 1");
         List<Cart> cartItems = cartIds.stream()
                 .flatMap(cartId -> cartItemRepository.findByCartId(cartId).stream())
                 .filter(cartItem -> cartItem.getUser().getId().equals(userId))
@@ -122,13 +122,10 @@ public class OrderServiceImpl implements IOrderService {
             Store store = storeRepository.findById(cartItem.getStoreId()).orElseThrow(() -> new EntityNotFoundException("Store not found"));
             orderDetail.setStore(store);
             orderDetail.setStatus(statusOrder);
-            // Set drink products
+            System.out.println("Vao 2");
+            // lay ra danh sach cac san pham uong kem tu cart
             if (cartItem.getDrinkProducts() != null) {
-                List<Product> drinkProducts = cartItem.getDrinkProducts().stream()
-                        .map(Product::getProductId) // Extract the ID from the Product entity
-                        .map(drinkId -> productRepository.findById(drinkId)
-                                .orElseThrow(() -> new EntityNotFoundException("Drink not found")))
-                        .collect(Collectors.toList());
+                List<Product> drinkProducts = new ArrayList<>(cartItem.getDrinkProducts());
                 orderDetail.setDrinkProducts(drinkProducts);
             }
             return orderDetail;
@@ -137,10 +134,12 @@ public class OrderServiceImpl implements IOrderService {
         order.setTotalAmount(Double.valueOf(orderDetails.stream().mapToDouble(OrderDetail::getTotalPrice).sum()));
         orderRepository.save(order);
         cartItemRepository.deleteAll(cartItems);
-
+        System.out.println("Vao 3");
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
 
+
+    @Transactional
     @Override
     public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, List<Long> drinkId, Long storeId, Integer quantity, String size, String deliveryAddress, Double longitude, Double latitude,String orderCode) {
         Product product = null;
@@ -214,12 +213,13 @@ public class OrderServiceImpl implements IOrderService {
         // Thiết lập thông tin nước uống nếu có
         if (drinkId != null && !drinkId.isEmpty()) {
             List<Product> drinkProducts = new ArrayList<>();
-            for (Long id : drinkId) {
-                Optional<Product> drinkOptional = productRepository.findById(id);
-                if (drinkOptional.isEmpty()) {
-                    return ResponseEntity.badRequest().body(new APIRespone(false, "Drink not found", ""));
+            for (int i = 0; i < drinkId.size(); i++) {
+                Optional<Product> drinkProductOptional = productRepository.findByProductId(drinkId.get(i));
+                if (drinkProductOptional.isEmpty()) {
+                    return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product not found", ""));
                 }
-                drinkProducts.add(drinkOptional.get());
+                drinkProducts.add(drinkProductOptional.get());
+
             }
             orderDetail.setDrinkProducts(drinkProducts);
         }

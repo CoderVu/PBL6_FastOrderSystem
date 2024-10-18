@@ -117,20 +117,19 @@ public class WebSecurityConfig {
                         .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers(ADMIN).hasAnyRole("ADMIN")
                         .anyRequest().authenticated()
-//                )
-//                        .sessionManagement(session -> session.maximumSessions(1)
-//                        .maxSessionsPreventsLogin(true)
- //               )
-//                .oauth2Login(oauth2 -> oauth2
-//                        .loginPage("/api/v1/auth/login-google")
-//                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
-//                        .failureUrl("/api/v1/auth/login-google-failure")
-//                )
-//                .oauth2Login(oauth2 -> oauth2
-//                        .loginPage("/api/v1/auth/login-facebook")
-//                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
-//                        .failureUrl("/api/v1/auth/login-facebook-failure")
-//                );
+                )
+                        .sessionManagement(session -> session.maximumSessions(1)
+                        .maxSessionsPreventsLogin(true)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/api/v1/auth/login-google")
+                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
+                        .failureUrl("/api/v1/auth/login-google-failure")
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/api/v1/auth/login-facebook")
+                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
+                        .failureUrl("/api/v1/auth/login-facebook-failure")
                 );
 
         http.authenticationProvider(authenticationProvider());
