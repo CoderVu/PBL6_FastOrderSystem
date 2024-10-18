@@ -122,6 +122,15 @@ public class OrderServiceImpl implements IOrderService {
             Store store = storeRepository.findById(cartItem.getStoreId()).orElseThrow(() -> new EntityNotFoundException("Store not found"));
             orderDetail.setStore(store);
             orderDetail.setStatus(statusOrder);
+            // Set drink products
+            if (cartItem.getDrinkProducts() != null) {
+                List<Product> drinkProducts = cartItem.getDrinkProducts().stream()
+                        .map(Product::getProductId) // Extract the ID from the Product entity
+                        .map(drinkId -> productRepository.findById(drinkId)
+                                .orElseThrow(() -> new EntityNotFoundException("Drink not found")))
+                        .collect(Collectors.toList());
+                orderDetail.setDrinkProducts(drinkProducts);
+            }
             return orderDetail;
         }).collect(Collectors.toList());
         order.setOrderDetails(orderDetails);
@@ -133,7 +142,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, Long drinkId, Long storeId, Integer quantity, String size, String deliveryAddress, Double longitude, Double latitude,String orderCode) {
+    public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, List<Long> drinkId, Long storeId, Integer quantity, String size, String deliveryAddress, Double longitude, Double latitude,String orderCode) {
         Product product = null;
         Combo combo = null;
 
@@ -203,15 +212,16 @@ public class OrderServiceImpl implements IOrderService {
             orderDetail.setTotalPrice(Double.valueOf(combo.getComboPrice() * quantity));
         }
         // Thiết lập thông tin nước uống nếu có
-        if (drinkId != null) {
-            Optional<Product> drinkOptional = productRepository.findByProductId(drinkId);
-            if (drinkOptional.isEmpty()) {
-                return ResponseEntity.badRequest().body(new APIRespone(false, "Drink not found", ""));
+        if (drinkId != null && !drinkId.isEmpty()) {
+            List<Product> drinkProducts = new ArrayList<>();
+            for (Long id : drinkId) {
+                Optional<Product> drinkOptional = productRepository.findById(id);
+                if (drinkOptional.isEmpty()) {
+                    return ResponseEntity.badRequest().body(new APIRespone(false, "Drink not found", ""));
+                }
+                drinkProducts.add(drinkOptional.get());
             }
-            if (drinkOptional.isPresent()) {
-                Product drink = drinkOptional.get();
-                orderDetail.setDrinkProduct(drink);
-            }
+            orderDetail.setDrinkProducts(drinkProducts);
         }
         orderDetail.setSize(s);
         orderDetail.setStore(storeOptional.get());

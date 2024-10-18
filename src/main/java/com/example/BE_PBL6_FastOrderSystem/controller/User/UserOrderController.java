@@ -74,7 +74,7 @@ public class UserOrderController {
         String paymentMethod = orderRequest.getPaymentMethod();
         Long productId = orderRequest.getProductId();
         Long comboId = orderRequest.getComboId();
-        Long drinkId = orderRequest.getDrinkId();
+        List<Long> drinkId = orderRequest.getDrinkId();
         Long storeId = orderRequest.getStoreId();
         Integer quantity = orderRequest.getQuantity();
         String size = orderRequest.getSize();
@@ -234,6 +234,7 @@ public class UserOrderController {
                     ResponseEntity<APIRespone> statusResponse = checkPaymentZaloPayStatus(zalopayResponse.get("apptransid").toString());
                     System.out.println("Payment status response: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
+                        System.out.println("fhdsjkhfjdskh");
                         ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress,longitude,latitude, orderCode);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             // duyệt qua tất cả các giỏ hàng

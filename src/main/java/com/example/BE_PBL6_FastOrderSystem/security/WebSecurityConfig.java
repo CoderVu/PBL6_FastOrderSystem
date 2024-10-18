@@ -120,18 +120,18 @@ public class WebSecurityConfig {
 //                )
 //                        .sessionManagement(session -> session.maximumSessions(1)
 //                        .maxSessionsPreventsLogin(true)
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/v1/auth/login-google")
-                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
-                        .failureUrl("/api/v1/auth/login-google-failure")
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/v1/auth/login-facebook")
-                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
-                        .failureUrl("/api/v1/auth/login-facebook-failure")
+ //               )
+//                .oauth2Login(oauth2 -> oauth2
+//                        .loginPage("/api/v1/auth/login-google")
+//                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
+//                        .failureUrl("/api/v1/auth/login-google-failure")
+//                )
+//                .oauth2Login(oauth2 -> oauth2
+//                        .loginPage("/api/v1/auth/login-facebook")
+//                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
+//                        .failureUrl("/api/v1/auth/login-facebook-failure")
+//                );
                 );
-
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
