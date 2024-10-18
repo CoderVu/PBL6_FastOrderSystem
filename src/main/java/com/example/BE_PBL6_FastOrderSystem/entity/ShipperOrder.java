@@ -12,7 +12,6 @@ public class ShipperOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne
     @JoinColumn(name = "shipper_id", nullable = false)
     private User shipper;

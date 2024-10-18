@@ -81,37 +81,34 @@ public class CartServiceImpl implements ICartService {
         if (user == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
         }
-        // Lay combo tu combo id
         Combo combo = comboRepository.findById(cartComboRequest.getComboId()).orElse(null);
         if (combo == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
         }
-        // Lay drink product tu drink product id
-        Product drinkProduct = productRepository.findById(cartComboRequest.getDrinkId()).orElse(null);
-        if (drinkProduct == null) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product not found", ""));
-        }
-        // Kiem tra so luong cua drink product
-        if (drinkProduct.getStockQuantity() < cartComboRequest.getQuantity()) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product not enough", ""));
-        }
-        // Kiem tra store cua drink product
-        ProductStore drinkProductStore = drinkProduct.getProductStores().stream()
-                .filter(ps -> Objects.equals(ps.getStore().getStoreId(), cartComboRequest.getStoreId()))
-                .findFirst()
-                .orElse(null);
-        Store drinkStore = (drinkProductStore != null) ? drinkProductStore.getStore() : null;
-        if (drinkStore == null) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product does not belong to the specified store", ""));
+        List<Product> drinkProducts = new ArrayList<>();
+        for (Long drinkId : cartComboRequest.getDrinkId()) {
+            Product drinkProduct = productRepository.findById(drinkId).orElse(null);
+            if (drinkProduct == null) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product not found", ""));
+            }
+            if (drinkProduct.getStockQuantity() < cartComboRequest.getQuantity()) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product not enough", ""));
+            }
+            ProductStore drinkProductStore = drinkProduct.getProductStores().stream()
+                    .filter(ps -> Objects.equals(ps.getStore().getStoreId(), cartComboRequest.getStoreId()))
+                    .findFirst()
+                    .orElse(null);
+            if (drinkProductStore == null) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product does not belong to the specified store", ""));
+            }
+            drinkProducts.add(drinkProduct);
         }
 
-        // Kiem tra so luong cua tung product trong combo
         for (Product product : combo.getProducts()) {
             if (product.getStockQuantity() < cartComboRequest.getQuantity()) {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Product " + product.getProductName() + " not enough", ""));
             }
         }
-        // Kiem tra store cua tung product trong combo
         for (Product product : combo.getProducts()) {
             Store store = storeRepository.findById(cartComboRequest.getStoreId()).orElse(null);
             if (store == null) {
@@ -129,7 +126,7 @@ public class CartServiceImpl implements ICartService {
             cartItem = new Cart();
             cartItem.setUser(user);
             cartItem.setCombo(combo);
-            cartItem.setDrinkProduct(drinkProduct);
+            cartItem.setDrinkProducts(drinkProducts);
             cartItem.setQuantity(cartComboRequest.getQuantity());
             cartItem.setUnitPrice(combo.getComboPrice());
             cartItem.setTotalPrice(combo.getComboPrice() * cartComboRequest.getQuantity());

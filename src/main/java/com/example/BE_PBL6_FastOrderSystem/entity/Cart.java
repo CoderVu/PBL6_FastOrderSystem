@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Setter
 @Getter
@@ -32,9 +33,13 @@ public class Cart {
     @ManyToOne
     @JoinColumn(name = "size_id")
     private Size size;
-    @ManyToOne
-    @JoinColumn(name = "drink_product_id")
-    private Product drinkProduct;
+    @ManyToMany
+    @JoinTable(
+            name = "cart_drink_products",
+            joinColumns = @JoinColumn(name = "cart_id"),
+            inverseJoinColumns = @JoinColumn(name = "drink_product_id")
+    )
+    private List<Product> drinkProducts;
     private Long storeId;
     private String status;
     private LocalDateTime createdAt;
@@ -52,14 +57,16 @@ public class Cart {
 
     @Override
     public String toString() {
-        return "CartItem{" +
+        return "Cart{" +
                 "cartId=" + cartId +
                 ", user=" + user +
                 ", product=" + product +
+                ", combo=" + combo +
                 ", quantity=" + quantity +
                 ", unitPrice=" + unitPrice +
                 ", totalPrice=" + totalPrice +
                 ", size=" + size +
+                ", drinkProducts=" + drinkProducts +
                 ", storeId=" + storeId +
                 ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +

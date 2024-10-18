@@ -47,6 +47,7 @@ public class CartResponse {
                         cart.getCombo().getComboId(),
                         cart.getCombo().getComboName(),
                         cart.getCombo().getImage(),
+                        cart.getDrinkProducts().stream().map(product -> product.getProductId()).toList(),
                         cart.getQuantity(),
                         cart.getUnitPrice(),
                         cart.getTotalPrice(),
