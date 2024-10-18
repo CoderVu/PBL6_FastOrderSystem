@@ -399,6 +399,10 @@ public class UserOrderController {
     public ResponseEntity<APIRespone> refundPaymentZaloPay(@RequestBody PaymentRequest request) throws IOException, URISyntaxException {
         return paymentService.refundPaymentZaloPay(request);
     }
+    @PostMapping("/update/feedback/{orderid}")
+    public ResponseEntity<APIRespone> updateFeedback(@PathVariable Long orderid) {
+        return  orderService.updateStatusFeedBack(orderid);
+    }
 
 
 }

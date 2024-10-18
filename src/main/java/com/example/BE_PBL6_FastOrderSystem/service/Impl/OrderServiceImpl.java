@@ -98,6 +98,7 @@ public class OrderServiceImpl implements IOrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
         order.setUser(user);
+        order.setFeedBack(false);
         order.setDeliveryAddress(deliveryAddress);
         if (deliveryAddress.equalsIgnoreCase("Mua tại cửa hàng")) {
             order.setDeliveryAddress("Mua tại cửa hàng");
@@ -188,6 +189,7 @@ public class OrderServiceImpl implements IOrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
         order.setUser(user);
+        order.setFeedBack(false);
         order.setDeliveryAddress(deliveryAddress);
         if (deliveryAddress.equalsIgnoreCase("Mua tại cửa hàng")) {
             order.setDeliveryAddress("Mua tại cửa hàng");
@@ -555,6 +557,14 @@ public class OrderServiceImpl implements IOrderService {
         }
         return ResponseEntity.ok(new APIRespone(true, "Success", new OrderResponse(order)));
     }
-    
+    @Override
+    public ResponseEntity<APIRespone> updateStatusFeedBack(Long orderid){
+        Order order = orderRepository.findById(orderid).get();
+        order.setFeedBack(true);
+        orderRepository.save(order);
+        return ResponseEntity.ok(new APIRespone(true, "Success", ""));
+    }
+
+
 
 }

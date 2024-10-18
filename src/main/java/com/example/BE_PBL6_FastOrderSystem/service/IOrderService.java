@@ -38,4 +38,6 @@ public interface IOrderService {
     ResponseEntity<APIRespone>  findOrderByOrderCodeAndUserId(String orderCode, Long userId);
 
     ResponseEntity<APIRespone> getOrderByStatus(Long ownerId, String status);
+
+    ResponseEntity<APIRespone> updateStatusFeedBack(Long orderid);
 }

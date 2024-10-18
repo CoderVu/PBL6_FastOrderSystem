@@ -43,9 +43,6 @@ public class Order {
         updatedAt = LocalDateTime.now();
     }
 
-
-
-
     @Override
     public String toString() {
         return "Order{" +
