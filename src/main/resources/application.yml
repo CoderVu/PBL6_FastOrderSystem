@@ -33,6 +33,7 @@ spring:
             client-secret: ${google.client.secret}
             scope:
               - email
+#              số điện thoại không thể lấy thông qua scope vi
               - profile
             redirect-uri: "${BASE_URL}/login/oauth2/code/google"
             authorization-grant-type: authorization_code
@@ -52,6 +53,7 @@ spring:
             token-uri: https://accounts.google.com/o/oauth2/token
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: sub
+
           facebook:
             authorization-uri: https://www.facebook.com/v2.8/dialog/oauth
             token-uri: https://graph.facebook.com/v2.8/oauth/access_token

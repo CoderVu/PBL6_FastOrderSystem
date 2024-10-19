@@ -18,9 +18,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +35,7 @@ import java.io.IOException;
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
+
 public class WebSecurityConfig {
     private final FoodUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
@@ -116,24 +119,23 @@ public class WebSecurityConfig {
                         .requestMatchers(SHIPPER).hasAnyRole("SHIPPER", "ADMIN", "OWNER")
                         .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers(ADMIN).hasAnyRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/api/v1/auth/login-oauth2")
+                        .defaultSuccessUrl("http://localhost:3000/home", true)
+                        .failureUrl("/api/v1/auth/login?error")
+
                 )
-                        .sessionManagement(session -> session.maximumSessions(1)
+
+                .sessionManagement(session -> session
+                        .maximumSessions(Integer.MAX_VALUE)
                         .maxSessionsPreventsLogin(true)
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/v1/auth/login-google")
-                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
-                        .failureUrl("/api/v1/auth/login-google-failure")
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/v1/auth/login-facebook")
-                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback", true)
-                        .failureUrl("/api/v1/auth/login-facebook-failure")
                 );
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 

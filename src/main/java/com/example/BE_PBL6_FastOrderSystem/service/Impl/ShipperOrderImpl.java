@@ -118,7 +118,7 @@ public class ShipperOrderImpl implements IShipperOrderService {
         return R * c; // Distance in km
     }
 
-    @Scheduled(fixedRate = 30000) // 30 giây
+    //@Scheduled(fixedRate = 30000) // 30 giây
     public ResponseEntity<APIRespone> autoAssignShipper() {
         List<OrderDetail> orderDetails = orderDetailRepository.findAllByStatus("Đơn hàng mới");
         Map<Store, Map<Long, List<OrderDetail>>> groupedOrderDetails = orderDetails.stream()
@@ -164,7 +164,7 @@ public class ShipperOrderImpl implements IShipperOrderService {
         return ResponseEntity.ok(new APIRespone(true, "Shipper đã được gán", ""));
     }
 
-    @Scheduled(fixedRate = 100000) // 100 giây
+    //@Scheduled(fixedRate = 100000) // 100 giây
     public void autoAssignShipperOrder() {
         List<ShipperOrder> ListShipperOrders = shipperOrderRepository.findAllByStatusIn(List.of("Chưa nhận", "Đã từ chối"));
         for (ShipperOrder shipperOrder : ListShipperOrders) {

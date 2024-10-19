@@ -9,11 +9,15 @@ import java.util.Collection;
 import java.util.HashSet;
 @Data
 @Entity
+@Table(name = "user", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "facebookId")
+})
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String facebookId;
+    private String sub;
     private String phoneNumber;
     private String password;
     private String fullName;
