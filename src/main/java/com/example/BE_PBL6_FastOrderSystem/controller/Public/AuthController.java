@@ -31,7 +31,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
@@ -101,7 +103,7 @@ public class AuthController {
         String name = principal.getAttribute("name");
         String picture = principal.getAttribute("picture");
         String base64Image = ImageGeneral.urlToBase64(picture);
-        Optional<User> optionalUser = Optional.ofNullable(userRepository.findByEmail(email));
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         User user;
         if (optionalUser.isPresent()) {
             user = optionalUser.get();
@@ -143,59 +145,84 @@ public class AuthController {
                 roles
         )));
     }
-    @GetMapping("/user-info-facebook")
-    public ResponseEntity<APIRespone> getUserInfoFacebook(@AuthenticationPrincipal OAuth2User principal) throws Exception {
-        if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "User not authenticated", null));
-        }
-        String email = principal.getAttribute("email");
-        String facebookId = principal.getAttribute("id");
-        String name = principal.getAttribute("name");
-        String picture = principal.getAttribute("picture");
-        String base64Image = ImageGeneral.urlToBase64(picture);
-        Optional<User> optionalUser = Optional.ofNullable((User) userRepository.findByFacebookId(facebookId));
-        User user;
-        if (optionalUser.isPresent()) {
-            user = optionalUser.get();
-            user.setAvatar(base64Image);
-            user.setFacebookId(facebookId);
-            user.setAccountLocked(false);
-            userRepository.save(user);
-        } else {
-            user = new User();
-            user.setEmail(email);
-            user.setFacebookId(facebookId);
-            user.setFullName(name);
-            user.setAvatar(base64Image);
-            user.setAccountLocked(false);
-            user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
-            userRepository.save(user);
-        }
-        // Chuyển đổi User thành FoodUserDetails
-        FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        String jwt = jwtUtils.generateToken(authentication);
 
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-        return ResponseEntity.ok(new APIRespone(true, "Success", new JwtResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFullName(),
-                user.getPhoneNumber(),
-                user.getAddress(),
-                user.getLongitude(),
-                user.getLatitude(),
-                user.getAvatar(),
-                user.getCreatedAt(),
-                user.getUpdatedAt(),
-                user.getAccountLocked(),
-                user.getIsActive(),
-                jwt,
-                roles
-        )));
+@GetMapping("/user-info-facebook")
+public ResponseEntity<APIRespone> getUserInfoFacebook(@AuthenticationPrincipal OAuth2User principal) throws Exception {
+    if (principal == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "User not authenticated", null));
     }
+    System.out.println("User Attributes: " + principal.getAttributes());
+    String email = principal.getAttribute("email") != null ? principal.getAttribute("email") : "";
+    String facebookId = principal.getAttribute("id");
+    String name = principal.getAttribute("name");
+
+    Map<String, Object> pictureData = (Map<String, Object>) principal.getAttribute("picture");
+    String pictureUrl = null;
+    if (pictureData != null && pictureData.get("data") != null) {
+        Map<String, Object> data = (Map<String, Object>) pictureData.get("data");
+        pictureUrl = (String) data.get("url");
+    }
+
+    if (facebookId == null || name == null) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Invalid Facebook profile information: Missing ID or name", null));
+    }
+
+    String base64Image = null;
+    try {
+        if (pictureUrl != null) {
+            base64Image = ImageGeneral.urlToBase64(pictureUrl);
+        }
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new APIRespone(false, "Failed to convert image: " + e.getMessage(), null));
+    }
+
+    Optional<User> optionalUser = userRepository.findByFacebookId(facebookId);
+    User user;
+
+    if (optionalUser.isPresent()) {
+        user = optionalUser.get();
+        user.setAvatar(base64Image);
+        user.setFacebookId(facebookId);
+        user.setAccountLocked(false);
+        userRepository.save(user);
+    } else {
+        user = new User();
+        user.setEmail(email);
+        user.setFacebookId(facebookId);
+        user.setFullName(name);
+        user.setAvatar(base64Image);
+        user.setAccountLocked(false);
+        user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
+        userRepository.save(user);
+    }
+
+    // Convert User to FoodUserDetails
+    FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
+    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    String jwt = jwtUtils.generateToken(authentication);
+
+    List<String> roles = userDetails.getAuthorities().stream()
+            .map(GrantedAuthority::getAuthority)
+            .collect(Collectors.toList());
+
+    // Return API response with user details
+    return ResponseEntity.ok(new APIRespone(true, "Success", new JwtResponse(
+            user.getId(),
+            user.getEmail(),
+            user.getFullName(),
+            user.getPhoneNumber(),
+            user.getAddress(),
+            user.getLongitude(),
+            user.getLatitude(),
+            user.getAvatar(),
+            user.getCreatedAt(),
+            user.getUpdatedAt(),
+            user.getAccountLocked(),
+            user.getIsActive(),
+            jwt,
+            roles
+    )));
+}
 
 
     @PostMapping("/shipper-registration")

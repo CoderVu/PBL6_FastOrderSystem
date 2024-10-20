@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletPath;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -18,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,11 +33,12 @@ import java.io.IOException;
 @Configuration
 @RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
-
+@EnableWebSecurity
 public class WebSecurityConfig {
     private final FoodUserDetailsService userDetailsService;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
     private final JwtUtils jwtUtils;
+
     private static final String[] AUTH = {
             "/api/v1/auth/**"
     };
@@ -67,22 +66,25 @@ public class WebSecurityConfig {
     private static final String[] ZALO = {
             "/api/v1/zalopay/**"
     };
+
     @Autowired
     public WebSecurityConfig(@Lazy JwtUtils jwtUtils, JwtAuthEntryPoint jwtAuthEntryPoint, FoodUserDetailsService userDetailsService) {
         this.jwtUtils = jwtUtils;
         this.jwtAuthEntryPoint = jwtAuthEntryPoint;
         this.userDetailsService = userDetailsService;
     }
+
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return new AccessDeniedHandler() {
             @Override
-            public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException, IOException {
+            public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
                 response.setStatus(HttpStatus.FORBIDDEN.value());
                 response.getWriter().write("Access Denied: " + accessDeniedException.getMessage());
             }
         };
     }
+
     @Bean
     public AuthTokenFilter authTokenFilter() {
         return new AuthTokenFilter(jwtUtils, userDetailsService);
@@ -119,15 +121,14 @@ public class WebSecurityConfig {
                         .requestMatchers(SHIPPER).hasAnyRole("SHIPPER", "ADMIN", "OWNER")
                         .requestMatchers(OWNER).hasAnyRole("OWNER", "ADMIN")
                         .requestMatchers(ADMIN).hasAnyRole("ADMIN")
-                        .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated())
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(jwtAuthEntryPoint)
+                                .accessDeniedHandler(accessDeniedHandler()))
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/api/v1/auth/login-oauth2")
-                        .defaultSuccessUrl("http://localhost:3000/home", true)
+                        .defaultSuccessUrl("http://localhost:3000/home")
                         .failureUrl("/api/v1/auth/login?error")
-
                 )
-
                 .sessionManagement(session -> session
                         .maximumSessions(Integer.MAX_VALUE)
                         .maxSessionsPreventsLogin(true)
@@ -138,6 +139,4 @@ public class WebSecurityConfig {
 
         return http.build();
     }
-
-
 }

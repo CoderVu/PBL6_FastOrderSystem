@@ -65,6 +65,7 @@ spring:
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
 BASE_URL: http://localhost:8080
       
 #docker run --name mysql -e MYSQL_DATABASE=db -e MYSQL_ROOT_PASSWORD=123456789 -p 3306:3306 -v mysql-data:/var/lib/mysql --network dockervu -d mysql:8.0.38
