@@ -15,7 +15,7 @@ public class Promotion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @Column(name = "image", columnDefinition = "LONGTEXT")
+    @Column(name = "image", columnDefinition = "TEXT")
     private String image;
     private String description;
     private Double discountPercentage;

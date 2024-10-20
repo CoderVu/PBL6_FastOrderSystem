@@ -16,9 +16,9 @@ public class ShipperRegistrationForm {
     private String name;
     @Column(name="CitizenID")
     private String  CitizenID;
-    @Column(name = "imageCitizenFront", columnDefinition = "LONGTEXT")
+    @Column(name = "imageCitizenFront", columnDefinition = "TEXT")
     private String imageCitizenFront;
-    @Column(name = "imageCitizenBack", columnDefinition = "LONGTEXT")
+    @Column(name = "imageCitizenBack", columnDefinition = "TEXT")
     private String imageCitizenBack;
     @Column(name="email")
     private String email;

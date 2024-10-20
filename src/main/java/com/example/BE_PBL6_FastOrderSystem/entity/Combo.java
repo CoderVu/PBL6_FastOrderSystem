@@ -13,7 +13,7 @@ public class Combo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long comboId;
     private String comboName;
-    @Column(name = "image", columnDefinition = "LONGTEXT")
+    @Column(name = "image", columnDefinition = "TEXT")
     private String image;
     private Double comboPrice;
     private String description;
