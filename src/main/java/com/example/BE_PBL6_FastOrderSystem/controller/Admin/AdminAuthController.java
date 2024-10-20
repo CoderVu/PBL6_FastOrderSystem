@@ -1,8 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 
 import com.example.BE_PBL6_FastOrderSystem.exception.AlreadyExistsException;
-import com.example.BE_PBL6_FastOrderSystem.exception.UserNotFoundException;
-import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.entity.User;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
@@ -10,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -29,9 +26,17 @@ public class AdminAuthController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
+    @PostMapping("/approve-shippers/{userId}")
+    public ResponseEntity<APIRespone> approveShipper(@PathVariable Long userId) {
+        return authService.approveShipper(userId);
+    }
     @GetMapping("/all_roles")
     public ResponseEntity<APIRespone> getUsers(@RequestParam String role) {
         return userService.getUsers(role);
+    }
+    @GetMapping("/all")
+    public ResponseEntity<APIRespone> getAllUsers() {
+        return userService.getAllUsers();
     }
     @PostMapping("/lock-account/{userId}")
     public ResponseEntity<APIRespone> lockUserAccount(@PathVariable Long userId) {

@@ -1,10 +1,11 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
-import com.example.BE_PBL6_FastOrderSystem.model.User;
+import com.example.BE_PBL6_FastOrderSystem.entity.User;
+import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+@Data
 public class UserResponse {
     private Long id;
     private String phoneNumber;
@@ -12,27 +13,15 @@ public class UserResponse {
     private String avatar;
     private String email;
     private String address;
+    private Double longitude;
+    private Double latitude;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean accountLocked;
-    private RoleResponse role;  // Change from List<RoleResponse> to a single RoleResponse
-    private List<StoreResponse> stores;
-    private List<OrderResponse> orders;
+    private Boolean isActive;
+    private Boolean isApproved;
+    private RoleResponse role;
 
-    public UserResponse(Long id, String phoneNumber, String fullName, String avatar, String email, String address, LocalDateTime createdAt, LocalDateTime updatedAt, Boolean accountLocked, RoleResponse role, List<StoreResponse> stores, List<OrderResponse> orders) {
-        this.id = id;
-        this.phoneNumber = phoneNumber;
-        this.fullName = fullName;
-        this.avatar = avatar;
-        this.email = email;
-        this.address = address;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.accountLocked = accountLocked;
-        this.role = role;
-        this.stores = stores;
-        this.orders = orders;
-    }
 
     public UserResponse(User user) {
         this.id = user.getId();
@@ -41,105 +30,15 @@ public class UserResponse {
         this.avatar = user.getAvatar();
         this.email = user.getEmail();
         this.address = user.getAddress();
+        this.longitude = (user != null) ? user.getLongitude() : null;
+        this.latitude = (user != null) ? user.getLatitude() : null;
         this.createdAt = user.getCreatedAt();
         this.updatedAt = user.getUpdatedAt();
-        this.accountLocked = user.isAccountLocked();
-        this.role = new RoleResponse(user.getRole().getId(), user.getRole().getName());  // Use the single role
+        this.accountLocked = user.getAccountLocked();
+        this.isActive = (user != null) ? user.getIsActive() : null;
+        this.isApproved = (user != null) ? user.getIsApproved() : null;
+        this.role = new RoleResponse(user.getRole().getId(), user.getRole().getName());
     }
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Boolean getAccountLocked() {
-        return accountLocked;
-    }
-
-    public void setAccountLocked(Boolean accountLocked) {
-        this.accountLocked = accountLocked;
-    }
-
-    public RoleResponse getRole() {  // Change from getRoles() to getRole()
-        return role;
-    }
-
-    public void setRole(RoleResponse role) {  // Change from setRoles() to setRole()
-        this.role = role;
-    }
-
-    public List<StoreResponse> getStores() {
-        return stores;
-    }
-
-    public void setStores(List<StoreResponse> stores) {
-        this.stores = stores;
-    }
-
-    public List<OrderResponse> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<OrderResponse> orders) {
-        this.orders = orders;
-    }
 }

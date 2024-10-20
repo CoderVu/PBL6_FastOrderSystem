@@ -11,10 +11,21 @@ import java.util.List;
 @NoArgsConstructor
 public class PaymentRequest {
     private Long amount;
-    private String orderCode;
+    private String orderId;
     private List<Long> cartIds;
+    private Long productId;
+    private Long storeId;
+    private Integer quantity;
+    private Long comboId;
+    private List<Long> drinkId;
+    private String size;
+    private String appuser;
+    private String apptransid;
+    private Long order_id;
     private Long userId;
     private String deliveryAddress;
+    private Double longitude;
+    private Double latitude;
     private String orderInfo;
     private String lang;
     private String extraData;

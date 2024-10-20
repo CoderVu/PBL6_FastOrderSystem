@@ -1,37 +1,77 @@
 server:
   port: 8080
+  address: localhost
+  servlet:
+    multipart:
+      multipart-enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
 spring:
   application:
     name: BE_PBL6_FastOrderSystem
-  main:
-    allow-circular-references: true
-  datasource:
-    username: root
-    password: 123456789
-    url: jdbc:mysql://localhost:3306/db_pbl6
-    driver-class-name: com.mysql.jdbc.Driver
-    security:
-      jwt:
-        secret-key: xTKk7Ald/su3sDOWzUozdd8E/7X5q6HYKUKZfl+4qrQ=
-        expire-length: 3600000
-  jackson:
-    serialization:
-     fail-on-empty-beans: false
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/db_pbl6
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    username: root
+#    password: 123456789
+    datasource:
+      url: jdbc:postgresql://root:64UCzA2ho0i2vz2kl7zwPabbC4YlexR0@dpg-csa6ed56l47c73etrssg-a/db_pbl6_wmg6
+      username: root
+      password: 64UCzA2ho0i2vz2kl7zwPabbC4YlexR0
+      driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: update
       format_sql: true
-  servlet:
-    multipart:
-      max-file-size: 5MB
-      max-request-size: 5MB
-      file-size-threshold: 2KB
+      dialect: org.hibernate.dialect.MySQLDialect
+  security:
+    jwt:
+      signerKey: "W31fqJQUxdNSy/Y+F+RFsa/Zi4hx3sX2tfRH/dAk/0342mbKCFpdljSyUkeE59vxGYdSPYIAW2UW+pExDCD+1Q=="
+      valid-duration: 86400 # 1 ngày
+      refreshable-duration: 86400 # 1 ngày
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${google.client.id}
+            client-secret: ${google.client.secret}
+            scope:
+              - email
+#              số điện thoại không thể lấy thông qua scope vi
+              - profile
+            redirect-uri: "${BASE_URL}/login/oauth2/code/google"
+            authorization-grant-type: authorization_code
+            client-name: google
+          facebook:
+            client-id: ${facebook.client.id}
+            client-secret: ${facebook.client.secret}
+            scope:
+              - email
+              - public_profile
+            redirect-uri: "${BASE_URL}/login/oauth2/code/facebook"
+            authorization-grant-type: authorization_code
+            client-name: facebook
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://accounts.google.com/o/oauth2/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+          facebook:
+            authorization-uri: https://www.facebook.com/v2.8/dialog/oauth
+            token-uri: https://graph.facebook.com/v2.8/oauth/access_token
+            user-info-uri: https://graph.facebook.com/me?fields=id,name,email,first_name,last_name
+            user-name-attribute: id
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
 logging:
   level:
-    com:
-      example:
-        BE_PBL6_FastOrderSystem:
-          service:
-            Impl:
-              ProductServiceImpl=DEBUG: INFO
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+BASE_URL: http://localhost:8080
+      
+#docker run --name mysql -e MYSQL_DATABASE=db -e MYSQL_ROOT_PASSWORD=123456789 -p 3306:3306 -v mysql-data:/var/lib/mysql --network dockervu -d mysql:8.0.38
+#docker run --name springboot -p 8080:8080 -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/db -e SPRING_DATASOURCE_USERNAME=root -e SPRING_DATASOURCE_PASSWORD=123456789 --network dockervu -d vunguyen2901/pbl6-app:latest

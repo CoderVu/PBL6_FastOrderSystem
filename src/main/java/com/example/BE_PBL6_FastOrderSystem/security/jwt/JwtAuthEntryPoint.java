@@ -11,7 +11,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -30,14 +29,12 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
         } else {
             // Handle 401 Unauthorized error
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
             ResponseEntity<APIRespone> responseEntity = buildResponseEntity(
                     HttpServletResponse.SC_UNAUTHORIZED,
                     "Unauthorized",
                     authException.getMessage(),
                     request.getServletPath()
             );
-
             final ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(response.getOutputStream(), responseEntity.getBody());
         }
@@ -56,15 +53,15 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
         final ObjectMapper mapper = new ObjectMapper();
         mapper.writeValue(response.getOutputStream(), responseEntity.getBody());
     }
+
     private ResponseEntity<APIRespone> buildResponseEntity(int status, String error, String message, String path) {
         APIRespone apiResponse = APIRespone.builder()
-                .status(false)
+                .success(false)
                 .message(message)
                 .data(Map.of(
                         "status", status,
                         "error", error,
                         "path", path
-
                 ))
                 .build();
         return ResponseEntity.status(status).body(apiResponse);
