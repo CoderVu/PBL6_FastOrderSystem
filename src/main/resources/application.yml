@@ -1,6 +1,6 @@
 server:
   port: 8080
-  address: localhost
+
   servlet:
     multipart:
       multipart-enabled: true
