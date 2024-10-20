@@ -40,7 +40,7 @@ public class AuthServiceImpl implements IAuthService {
 
     @Override
     public ResponseEntity<APIRespone> authenticateUser(String username, String password) {
-        Optional<User> user = Optional.ofNullable(userRepository.findByPhoneNumber(username));
+        Optional<User> user = userRepository.findByPhoneNumber(username);
         if (user.isEmpty()) {
             user = userRepository.findByEmail(username);
         }

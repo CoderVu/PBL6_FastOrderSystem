@@ -18,12 +18,12 @@ public class FoodUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = Optional.ofNullable(userRepository.findByPhoneNumber(username));
+        Optional<User> user = userRepository.findByPhoneNumber(username);
         if (user.isEmpty()) {
             user = userRepository.findByEmail(username);
         }
         if (user.isEmpty()) {
-            throw new UsernameNotFoundException("User not found with username or phone number: " + username);
+            throw new UsernameNotFoundException("User Not Found with username: " + username);
         }
         return FoodUserDetails.buildUserDetails(user.orElse(null));
     }
