@@ -8,16 +8,16 @@ server:
 spring:
   application:
     name: BE_PBL6_FastOrderSystem
-#  datasource:
-#    url: jdbc:mysql://localhost:3306/db_pbl6
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    username: root
-#    password: 123456789
-    datasource:
-      url: jdbc:postgresql://root:64UCzA2ho0i2vz2kl7zwPabbC4YlexR0@dpg-csa6ed56l47c73etrssg-a/db_pbl6_wmg6
-      username: root
-      password: 64UCzA2ho0i2vz2kl7zwPabbC4YlexR0
-      driver-class-name: org.postgresql.Driver
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_pbl6
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456789
+#    datasource:
+#      url: jdbc:postgresql://root:64UCzA2ho0i2vz2kl7zwPabbC4YlexR0@dpg-csa6ed56l47c73etrssg-a/db_pbl6_wmg6
+#      username: root
+#      password: 64UCzA2ho0i2vz2kl7zwPabbC4YlexR0
+#      driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
     hibernate:

@@ -14,6 +14,7 @@ import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.service.IFormService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.http.*;
 
@@ -92,59 +93,71 @@ public class AuthController {
     public ResponseEntity<APIRespone> verifyOTP(@RequestParam String email, @RequestParam String otp, @RequestParam String newPassword) {
         return authService.confirmOTP(email, otp, newPassword);
     }
-
-    @GetMapping("/user-info-google")
-    public ResponseEntity<APIRespone> getUserInfo(@AuthenticationPrincipal OAuth2User principal) throws Exception {
-        if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new APIRespone(false, "User not authenticated", null));
-        }
-        String email = principal.getAttribute("email");
-        String sub = principal.getAttribute("sub");
-        String name = principal.getAttribute("name");
-        String picture = principal.getAttribute("picture");
-        String base64Image = ImageGeneral.urlToBase64(picture);
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        User user;
-        if (optionalUser.isPresent()) {
-            user = optionalUser.get();
-            user.setAvatar(base64Image);
-            user.setSub(sub);
-            userRepository.save(user);
-        } else {
-            user = new User();
-            user.setEmail(email);
-            user.setSub(sub);
-            user.setFullName(name);
-            user.setAvatar(base64Image);
-            user.setAccountLocked(false);
-            user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
-            userRepository.save(user);
-        }
-        // Chuyển đổi User thành FoodUserDetails
-        FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        String jwt = jwtUtils.generateToken(authentication);
-
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-        return ResponseEntity.ok(new APIRespone(true, "Success", new JwtResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getFullName(),
-                user.getPhoneNumber(),
-                user.getAddress(),
-                user.getLongitude(),
-                user.getLatitude(),
-                user.getAvatar(),
-                user.getCreatedAt(),
-                user.getUpdatedAt(),
-                user.getAccountLocked(),
-                user.getIsActive(),
-                jwt,
-                roles
-        )));
+@GetMapping("/oauth2/callback/google")
+public void handleGoogleCallback(HttpServletResponse response, @AuthenticationPrincipal OAuth2User principal) throws Exception {
+    if (principal == null) {
+        response.sendRedirect("http://localhost:3000/login?error");
+        return;
     }
+    String email = principal.getAttribute("email");
+    String sub = principal.getAttribute("sub");
+    String name = principal.getAttribute("name");
+    String picture = principal.getAttribute("picture");
+    String base64Image = ImageGeneral.urlToBase64(picture);
+    Optional<User> optionalUser = userRepository.findByEmail(email);
+    User user;
+    if (optionalUser.isPresent()) {
+        user = optionalUser.get();
+        user.setAvatar(base64Image);
+        user.setSub(sub);
+        userRepository.save(user);
+    } else {
+        user = new User();
+        user.setEmail(email);
+        user.setSub(sub);
+        user.setFullName(name);
+        user.setAvatar(base64Image);
+        user.setAccountLocked(false);
+        user.setRole(roleRepository.findByName("ROLE_USER").orElseThrow(() -> new RuntimeException("ROLE_USER not found")));
+        userRepository.save(user);
+    }
+    // Convert User to FoodUserDetails
+    FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
+    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    String jwt = jwtUtils.generateToken(authentication);
+
+    response.sendRedirect("http://localhost:3000/oauth2/redirect?token=" + jwt);
+}
+    @GetMapping("/user-info-google")
+    public ResponseEntity<APIRespone> getUserInfo(@RequestHeader("Authorization") String token) {
+        String jwt = token.substring(7); // Remove "Bearer " prefix
+        System.out.println("JWT: " + jwt);
+        String email = jwtUtils.getUserNameFromToken(jwt);
+        System.out.println("Email: " + email);
+        Optional<User> optionalUser = userRepository.findByPhoneNumber(email);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return ResponseEntity.ok(new APIRespone(true, "User info retrieved successfully", new JwtResponse(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getFullName(),
+                    user.getPhoneNumber(),
+                    user.getAddress(),
+                    user.getLongitude(),
+                    user.getLatitude(),
+                    user.getAvatar(),
+                    user.getCreatedAt(),
+                    user.getUpdatedAt(),
+                    user.getAccountLocked(),
+                    user.getIsActive(),
+                    jwt,
+                    List.of("ROLE_USER")
+            )));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "User not found", null));
+        }
+    }
+
 
 @GetMapping("/user-info-facebook")
 public ResponseEntity<APIRespone> getUserInfoFacebook(@AuthenticationPrincipal OAuth2User principal) throws Exception {

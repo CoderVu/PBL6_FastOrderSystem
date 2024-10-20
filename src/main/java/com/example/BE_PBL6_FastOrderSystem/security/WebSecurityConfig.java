@@ -126,7 +126,7 @@ public class WebSecurityConfig {
                         exception.authenticationEntryPoint(jwtAuthEntryPoint)
                                 .accessDeniedHandler(accessDeniedHandler()))
                 .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("http://localhost:3000/home")
+                        .defaultSuccessUrl("/api/v1/auth/oauth2/callback/google", true)
                         .failureUrl("/api/v1/auth/login?error")
                 )
                 .sessionManagement(session -> session

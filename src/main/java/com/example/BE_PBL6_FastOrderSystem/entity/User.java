@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.HashSet;
 @Data
 @Entity
-@Table(name = "users", uniqueConstraints = {
+@Table(name = "user", uniqueConstraints = {
         @UniqueConstraint(columnNames = "facebookId")
 })
 public class User {
