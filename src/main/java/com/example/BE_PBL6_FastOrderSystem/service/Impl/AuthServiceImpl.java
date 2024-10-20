@@ -94,6 +94,7 @@ public class AuthServiceImpl implements IAuthService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIRespone(false, "Address is required and must contain only letters, numbers, spaces, commas, periods, and hyphens", ""));
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setAccountLocked(false);
         Optional<Role> optionalRole = roleRepository.findByName("ROLE_USER");
         if (optionalRole.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "ROLE_USER not found", ""));
