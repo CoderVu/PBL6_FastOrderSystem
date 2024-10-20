@@ -15,7 +15,6 @@ public class JwtResponse {
     private Double longitude;
     private Double latitude;
     private String avatar;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Boolean accountLocked;

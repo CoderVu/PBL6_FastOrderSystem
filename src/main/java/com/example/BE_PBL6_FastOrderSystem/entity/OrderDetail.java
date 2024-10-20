@@ -1,8 +1,9 @@
-package com.example.BE_PBL6_FastOrderSystem.model;
+package com.example.BE_PBL6_FastOrderSystem.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -20,9 +21,13 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "combo_id")
     private Combo combo;
-    @ManyToOne
-    @JoinColumn(name = "drink_product_id")
-    private Product drinkProduct;
+    @ManyToMany
+    @JoinTable(
+            name = "order_detail_drink_products",
+            joinColumns = @JoinColumn(name = "order_detail_id"),
+            inverseJoinColumns = @JoinColumn(name = "drink_product_id")
+    )
+    private List<Product> drinkProducts;
 
     private Integer quantity;
     private Double unitPrice;

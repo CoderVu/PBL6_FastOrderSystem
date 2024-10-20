@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<APIRespone> handleMissingParams(MissingServletRequestParameterException ex, WebRequest request) {
         String paramName = ex.getParameterName();
         APIRespone apiResponse = APIRespone.builder()
-                .status(false)
+                .success(false)
                 .message("Required request parameter '" + paramName + "' is missing")
                 .data(Map.of(
                         "status", HttpStatus.BAD_REQUEST.value(),
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AsyncRequestNotUsableException.class)
     public ResponseEntity<APIRespone> handleAsyncRequestNotUsableException(AsyncRequestNotUsableException ex) {
         APIRespone apiResponse = APIRespone.builder()
-                .status(false)
+                .success(false)
                 .message("Request not usable: " + ex.getMessage())
                 .data(Map.of(
                         "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<APIRespone> handleRuntimeException(RuntimeException ex, WebRequest request) {
         APIRespone apiResponse = APIRespone.builder()
-                .status(false)
+                .success(false)
                 .message("An error occurred: " + ex.getMessage())
                 .data(Map.of(
                         "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<APIRespone> handleGenericException(Exception ex, WebRequest request) {
         APIRespone apiResponse = APIRespone.builder()
-                .status(false)
+                .success(false)
                 .message("An unexpected error occurred: " + ex.getMessage())
                 .data(Map.of(
                         "status", HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AsyncRequestTimeoutException.class)
     public ResponseEntity<APIRespone> handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex) {
         APIRespone apiResponse = APIRespone.builder()
-                .status(false)
+                .success(false)
                 .message("Request timeout: " + ex.getMessage())
                 .data(Map.of(
                         "status", HttpStatus.REQUEST_TIMEOUT.value(),

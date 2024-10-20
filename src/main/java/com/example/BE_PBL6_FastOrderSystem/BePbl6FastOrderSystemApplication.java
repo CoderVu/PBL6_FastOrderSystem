@@ -1,7 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem;
 
 import com.example.BE_PBL6_FastOrderSystem.repository.RoleRepository;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -9,7 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
-import com.example.BE_PBL6_FastOrderSystem.model.Role;
+import com.example.BE_PBL6_FastOrderSystem.entity.Role;
 @EnableScheduling
 @SpringBootApplication
 public class BePbl6FastOrderSystemApplication {

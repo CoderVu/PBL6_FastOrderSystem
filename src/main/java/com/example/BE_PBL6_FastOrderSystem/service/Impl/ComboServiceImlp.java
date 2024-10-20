@@ -3,7 +3,7 @@ package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.ComboRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.*;
-import com.example.BE_PBL6_FastOrderSystem.model.Combo;
+import com.example.BE_PBL6_FastOrderSystem.entity.Combo;
 import com.example.BE_PBL6_FastOrderSystem.repository.ComboRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IComboService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
@@ -12,9 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,6 +72,7 @@ public class ComboServiceImlp implements IComboService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        combo.setDescription(comboRequest.getDescription());
         comboRepository.save(combo);
        return ResponseEntity.status(HttpStatus.CREATED).body(new APIRespone(true, "Combo added successfully", ""));
     }
@@ -84,13 +85,16 @@ public class ComboServiceImlp implements IComboService {
         Combo combo = comboRepository.findById(comboId).get();
         combo.setComboName(comboRequest.getComboName());
         combo.setComboPrice(comboRequest.getPrice());
-        try {
-            InputStream image = comboRequest.getImage().getInputStream();
-            String base64Image = ImageGeneral.fileToBase64(image);
-            combo.setImage(base64Image);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+       if (comboRequest.getImage() != null){
+              try {
+                InputStream image = comboRequest.getImage().getInputStream();
+                String base64Image = ImageGeneral.fileToBase64(image);
+                combo.setImage(base64Image);
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+       }
+        combo.setDescription(comboRequest.getDescription());
         comboRepository.save(combo);
         return ResponseEntity.ok(new APIRespone(true, "Combo updated successfully", ""));
     }
@@ -119,6 +123,27 @@ public class ComboServiceImlp implements IComboService {
         combo.getProducts().add(productRepository.findById(productId).get());
         comboRepository.save(combo);
         return ResponseEntity.ok(new APIRespone(true, "Product added to combo successfully", ""));
+    }
+    @Override
+    public ResponseEntity<APIRespone> addProducts(Long comboId, List<Long> productIds) {
+        if (comboRepository.findById(comboId).isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
+        }
+        Combo combo = comboRepository.findById(comboId).get();
+        List<String> notFoundProducts = new ArrayList<>();
+
+        for (Long productId : productIds) {
+            if (productRepository.findById(productId).isEmpty()) {
+                notFoundProducts.add(productId.toString());
+                continue;
+            }
+            if (combo.getProducts().stream().anyMatch(product -> product.getProductId().equals(productId))) {
+                continue;
+            }
+            combo.getProducts().add(productRepository.findById(productId).get());
+        }
+        comboRepository.save(combo);
+        return ResponseEntity.ok(new APIRespone(true, "Products added to combo successfully", "Product not found "+notFoundProducts));
     }
     @Override
     public ResponseEntity<APIRespone> getComboById(Long comboId) {

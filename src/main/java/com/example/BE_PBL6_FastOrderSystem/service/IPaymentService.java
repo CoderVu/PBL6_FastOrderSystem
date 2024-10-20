@@ -1,7 +1,5 @@
 package com.example.BE_PBL6_FastOrderSystem.service;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Order;
-import com.example.BE_PBL6_FastOrderSystem.model.PaymentMethod;
 import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +17,8 @@ public interface IPaymentService {
     Map<String, Object> getStatusMomo(PaymentRequest requestDTO) throws IOException;
     Map<String, Object> getStatusZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException;
 
+
+    ResponseEntity<APIRespone> refundPaymentZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException;
 
     ResponseEntity<APIRespone> getAllPayment();
 

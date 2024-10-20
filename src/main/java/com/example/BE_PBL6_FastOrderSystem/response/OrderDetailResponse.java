@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
-import com.example.BE_PBL6_FastOrderSystem.model.OrderDetail;
+import com.example.BE_PBL6_FastOrderSystem.entity.OrderDetail;
 import lombok.Data;
 
 @Data

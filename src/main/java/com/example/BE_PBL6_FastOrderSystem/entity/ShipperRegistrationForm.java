@@ -1,4 +1,4 @@
-package com.example.BE_PBL6_FastOrderSystem.model;
+package com.example.BE_PBL6_FastOrderSystem.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -15,10 +15,10 @@ public class ShipperRegistrationForm {
     @Column(name="name")
     private String name;
     @Column(name="CitizenID")
-    private int CitizenID;
-    @Column(name = "imageCitizenFront", columnDefinition = "LONGTEXT")
+    private String  CitizenID;
+    @Column(name = "imageCitizenFront", columnDefinition = "TEXT")
     private String imageCitizenFront;
-    @Column(name = "imageCitizenBack", columnDefinition = "LONGTEXT")
+    @Column(name = "imageCitizenBack", columnDefinition = "TEXT")
     private String imageCitizenBack;
     @Column(name="email")
     private String email;

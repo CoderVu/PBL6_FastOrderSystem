@@ -1,15 +1,14 @@
 package com.example.BE_PBL6_FastOrderSystem.request;
 
-import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
-@Data
-public class UserRequest {
+
+public class UserRequestV2 {
     private String fullName;
-    private MultipartFile avatar;
+    private String avatar;
     private String email;
     private String address;
 
-    public UserRequest(String fullName, MultipartFile avatar, String email, String address) {
+    public UserRequestV2(String fullName, String avatar, String email, String address) {
         this.fullName = fullName;
         this.avatar = avatar;
         this.email = email;
@@ -19,10 +18,10 @@ public class UserRequest {
     public String getFullName() {
         return fullName;
     }
-    public MultipartFile getAvatar() {
+    public String getAvatar() {
         return avatar;
     }
-    public void setAvatar(MultipartFile avatar) {
+    public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
 

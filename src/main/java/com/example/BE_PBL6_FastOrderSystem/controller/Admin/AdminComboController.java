@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin/combo")
@@ -27,7 +29,7 @@ public class AdminComboController {
             @PathVariable Long comboId,
             @RequestParam("comboName") String comboName,
             @RequestParam("price") Double price,
-            @RequestParam("image") MultipartFile image,
+            @RequestParam(value = "image", required = false) MultipartFile image,
             @RequestParam("description") String description){
         ComboRequest comboRequest = new ComboRequest(comboName, price, image, description);
         return comboService.updateCombo(comboId, comboRequest);
@@ -36,9 +38,13 @@ public class AdminComboController {
     ResponseEntity<APIRespone> deleteCombo(@PathVariable Long comboId){
         return comboService.deleteCombo(comboId);
     }
+//    @PostMapping("/addProduct/{comboId}")
+//    ResponseEntity<APIRespone> addProduct(@PathVariable Long comboId, @RequestParam Long productId){
+//        return comboService.addProduct(comboId, productId);
+//    }
     @PostMapping("/addProduct/{comboId}")
-    ResponseEntity<APIRespone> addProduct(@PathVariable Long comboId, @RequestParam Long productId){
-        return comboService.addProduct(comboId, productId);
+    ResponseEntity<APIRespone> addListProduct(@PathVariable Long comboId, @RequestParam List<Long> productIds){
+        return comboService.addProducts(comboId, productIds);
     }
 
 

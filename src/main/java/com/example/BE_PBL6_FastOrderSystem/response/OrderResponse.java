@@ -1,6 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.response;
 
-import com.example.BE_PBL6_FastOrderSystem.model.Order;
+import com.example.BE_PBL6_FastOrderSystem.entity.Order;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -31,8 +31,6 @@ public class OrderResponse {
         this.deliveryAddress = order.getDeliveryAddress();
         this.createdAt = order.getCreatedAt();
         this.updatedAt = order.getUpdatedAt();
-        this.orderDetails = order.getOrderDetails().stream()
-                .map(OrderDetailResponse::new)
-                .collect(Collectors.toList());
+        this.orderDetails = order.getOrderDetails().stream().map(OrderDetailResponse::new).collect(Collectors.toList());
     }
 }

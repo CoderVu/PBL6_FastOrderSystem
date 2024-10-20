@@ -20,7 +20,7 @@ public class PublicController {
     private final IStoreService storeService;
     private final ISizeService sizeService;
     private final IStatusOrderService statusOrderService;
-    private final IStaffService scheduleService;
+    private final IRateService rateService;
 
     private final IOrderService orderService;
     @GetMapping("/categories/all")
@@ -106,6 +106,14 @@ public class PublicController {
       public ResponseEntity<APIRespone> getSizeById(@PathVariable("id") Long sizeId) {
          return sizeService.getSizeById(sizeId);
       }
+    @GetMapping("/rate/product/{productId}")
+    public ResponseEntity<APIRespone> getRateByProductId(@PathVariable("productId") Long productId) {
+        return rateService.getRateByProduct(productId);
+    }
+    @GetMapping("/rate/combo/{comboId}")
+    public ResponseEntity<APIRespone> getRateByComboId(@PathVariable("comboId") Long comboId) {
+        return rateService.getRateByCombo(comboId);
+    }
     @GetMapping("/status/all")
     public ResponseEntity<APIRespone> getStatus() {
         return statusOrderService.getAllStatus();

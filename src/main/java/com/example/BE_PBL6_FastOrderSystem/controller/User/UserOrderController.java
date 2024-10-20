@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.User;
 import com.example.BE_PBL6_FastOrderSystem.controller.Payment.MOMO.PaymentMomoCheckStatusController;
 import com.example.BE_PBL6_FastOrderSystem.controller.Payment.ZALOPAY.PaymentZaloPayCheckStatusController;
-import com.example.BE_PBL6_FastOrderSystem.model.Cart;
+import com.example.BE_PBL6_FastOrderSystem.entity.Cart;
 import com.example.BE_PBL6_FastOrderSystem.repository.ProductRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.PaymentRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
@@ -17,6 +17,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -73,7 +74,7 @@ public class UserOrderController {
         String paymentMethod = orderRequest.getPaymentMethod();
         Long productId = orderRequest.getProductId();
         Long comboId = orderRequest.getComboId();
-        Long drinkId = orderRequest.getDrinkId();
+        List<Long> drinkId = orderRequest.getDrinkId();
         Long storeId = orderRequest.getStoreId();
         Integer quantity = orderRequest.getQuantity();
         String size = orderRequest.getSize();
@@ -115,7 +116,7 @@ public class UserOrderController {
 
                             System.out.println("data: " + data);
                             paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                         //  orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         }
                         scheduler.shutdown();
                     } else {
@@ -152,7 +153,7 @@ public class UserOrderController {
                             orderService.updateQuantityProduct(productId, comboId, storeId, quantity);
                             ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                             OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
-                            orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                           orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                             paymentService.savePayment(orderRequest, data.getOrderId(), userId);
                         }
                         scheduler.shutdown();
@@ -179,7 +180,7 @@ public class UserOrderController {
                 ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                 OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                 paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-                orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+              orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
             }
             return response;
         } else {
@@ -234,6 +235,7 @@ public class UserOrderController {
                     System.out.println("Payment status response: " + statusResponse);
                     if (statusResponse.getStatusCode() == HttpStatus.OK) {
                         ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress,longitude,latitude, orderCode);
+                        System.out.println("Check zalo " + response);
                         if (response.getStatusCode() == HttpStatus.OK) {
                             // duyệt qua tất cả các giỏ hàng
                             for (Cart cart : cartItems) {
@@ -253,7 +255,7 @@ public class UserOrderController {
                         OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                         System.out.println("data: " + data);
                         paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-                        orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                    //   orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         scheduler.shutdown();
                     } else {
                         System.out.println("Payment status is not OK. Retrying...");
@@ -308,7 +310,7 @@ public class UserOrderController {
                         ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                         OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                         paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-                        orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
+                       //orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
                         scheduler.shutdown();
                     } else {
                         System.out.println("Payment status is not OK. Retrying...");
@@ -328,6 +330,7 @@ public class UserOrderController {
             orderRequest.setLang("en");
             orderRequest.setExtraData("additional data");
             ResponseEntity<APIRespone> response = orderService.processOrder(userId, paymentMethod, cartIds, deliveryAddress,  longitude,latitude, orderCode);
+            System.out.println("Check 1 " + response);
             if (response.getStatusCode() == HttpStatus.OK) {
                 if (response.getStatusCode() == HttpStatus.OK) {
                     for (Cart cart : cartItems) {
@@ -346,7 +349,6 @@ public class UserOrderController {
                 ResponseEntity<APIRespone> orderResponse = orderService.findOrderByOrderCode(orderCode);
                 OrderResponse data = (OrderResponse) orderResponse.getBody().getData();
                 paymentService.savePayment(orderRequest, data.getOrderId(), userId);
-                orderService.updateOrderStatus(orderCode, "Đơn hàng đã được xác nhận");
             }
             return response;
         } else {
@@ -370,11 +372,14 @@ public class UserOrderController {
         Long userId = FoodUserDetails.getCurrentUserId();
         return orderService.cancelOrder(orderCode, userId);
     }
-    @GetMapping("/history/all")
+    @GetMapping("/history")
     public ResponseEntity<APIRespone> getAllOrders() {
+
         Long userId = FoodUserDetails.getCurrentUserId();
         return orderService.getAllOrderDetailsByUser(userId);
     }
+
+
     @GetMapping("/history/{orderCode}")
     public ResponseEntity<APIRespone> findOrderByOrderIdAndUserId(@PathVariable String orderCode) {
         Long userId = FoodUserDetails.getCurrentUserId();
@@ -389,6 +394,14 @@ public class UserOrderController {
     @GetMapping("/find")
     public ResponseEntity<APIRespone> findOrderByOrderCode(@RequestParam String orderCode) {
         return orderService.findOrderByOrderCode(orderCode);
+    }
+    @PostMapping("/refund/payment/zalo")
+    public ResponseEntity<APIRespone> refundPaymentZaloPay(@RequestBody PaymentRequest request) throws IOException, URISyntaxException {
+        return paymentService.refundPaymentZaloPay(request);
+    }
+    @PostMapping("/update/feedback/{orderid}")
+    public ResponseEntity<APIRespone> updateFeedback(@PathVariable Long orderid) {
+        return  orderService.updateStatusFeedBack(orderid);
     }
 
 

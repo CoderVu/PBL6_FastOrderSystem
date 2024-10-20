@@ -1,11 +1,10 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
 
-import com.example.BE_PBL6_FastOrderSystem.model.StatusOrder;
+import com.example.BE_PBL6_FastOrderSystem.entity.StatusOrder;
 import com.example.BE_PBL6_FastOrderSystem.repository.OrderRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.StatusOrderRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.StatusOrderRequest;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
-import com.example.BE_PBL6_FastOrderSystem.response.SizeResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.StatusOrderResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IStatusOrderService;
 import lombok.RequiredArgsConstructor;

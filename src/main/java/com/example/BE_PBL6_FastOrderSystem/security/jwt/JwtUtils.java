@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.security.jwt;
 
+import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
 import com.example.BE_PBL6_FastOrderSystem.service.Impl.AuthServiceImpl;
 import io.jsonwebtoken.*;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -35,7 +37,7 @@ public class JwtUtils {
     private int jwtExpirationMs;
 
     private final IUserService userService;
-    private final AuthServiceImpl authService;
+    private final IAuthService authService;
 
     public JwtUtils(@Lazy AuthServiceImpl authService, IUserService userService) {
         this.authService = authService;
@@ -116,23 +118,27 @@ public class JwtUtils {
         return false;
     }
 
-    public String generateTokenFromGoogleToken(String googleToken) {
-        return Jwts.builder()
-                .setSubject(googleToken)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs * 1000L))
-                .setIssuer("FastOrderSystem")
-                .setAudience("FastOrderSystem")
-                .setNotBefore(new Date())
-                .setHeaderParam("typ", "JWT")
-                .setHeaderParam("alg", "HS512")
-                .setHeaderParam("kid", "fastorder")
-                .setId(UUID.randomUUID().toString())
-                .signWith(key(), SignatureAlgorithm.HS512)
-                .compact();
-    }
+
 
     public String generateToken(Authentication authentication) {
         return generateJwtTokenForUser(authentication);
     }
+
+
+//    public String createToken(String userId, String email) {
+//        return Jwts.builder()
+//                .setSubject(userId)
+//                .claim("email", email)
+//                .setIssuedAt(new Date())
+//                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs * 1000L))
+//                .setIssuer("FastOrderSystem")
+//                .setAudience("FastOrderSystem")
+//                .setNotBefore(new Date())
+//                .setHeaderParam("typ", "JWT")
+//                .setHeaderParam("alg", "HS512")
+//                .setHeaderParam("kid", "fastorder")
+//                .setId(UUID.randomUUID().toString())
+//                .signWith(key(), SignatureAlgorithm.HS512)
+//                .compact();
+//    }
 }

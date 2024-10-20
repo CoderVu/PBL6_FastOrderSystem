@@ -1,5 +1,5 @@
 package com.example.BE_PBL6_FastOrderSystem.service.Impl;
-import com.example.BE_PBL6_FastOrderSystem.model.*;
+import com.example.BE_PBL6_FastOrderSystem.entity.*;
 import com.example.BE_PBL6_FastOrderSystem.repository.OrderDetailRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.OrderRepository;
 import com.example.BE_PBL6_FastOrderSystem.repository.PaymentDetailRepository;
@@ -314,6 +314,36 @@ public class PaymentServiceImpl implements IPaymentService {
 
 		return response;
 	}
+    @Override
+    public ResponseEntity<APIRespone> refundPaymentZaloPay(PaymentRequest requestDTO) throws IOException, URISyntaxException {
+        String appid = ZaloPayConstant.APP_ID;
+        String key1 = ZaloPayConstant.KEY1;
+        String data = appid + "|" + requestDTO.getApptransid() + "|" + key1;
+        String mac = HelperHmacSHA256.computeHmacSha256(data, ZaloPayConstant.KEY1);
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("appid", appid));
+        params.add(new BasicNameValuePair("apptransid", requestDTO.getApptransid()));
+        params.add(new BasicNameValuePair("mac", mac));
+
+        URIBuilder uri = new URIBuilder(ZaloPayConstant.REFUND_URL);
+        uri.addParameters(params);
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        HttpPost post = new HttpPost(uri.build());
+
+        CloseableHttpResponse res = client.execute(post);
+        BufferedReader rd = new BufferedReader(new InputStreamReader(res.getEntity().getContent()));
+        StringBuilder resultJsonStr = new StringBuilder();
+        String line;
+        while ((line = rd.readLine()) != null) {
+            resultJsonStr.append(line);
+        }
+        JSONObject result = new JSONObject(resultJsonStr.toString());
+        Map<String, Object> response = new HashMap<>();
+        response.put("returncode", result.getInt("returncode"));
+        response.put("returnmessage", result.getString("returnmessage"));
+        return ResponseEntity.ok(new APIRespone(true, "Refund successfully", response));
+    }
     @Override
     public ResponseEntity<APIRespone> getAllPayment(){
           if (paymentRepository.findAll().isEmpty()) {

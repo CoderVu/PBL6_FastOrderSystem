@@ -6,7 +6,7 @@ import lombok.Data;
 public class FormResponse {
     private Long id;
     private String name;
-    private int CitizenID;
+    private String CitizenID;
     private String imageCitizenFront;
     private String imageCitizenBack;
     private String email;
@@ -16,7 +16,7 @@ public class FormResponse {
     private String vehicle;
     private String licensePlate;
     private String DriverLicense;
-    public FormResponse(Long id, String name, int CitizenID, String imageCitizenFront, String imageCitizenBack, String email, String phone, String address, int age, String vehicle, String licensePlate, String DriverLicense) {
+    public FormResponse(Long id, String name, String CitizenID, String imageCitizenFront, String imageCitizenBack, String email, String phone, String address, int age, String vehicle, String licensePlate, String DriverLicense) {
         this.id = id;
         this.name = name;
         this.CitizenID = CitizenID;
