@@ -29,7 +29,7 @@ public class Chat {
     @Column(nullable = false, columnDefinition = "boolean default false")
     Boolean isRead = false;
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String image;
     @PrePersist
     protected void onCreate() {

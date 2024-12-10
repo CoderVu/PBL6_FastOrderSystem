@@ -12,7 +12,7 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, columnDefinition = "LONGTEXT")
+    @Column(nullable = false, unique = true, columnDefinition = "TEXT")
     private String token;
 
     @Column(nullable = false)
