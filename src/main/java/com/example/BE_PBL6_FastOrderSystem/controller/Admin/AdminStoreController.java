@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/api/v1/admin/stores")
@@ -25,10 +26,10 @@ public class AdminStoreController {
             @RequestParam("storeName") String storeName,
             @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("latitude") Double latitude,
-            @RequestParam("closingTime") LocalDateTime closingTime,
+            @RequestParam("openingTime") LocalTime openingTime,
+            @RequestParam("closingTime") LocalTime closingTime,
             @RequestParam("longitude") Double longitude,
             @RequestParam("location") String location,
-            @RequestParam("openingTime") LocalDateTime openingTime,
             @RequestParam("managerId") Long managerId) {
         StoreRequest storeRequest = new StoreRequest(storeName, image, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
         return storeService.addStore(storeRequest);
@@ -40,10 +41,10 @@ public class AdminStoreController {
             @RequestParam("storeName") String storeName,
             @RequestParam("phoneNumber") String phoneNumber,
             @RequestParam("latitude") Double latitude,
-            @RequestParam("closingTime") LocalDateTime closingTime,
+            @RequestParam("openingTime") LocalTime openingTime,
+            @RequestParam("closingTime") LocalTime closingTime,
             @RequestParam("longitude") Double longitude,
             @RequestParam("location") String location,
-            @RequestParam("openingTime") LocalDateTime openingTime,
             @RequestParam("managerId") Long managerId) {
         StoreRequest storeRequest = new StoreRequest(storeName, image, phoneNumber, location, longitude, latitude, openingTime, closingTime, managerId);
         return storeService.updateStore(id, storeRequest);

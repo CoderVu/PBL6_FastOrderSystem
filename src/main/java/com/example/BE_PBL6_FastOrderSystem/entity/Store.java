@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @Entity
@@ -21,8 +22,8 @@ public class Store {
     private String location;
     private Double longitude;
     private Double latitude;
-    private LocalDateTime openingTime;
-    private LocalDateTime closingTime;
+    private LocalTime openingTime;
+    private LocalTime closingTime;
     @OneToOne
     @JoinColumn(name = "manager_id")
     private User manager;

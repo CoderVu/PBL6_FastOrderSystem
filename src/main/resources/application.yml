@@ -30,7 +30,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
       format_sql: true
       dialect: org.hibernate.dialect.MySQL8Dialect
       # dialect: org.hibernate.dialect.PostgreSQLDialect

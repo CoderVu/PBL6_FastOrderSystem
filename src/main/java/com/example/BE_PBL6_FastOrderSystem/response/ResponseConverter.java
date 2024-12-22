@@ -33,13 +33,17 @@ public class ResponseConverter {
                 })
                 .collect(Collectors.toList());
         // Calculate discounted price if a promotion exists
-        Double discountedPrice = product.getPrice();
-        if (product.getPromotions() != null && !product.getPromotions().isEmpty()) {
-            double maxDiscountPercentage = product.getPromotions().stream()
-                    .mapToDouble(Promotion::getDiscountPercentage)
-                    .max()
-                    .orElse(0);
-            discountedPrice = product.getPrice() * (1 - maxDiscountPercentage / 100);
+//        Double discountedPrice = product.getPrice();
+//        if (product.getPromotions() != null && !product.getPromotions().isEmpty()) {
+//            double maxDiscountPercentage = product.getPromotions().stream()
+//                    .mapToDouble(Promotion::getDiscountPercentage)
+//                    .max()
+//                    .orElse(0);
+//            discountedPrice = product.getPrice() * (1 - maxDiscountPercentage / 100);
+//        }
+        Double discountedPrice = product.getDiscountedPrice();
+        if (discountedPrice == null || discountedPrice == 0.0) {
+            discountedPrice = product.getPrice();
         }
         // Calculate average rate if rates = null thi average rate = 0
         double averageRate = 0.0;

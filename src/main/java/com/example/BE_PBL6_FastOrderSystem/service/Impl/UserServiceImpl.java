@@ -96,7 +96,7 @@ public class UserServiceImpl implements IUserService {
         }
         User existingUser = optionalUser.get();
         existingUser.setFullName(userRequest.getFullName());
-        if (userRequest.getAvatar() != null) {
+        if (userRequest.getAvatar() != null && !userRequest.getAvatar().isEmpty()) {
             try {
                 InputStream imageInputStream = userRequest.getAvatar().getInputStream();
                 String base64Image = ImageGeneral.fileToBase64(imageInputStream);

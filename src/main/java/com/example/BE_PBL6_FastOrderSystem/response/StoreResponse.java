@@ -16,16 +16,13 @@ public class StoreResponse {
     private Double longitude;
     private Double latitude;
     private String numberPhone;
-    private LocalDateTime openingTime;
-    private LocalDateTime closingTime;
-//    @JsonIgnore // @JsonIgnore để tránh việc lặp vô hạn khi lấy thông tin của người quản lý
-//    private UserResponse user;
-//    private String managerName;
+    private LocalTime openingTime;
+    private LocalTime closingTime;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer stockQuantity;
     // Constructor cho việc lấy thông tin cơ bản của cửa hàng và số lượng hàng tồn kho của product hiện tại
-    public StoreResponse(Long storeId, String storeName,String image ,String location, Double longitude, Double latitude, String numberPhone, LocalDateTime openingTime, LocalDateTime closingTime, LocalDateTime createdAt, LocalDateTime updatedAt, Integer stockQuantity) {
+    public StoreResponse(Long storeId, String storeName,String image ,String location, Double longitude, Double latitude, String numberPhone, LocalTime openingTime, LocalTime closingTime, LocalDateTime createdAt, LocalDateTime updatedAt, Integer stockQuantity) {
         this.storeId = storeId;
         this.storeName = storeName;
         this.image = image;
@@ -40,7 +37,7 @@ public class StoreResponse {
         this.stockQuantity = stockQuantity;
     }
     // Constructor cho việc lấy thông tin cơ bản của cửa hàng và thông tin của người quản lý
-    public StoreResponse(Long storeId, String storeName, String image, String location, Double longitude, Double latitude,String numberPhone,LocalDateTime openingTime,LocalDateTime closingTime, LocalDateTime createdAt, LocalDateTime updatedAt,Long managerId) {
+    public StoreResponse(Long storeId, String storeName, String image, String location, Double longitude, Double latitude,String numberPhone,LocalTime openingTime,LocalTime closingTime, LocalDateTime createdAt, LocalDateTime updatedAt,Long managerId) {
         this.storeId = storeId;
         this.storeName = storeName;
         this.image = image;

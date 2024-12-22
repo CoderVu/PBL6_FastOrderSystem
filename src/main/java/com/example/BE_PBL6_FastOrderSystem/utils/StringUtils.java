@@ -1,6 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.utils;
 
 import java.text.Normalizer;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 public class StringUtils {
@@ -21,5 +22,5 @@ public class StringUtils {
         // Chuyển tất cả sang chữ thường
         return normalized.toLowerCase();
     }
-
+    public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 }

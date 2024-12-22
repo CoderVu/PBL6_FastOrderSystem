@@ -62,7 +62,6 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public Double getPriceBasedProductOnSize(Product product, Size size) {
         Double basePrice = (product.getDiscountedPrice() != 0.0) ? product.getDiscountedPrice() : product.getPrice();
-
         return switch (size.getName()) {
             case "L" -> basePrice + 10000;
             case "XL" -> basePrice + 20000;

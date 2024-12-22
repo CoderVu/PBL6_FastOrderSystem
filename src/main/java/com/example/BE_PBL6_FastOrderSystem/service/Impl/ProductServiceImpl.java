@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,18 +58,6 @@ public class ProductServiceImpl implements IProductService {
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponse), HttpStatus.OK);
     }
 
-
-//    @Override
-//    public ResponseEntity<APIRespone> getProductsByStoreId(Long storeId) {
-//        Optional<Store> store = storeRepository.findById(storeId);
-//        if (store.isEmpty()) {
-//            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
-//        }
-//        List<ProductResponse> productResponses = productRepository.findByStoreId(storeId).stream()
-//                .map(ResponseConverter::convertToProductResponse)
-//                .collect(Collectors.toList());
-//        return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
-//    }
     @Override
     public ResponseEntity<APIRespone> getProductsByStore_CategoryId(Long storeId,Long categoryId) {
         Optional<Store> store = storeRepository.findById(storeId);
@@ -337,12 +326,15 @@ public class ProductServiceImpl implements IProductService {
         }
         Product product = new Product();
         product.setProductName(productRequest.getProductName());
-        if (productRequest.getImage() != null) {
+        if (productRequest.getImage() != null && !productRequest.getImage().isEmpty()) {
             try {
-
+                if (product.getImage() != null) {
+                    Path oldImagePath = Paths.get("uploads/images/" + product.getImage());
+                    Files.deleteIfExists(oldImagePath);
+                }
                 String normalizedProductName = StringUtils.normalizeString(productRequest.getProductName());
-                System.out.println(normalizedProductName);
-                String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
+                String timestamp = LocalDateTime.now().format(StringUtils.formatter);
+                String imageName = normalizedProductName + "_" + timestamp + ".jpg";
                 Path imagePath = Paths.get("uploads/images/" + imageName);
                 Files.createDirectories(imagePath.getParent());
                 Files.copy(productRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
@@ -350,7 +342,6 @@ public class ProductServiceImpl implements IProductService {
             } catch (Exception e) {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Error when uploading image", ""));
             }
-
         }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
@@ -376,21 +367,22 @@ public class ProductServiceImpl implements IProductService {
             return new ResponseEntity<>(new APIRespone(false, "Product already exists", ""), HttpStatus.BAD_REQUEST);
         }
         product.setProductName(productRequest.getProductName());
-        try {
-            if (product.getImage() != null) {
-                Path oldImagePath = Paths.get("uploads/images/" + product.getImage());
-                Files.deleteIfExists(oldImagePath);
+        if (productRequest.getImage() != null && !productRequest.getImage().isEmpty())
+            try {
+                if (product.getImage() != null) {
+                    Path oldImagePath = Paths.get("uploads/images/" + product.getImage());
+                    Files.deleteIfExists(oldImagePath);
+                }
+                String normalizedProductName = StringUtils.normalizeString(productRequest.getProductName());
+                String timestamp = LocalDateTime.now().format(StringUtils.formatter);
+                String imageName = normalizedProductName + "_" + timestamp + ".jpg";
+                Path imagePath = Paths.get("uploads/images/" + imageName);
+                Files.createDirectories(imagePath.getParent());
+                Files.copy(productRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+                product.setImage(imageName);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Error when uploading image", ""));
             }
-            String normalizedProductName = StringUtils.normalizeString(productRequest.getProductName());
-
-            String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
-            Path imagePath = Paths.get("uploads/images/" + imageName);
-            Files.createDirectories(imagePath.getParent());
-            Files.copy(productRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
-            product.setImage(imageName);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Error when uploading image", ""));
-        }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
         Optional<Category> category = categoryRepository.findById(productRequest.getCategoryId());

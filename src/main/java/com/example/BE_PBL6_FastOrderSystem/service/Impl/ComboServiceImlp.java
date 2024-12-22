@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,7 +73,8 @@ public class ComboServiceImlp implements IComboService {
         if (comboRequest.getImage() != null) {
             try {
                 String normalizedProductName = StringUtils.normalizeString(comboRequest.getComboName());
-                String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
+                String timestamp = LocalDateTime.now().format(StringUtils.formatter);
+                String imageName = normalizedProductName + "_" + timestamp + ".jpg";
                 Path imagePath = Paths.get("uploads/images/" + imageName);
                 Files.createDirectories(imagePath.getParent());
                 Files.copy(comboRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
@@ -101,7 +103,8 @@ public class ComboServiceImlp implements IComboService {
                 Files.deleteIfExists(oldImagePath);
             }
                 String normalizedProductName = StringUtils.normalizeString(comboRequest.getComboName());
-                String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
+                String timestamp = LocalDateTime.now().format(StringUtils.formatter);
+                String imageName = normalizedProductName + "_" + timestamp + ".jpg";
                 Path imagePath = Paths.get("uploads/images/" + imageName);
                 Files.createDirectories(imagePath.getParent());
                 Files.copy(comboRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);

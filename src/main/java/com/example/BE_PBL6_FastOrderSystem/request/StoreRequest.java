@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 @Data
 public class StoreRequest {
@@ -14,10 +15,10 @@ public class StoreRequest {
     private String location;
     private Double longitude;
     private Double latitude;
-    private LocalDateTime openingTime;
-    private LocalDateTime closingTime;
+    private LocalTime openingTime;
+    private LocalTime closingTime;
     private Long managerId;
-    public StoreRequest(String storeName, MultipartFile image, String phoneNumber, String location, Double longitude, Double latitude, LocalDateTime openingTime, LocalDateTime closingTime, Long managerId) {
+    public StoreRequest(String storeName, MultipartFile image, String phoneNumber, String location, Double longitude, Double latitude, LocalTime openingTime, LocalTime closingTime, Long managerId) {
         this.storeName = storeName;
         this.image = image;
         this.phoneNumber = phoneNumber;

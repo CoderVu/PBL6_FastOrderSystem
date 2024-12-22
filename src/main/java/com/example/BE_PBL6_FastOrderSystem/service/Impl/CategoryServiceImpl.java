@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +82,8 @@ public ResponseEntity<APIRespone> addCategory(CategoryRequest categoryRequest) {
     if (categoryRequest.getImage() != null) {
         try {
             String normalizedProductName = StringUtils.normalizeString(categoryRequest.getCategoryName());
-            String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
+            String timestamp = LocalDateTime.now().format(StringUtils.formatter);
+            String imageName = normalizedProductName + "_" + timestamp + ".jpg";
             Path imagePath = Paths.get("uploads/images/" + imageName);
             Files.createDirectories(imagePath.getParent());
             Files.copy(categoryRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
@@ -101,22 +103,21 @@ public ResponseEntity<APIRespone> addCategory(CategoryRequest categoryRequest) {
          }
         Category category = categoryRepository.findById(id).get();
         category.setCategoryName(categoryRequest.getCategoryName());
-        try {
-            if (categoryRequest.getImage() != null) {
-               Path oldImagePath = Paths.get("uploads/images/" + category.getImage());
+        if (categoryRequest.getImage() != null) {
+            try {
+                String normalizedProductName = StringUtils.normalizeString(categoryRequest.getCategoryName());
+                String timestamp = LocalDateTime.now().format(StringUtils.formatter);
+                String imageName = normalizedProductName + "_" + timestamp + ".jpg";
+                Path imagePath = Paths.get("uploads/images/" + imageName);
+                Files.createDirectories(imagePath.getParent());
+                Files.copy(categoryRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+                Path oldImagePath = Paths.get("uploads/images/" + category.getImage());
                 Files.deleteIfExists(oldImagePath);
+                category.setImage(imageName);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Error when uploading image", ""));
             }
-            String normalizedProductName = StringUtils.normalizeString(categoryRequest.getCategoryName());
-            String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
-            Path imagePath = Paths.get("uploads/images/" + imageName);
-            Files.createDirectories(imagePath.getParent());
-            Files.copy(categoryRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
-            category.setImage(imageName);
-
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new APIRespone(false, "Error when uploading image", ""));
         }
-
         category.setDescription(categoryRequest.getDescription());
         category = categoryRepository.save(category);
         return ResponseEntity.ok(new APIRespone(true, "Update category successfully", new CategoryResponse(category.getCategoryId(), category.getCategoryName(),category.getImage(),  category.getDescription())));
