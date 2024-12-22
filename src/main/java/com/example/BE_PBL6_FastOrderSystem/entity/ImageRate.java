@@ -10,7 +10,7 @@ public class ImageRate {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String imageId;
-    @Column(name = "image", columnDefinition = "LONGTEXT")
+    @Column(name = "image", columnDefinition = "TEXT")
     private String image;
     @ManyToOne
     @JoinColumn(name = "rate_id")
