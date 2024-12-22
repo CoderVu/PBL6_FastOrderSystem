@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ShipperReportServiceImpl implements IShipperReportService {
-    final ShipperOrderRepository shipperOrderRepository;
+    private final ShipperOrderRepository shipperOrderRepository;
 
     @Override
     public ResponseEntity<APIRespone> getAllShipperReport(Long shipperId) {

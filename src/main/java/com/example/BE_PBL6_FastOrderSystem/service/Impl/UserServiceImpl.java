@@ -30,11 +30,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
-    @Autowired
     private final UserRepository userRepository;
-    @Autowired
     private final PasswordEncoder passwordEncoder;
-    @Autowired
     private final FoodUserDetailsService userDetailsService;
 
     @Override
@@ -176,7 +173,6 @@ public class UserServiceImpl implements IUserService {
         if (userRequest.getAvatar() != null) {
             existingUser.setAvatar(userRequest.getAvatar());
         }
-
         existingUser.setEmail(userRequest.getEmail());
         existingUser.setAddress(userRequest.getAddress());
         existingUser.setLatitude(userRequest.getLatitude());

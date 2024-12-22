@@ -1,7 +1,7 @@
 package com.example.BE_PBL6_FastOrderSystem.request;
-
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.NoArgsConstructor;
+@NoArgsConstructor
 @Data
 public class UserRequestV2 {
     private String fullName;

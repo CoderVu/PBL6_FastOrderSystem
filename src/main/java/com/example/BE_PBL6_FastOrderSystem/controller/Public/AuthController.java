@@ -160,7 +160,8 @@ public class AuthController {
         if ("flutter".equalsIgnoreCase(client)) {
             redirectUrl = "myapp://oauth2/redirect?token=" + jwt + "&userId=" + user.getId();
         } else {
-            redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + jwt + "&userId=" + user.getId();
+          // redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + jwt + "&userId=" + user.getId();
+            redirectUrl = "https://pbl6-fe-user-taupe.vercel.app/oauth2/redirect?token=" + jwt + "&userId=" + user.getId();
         }
 
         response.sendRedirect(redirectUrl);

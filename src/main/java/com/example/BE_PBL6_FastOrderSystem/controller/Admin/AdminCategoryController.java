@@ -17,13 +17,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminCategoryController {
     private final ICategoryService categoryService;
     @PostMapping("/add")
-    public ResponseEntity<APIRespone> addCategory(@RequestParam String categoryName, @RequestParam MultipartFile image, @RequestParam String description) {
+    public ResponseEntity<APIRespone> addCategory(@RequestParam String categoryName,   @RequestParam(value = "image", required = false) MultipartFile image, @RequestParam String description) {
         CategoryRequest categoryRequest = new CategoryRequest(categoryName, image, description);
         return categoryService.addCategory(categoryRequest);
     }
 
     @PutMapping("update/{id}")
-    public ResponseEntity<APIRespone> updateCategory(@PathVariable Long id, @RequestParam String categoryName, @RequestParam MultipartFile image, @RequestParam String description) {
+    public ResponseEntity<APIRespone> updateCategory(@PathVariable Long id, @RequestParam String categoryName,   @RequestParam(value = "image", required = false) MultipartFile image, @RequestParam String description) {
         CategoryRequest categoryRequest = new CategoryRequest(categoryName, image, description);
       return categoryService.updateCategory(id, categoryRequest);
     }

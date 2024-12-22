@@ -222,151 +222,6 @@ public class OrderServiceImpl implements IOrderService {
         return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
     }
 
-
-//    @Transactional
-//    @Override
-//    public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, List<Long> drinkId, Long storeId, Integer quantity, String size, String deliveryAddress, Double longitude, Double latitude,String orderCode, String discountCode) {
-//        Product product = null;
-//        Combo combo = null;
-//
-//        if (productId != null) {
-//            Optional<Product> productOptional = productRepository.findByProductId(productId);
-//            if (productOptional.isEmpty()) {
-//                return ResponseEntity.badRequest().body(new APIRespone(false, "Product not found", ""));
-//            }
-//            product = productOptional.get();
-//        }
-//
-//        if (comboId != null) {
-//            Optional<Combo> comboOptional = comboRepository.findById(comboId);
-//            if (comboOptional.isEmpty()) {
-//                return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
-//            }
-//            combo = comboOptional.get();
-//        }
-//
-//        if (product == null && combo == null) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "Neither product nor combo found", ""));
-//        }
-//
-//        Optional<Store> storeOptional = storeRepository.findById(storeId);
-//        if (storeOptional.isEmpty()) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
-//        }
-//
-//        PaymentMethod paymentMethodEntity = paymentMethodRepository.findByName(paymentMethod);
-//        if (paymentMethodEntity == null) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "Payment method not found", ""));
-//        }
-//        // Calculate total amount
-//        Long totalAmount = calculateOrderNowAmount(productId, comboId, quantity, storeId, latitude, longitude, discountCode, size);
-//        if (totalAmount == null) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "Failed to calculate total amount", ""));
-//        }
-//
-//        Optional<User> userOptional = userRepository.findById(userId);
-//        if (userOptional.isEmpty()) {
-//            return ResponseEntity.badRequest().body(new APIRespone(false, "User not found", ""));
-//        }
-//        User user = userOptional.get();
-//        Order order = new Order();
-//        order.setOrderDate(LocalDateTime.now());
-//        StatusOrder statusOrder = statusOrderRepository.findByStatusName("Đơn hàng mới");
-//        order.setStatus(statusOrder);
-//        order.setOrderCode(orderCode);
-//        order.setCreatedAt(LocalDateTime.now());
-//        order.setUpdatedAt(LocalDateTime.now());
-//        order.setUser(user);
-//        order.setFeedback(false);
-//        order.setDeliveryAddress(deliveryAddress);
-//        if (deliveryAddress.equalsIgnoreCase("Mua tại cửa hàng")) {
-//            order.setDeliveryAddress("Mua tại cửa hàng");
-//        } else {
-//            order.setDeliveryAddress(deliveryAddress);
-//            order.setLongitude(longitude);
-//            order.setLatitude(latitude);
-//        }
-//        Size s = sizeRepository.findByName(size);
-//        OrderDetail orderDetail = new OrderDetail();
-//        orderDetail.setOrder(order);
-//        orderDetail.setProduct(product);
-//        orderDetail.setCombo(combo);
-//        orderDetail.setQuantity(quantity);
-//
-//        if (product != null) {
-//            Double unitPrice = getPriceBasedProductOnSize(product, s);
-//            orderDetail.setUnitPrice(unitPrice);
-//            Double totalPrice = unitPrice * quantity;
-//            if (discountCode != null) {
-//                totalPrice = applyDiscount(totalPrice, discountCode);
-//            }
-//            orderDetail.setTotalPrice(totalPrice);
-//        } else {
-//            Double unitPrice = getPriceBasedComboOnSize(combo, s);
-//            orderDetail.setUnitPrice(unitPrice);
-//            Double totalPrice = unitPrice * quantity;
-//            if (discountCode != null) {
-//                totalPrice = applyDiscount(totalPrice, discountCode);
-//            }
-//            orderDetail.setTotalPrice(totalPrice);
-//        }
-//        // Thiết lập thông tin nước uống nếu có
-//        if (drinkId != null && !drinkId.isEmpty()) {
-//            List<Product> drinkProducts = new ArrayList<>();
-//            for (int i = 0; i < drinkId.size(); i++) {
-//                Optional<Product> drinkProductOptional = productRepository.findByProductId(drinkId.get(i));
-//                if (drinkProductOptional.isEmpty()) {
-//                    return ResponseEntity.badRequest().body(new APIRespone(false, "Drink product not found", ""));
-//                }
-//                drinkProducts.add(drinkProductOptional.get());
-//            }
-//            orderDetail.setDrinkProducts(drinkProducts);
-//        }
-//        orderDetail.setSize(s);
-//        orderDetail.setStore(storeOptional.get());
-//        orderDetail.setStatus(statusOrder);
-//        List<OrderDetail> orderDetails = new ArrayList<>();
-//        orderDetails.add(orderDetail);
-//
-//
-//        order.setTotalAmount(Double.valueOf(totalAmount));
-//        order.setOrderDetails(orderDetails);
-//        // Nhóm các order detail theo cửa hàng
-//        if (!deliveryAddress.equalsIgnoreCase("Mua tại cửa hàng")) {
-//            // Group OrderDetail objects by their store
-//            Map<Store, List<OrderDetail>> groupedOrderDetails = orderDetails.stream()
-//                    .collect(Collectors.groupingBy(OrderDetail::getStore));
-//            for (Map.Entry<Store, List<OrderDetail>> entry : groupedOrderDetails.entrySet()) {
-//                Store store = entry.getKey();
-//                List<OrderDetail> storeOrderDetails = entry.getValue();
-//                // Calculate the shipping fee for the store
-//                Double shippingFee = calculateShippingFee(order, store);
-//                // Assign the shipping fee to each OrderDetail in the group
-//                ShippingFee fee = new ShippingFee();
-//                fee.setFee(shippingFee);
-//                shippingFeeRepository.save(fee);
-//                for (OrderDetail orderDetail1 : storeOrderDetails) {
-//                    orderDetail1.setShippingFee(fee);
-//                }
-//            }
-//        }
-//        order.setOrderDetails(orderDetails);
-//        orderRepository.save(order);
-//        if (discountCode != null) {
-//            UserVoucher userVoucher = userVoucherRepository.findByCode(discountCode,userId);
-//            if (userVoucher != null) {
-//                userVoucher.setIsUsed(true);
-//                userVoucherRepository.save(userVoucher);
-//            }
-//
-//        }
-//        AnnounceUser announceUser  = new AnnounceUser(userId,"Thông báo đơn hàng ","Bạn đặt hàng "+orderCode +" thành công . Tổng giá trị " + totalAmount);
-//        announceRepository.save(announceUser);
-//        User owner = storeRepository.findById(storeId).get().getManager();
-//        AnnounceUser announceUser1  = new AnnounceUser(owner.getId(),"Thông báo xác nhận đơn hàng đơn hàng ","Có đơn hàng mới có mã "+orderCode);
-//        announceRepository.save(announceUser1);
-//        return ResponseEntity.ok(new APIRespone(true, "Order placed successfully", ""));
-//    }
 @Transactional
 @Override
 public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMethod, Long productId, Long comboId, List<Long> drinkId, Long storeId, Integer quantity, String size, String deliveryAddress, Double longitude, Double latitude, String orderCode, String discountCode) {
@@ -411,6 +266,7 @@ public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMet
         totalAmount = TinhTongTienKhiMuaNgayTaiQuay(productId, comboId, quantity, size);
     } else {
         totalAmount = calculateOrderNowAmount(productId, comboId, quantity, storeId, latitude, longitude, discountCode, size);
+
     }
 
     if (totalAmount == null) {
@@ -465,7 +321,6 @@ public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMet
         }
         orderDetail.setTotalPrice(totalPrice);
     }
-
     // Set delivery address and shipping if applicable
     if ("Mua tại cửa hàng".equalsIgnoreCase(deliveryAddress)) {
         order.setDeliveryAddress("Mua tại cửa hàng");
@@ -862,6 +717,9 @@ public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMet
         if (statusOrder == null) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Status not found", ""));
         }
+        // update status order
+        order.setStatus(statusOrder);
+
         // tim tat ca store cua StoreId
         List<Store> stores = storeRepository.findAllByManagerId(OwnerId);
         if (stores.isEmpty()) {

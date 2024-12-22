@@ -8,12 +8,17 @@ import com.example.BE_PBL6_FastOrderSystem.repository.ComboRepository;
 import com.example.BE_PBL6_FastOrderSystem.service.IComboService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import com.example.BE_PBL6_FastOrderSystem.response.ResponseConverter;
+import com.example.BE_PBL6_FastOrderSystem.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,12 +69,17 @@ public class ComboServiceImlp implements IComboService {
         Combo combo = new Combo();
         combo.setComboName(comboRequest.getComboName());
         combo.setComboPrice(comboRequest.getPrice());
-        try {
-            InputStream image = comboRequest.getImage().getInputStream();
-            String base64Image = ImageGeneral.fileToBase64(image);
-            combo.setImage(base64Image);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (comboRequest.getImage() != null) {
+            try {
+                String normalizedProductName = StringUtils.normalizeString(comboRequest.getComboName());
+                String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
+                Path imagePath = Paths.get("uploads/images/" + imageName);
+                Files.createDirectories(imagePath.getParent());
+                Files.copy(comboRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+                combo.setImage(imageName);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Error when uploading image", ""));
+            }
         }
         combo.setDescription(comboRequest.getDescription());
         combo.setNumberDrinks(comboRequest.getNumberDrinks());
@@ -85,15 +95,21 @@ public class ComboServiceImlp implements IComboService {
         Combo combo = comboRepository.findById(comboId).get();
         combo.setComboName(comboRequest.getComboName());
         combo.setComboPrice(comboRequest.getPrice());
-       if (comboRequest.getImage() != null){
-              try {
-                InputStream image = comboRequest.getImage().getInputStream();
-                String base64Image = ImageGeneral.fileToBase64(image);
-                combo.setImage(base64Image);
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
+        try {
+            if (comboRequest.getImage() != null) {
+                Path oldImagePath = Paths.get("uploads/images/" + combo.getImage());
+                Files.deleteIfExists(oldImagePath);
+            }
+                String normalizedProductName = StringUtils.normalizeString(comboRequest.getComboName());
+                String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
+                Path imagePath = Paths.get("uploads/images/" + imageName);
+                Files.createDirectories(imagePath.getParent());
+                Files.copy(comboRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+                combo.setImage(imageName);
        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Error when uploading image", ""));
+        }
         combo.setDescription(comboRequest.getDescription());
         combo.setNumberDrinks(comboRequest.getNumberDrinks());
         comboRepository.save(combo);
@@ -104,6 +120,13 @@ public class ComboServiceImlp implements IComboService {
     public ResponseEntity<APIRespone> deleteCombo(Long comboId) {
         if (comboRepository.findById(comboId).isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Combo not found", ""));
+        }
+        Combo combo = comboRepository.findById(comboId).get();
+        try {
+            Path imagePath = Paths.get("uploads/images/" + combo.getImage());
+            Files.deleteIfExists(imagePath);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Error when deleting image", ""));
         }
         comboRepository.deleteById(comboId);
         return ResponseEntity.ok(new APIRespone(true, "Combo deleted successfully", ""));

@@ -26,7 +26,7 @@ public class User {
     private String phoneNumber;
     private String password;
     private String fullName;
-    @Column(name = "avatar", columnDefinition = "TEXT")
+    @Column(name = "avatar", columnDefinition = "LONGTEXT")
     private String avatar;
     @Column(name = "email")
     private String email;

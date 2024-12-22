@@ -20,8 +20,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class StaffServiceImpl implements IStaffService {
-private final StaffRepository staffRepository;
-private final StoreRepository storeRepository;
+    private final StaffRepository staffRepository;
+    private final StoreRepository storeRepository;
+
     @Override
     public ResponseEntity<APIRespone> createStaff(Long OwerId,StaffRequest request) {
         Staff staff = new Staff();
@@ -53,7 +54,7 @@ private final StoreRepository storeRepository;
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(new APIRespone(false, "No staff found", null));
         }
         List<StaffResponse> staffRespons = staffRepository.findAll().stream()
-                .map(staff -> new StaffResponse(staff.getId(), staff.getEmployeeName(), staff.getStaff_code(), staff.getDepartment(), staff.getStore().getStoreId()))
+                .map(staff -> new StaffResponse(staff.getId(), staff.getEmployeeName(), staff.getStaff_code(), staff.getDepartment(), staff.getStore().getStoreName()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Get all staff successfully", staffRespons));
     }
@@ -64,7 +65,7 @@ private final StoreRepository storeRepository;
          }
        List<StaffResponse> staffRespons = staffRepository.findAll().stream()
                .filter(staff -> staff.getId().equals(id))
-               .map(staff -> new StaffResponse(staff.getId(), staff.getEmployeeName(), staff.getStaff_code(), staff.getDepartment(), staff.getStore().getStoreId()))
+               .map(staff -> new StaffResponse(staff.getId(), staff.getEmployeeName(), staff.getStaff_code(), staff.getDepartment(), staff.getStore().getStoreName()))
                .collect(Collectors.toList());
          return ResponseEntity.ok(new APIRespone(true, "Get staff by id successfully", staffRespons));
     }
@@ -80,7 +81,7 @@ private final StoreRepository storeRepository;
         Store store = stores.get(0);
         List<StaffResponse> staffRespons = staffRepository.findAll().stream()
                 .filter(staff -> staff.getStore().getStoreId().equals(store.getStoreId()))
-                .map(staff -> new StaffResponse(staff.getId(), staff.getEmployeeName(), staff.getStaff_code(), staff.getDepartment(), staff.getStore().getStoreId()))
+                .map(staff -> new StaffResponse(staff.getId(), staff.getEmployeeName(), staff.getStaff_code(), staff.getDepartment(), staff.getStore().getStoreName()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Get staff by store id successfully", staffRespons));
     }
@@ -92,7 +93,7 @@ private final StoreRepository storeRepository;
         }
         List<StaffResponse> staffRespons = staffRepository.findAll().stream()
                 .filter(staff -> staff.getStaff_code().equals(staffCode))
-                .map(staff -> new StaffResponse(staff.getId(), staff.getEmployeeName(), staff.getStaff_code(), staff.getDepartment(), staff.getStore().getStoreId()))
+                .map(staff -> new StaffResponse(staff.getId(), staff.getEmployeeName(), staff.getStaff_code(), staff.getDepartment(), staff.getStore().getStoreName()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Get staff by staff code successfully", staffRespons));
     }

@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,7 +23,7 @@ public class ImageController {
     @GetMapping("/images/{imageName}")
     public ResponseEntity<byte[]> getImage(@PathVariable String imageName) {
         try {
-            Path imagePath = new ClassPathResource("static/image/" + imageName).getFile().toPath();
+            Path imagePath = Paths.get("uploads/images/" + imageName);
             byte[] imageBytes = Files.readAllBytes(imagePath);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.IMAGE_JPEG);
@@ -30,7 +31,5 @@ public class ImageController {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found", e);
         }
-        // in ra màn hình console
-
     }
 }

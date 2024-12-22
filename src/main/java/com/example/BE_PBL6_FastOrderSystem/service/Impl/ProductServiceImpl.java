@@ -11,6 +11,7 @@ import com.example.BE_PBL6_FastOrderSystem.response.ProductResponse;
 import com.example.BE_PBL6_FastOrderSystem.service.IProductService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
 import com.example.BE_PBL6_FastOrderSystem.response.ResponseConverter;
+import com.example.BE_PBL6_FastOrderSystem.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,16 +34,6 @@ public class ProductServiceImpl implements IProductService {
     private final StoreRepository storeRepository;
     private final ProductStoreRepository productStoreRepository;
 
-//    @Override
-//    public ResponseEntity<APIRespone> getAllProduct() {
-//        if (productRepository.findAll().isEmpty()) {
-//            return new ResponseEntity<>(new APIRespone(false, "No product found", ""), HttpStatus.NOT_FOUND);
-//        }
-//        List<ProductResponse> productResponses = productRepository.findAll().stream()
-//                .map(ResponseConverter::convertToProductResponse)
-//                .collect(Collectors.toList());
-//        return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
-//    }
     @Override
     public List<ProductResponse> getAllProduct(){
         if (productRepository.findAll().isEmpty()) {
@@ -342,12 +337,20 @@ public class ProductServiceImpl implements IProductService {
         }
         Product product = new Product();
         product.setProductName(productRequest.getProductName());
-        try {
-            InputStream imageInputStream = productRequest.getImage().getInputStream();
-            String base64Image = ImageGeneral.fileToBase64(imageInputStream);
-            product.setImage(base64Image);
-        } catch (IOException e) {
-            return new ResponseEntity<>(new APIRespone(false, "Error when upload image", ""), HttpStatus.BAD_REQUEST);
+        if (productRequest.getImage() != null) {
+            try {
+
+                String normalizedProductName = StringUtils.normalizeString(productRequest.getProductName());
+                System.out.println(normalizedProductName);
+                String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
+                Path imagePath = Paths.get("uploads/images/" + imageName);
+                Files.createDirectories(imagePath.getParent());
+                Files.copy(productRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+                product.setImage(imageName);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Error when uploading image", ""));
+            }
+
         }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
@@ -373,14 +376,20 @@ public class ProductServiceImpl implements IProductService {
             return new ResponseEntity<>(new APIRespone(false, "Product already exists", ""), HttpStatus.BAD_REQUEST);
         }
         product.setProductName(productRequest.getProductName());
-        if (productRequest.getImage() != null) {
-            try {
-                InputStream imageInputStream = productRequest.getImage().getInputStream();
-                String base64Image = ImageGeneral.fileToBase64(imageInputStream);
-                product.setImage(base64Image);
-            } catch (IOException e) {
-                return new ResponseEntity<>(new APIRespone(false, "Error when upload image", ""), HttpStatus.BAD_REQUEST);
+        try {
+            if (product.getImage() != null) {
+                Path oldImagePath = Paths.get("uploads/images/" + product.getImage());
+                Files.deleteIfExists(oldImagePath);
             }
+            String normalizedProductName = StringUtils.normalizeString(productRequest.getProductName());
+
+            String imageName = normalizedProductName + "_" + System.currentTimeMillis() + ".jpg";
+            Path imagePath = Paths.get("uploads/images/" + imageName);
+            Files.createDirectories(imagePath.getParent());
+            Files.copy(productRequest.getImage().getInputStream(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+            product.setImage(imageName);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Error when uploading image", ""));
         }
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
@@ -397,13 +406,21 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ResponseEntity<APIRespone> deleteProduct(Long id) {
-        Optional<Product> product = productRepository.findById(id);
-        if (product.isEmpty()) {
+        Optional<Product> productOptional = productRepository.findById(id);
+        if (productOptional.isEmpty()) {
             return new ResponseEntity<>(new APIRespone(false, "Product not found", ""), HttpStatus.NOT_FOUND);
+        }
+        Product product = productOptional.get();
+        if (product.getImage() != null) {
+            try {
+                Path imagePath = Paths.get("uploads/images/" + product.getImage());
+                Files.deleteIfExists(imagePath);
+            } catch (IOException e) {
+                return new ResponseEntity<>(new APIRespone(false, "Error when deleting image", ""), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
         productRepository.deleteById(id);
         return new ResponseEntity<>(new APIRespone(true, "Product deleted successfully", ""), HttpStatus.OK);
-
     }
     @Override
     public ResponseEntity<APIRespone> applyProductsToStoreOfOwner(Long managerId, Long storeId, List<Long> productIds, List<Integer> quantity) {

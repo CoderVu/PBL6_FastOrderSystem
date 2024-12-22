@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ScheduleServiceImpl implements IScheduleService {
-    private final IStaffService staffService;
     private final StaffRepository staffRepository;
     private final StoreRepository storeRepository;
     private final ScheduleRepository scheduleRepository;

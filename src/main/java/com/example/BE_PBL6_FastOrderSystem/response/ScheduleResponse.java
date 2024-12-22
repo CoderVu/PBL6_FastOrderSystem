@@ -20,7 +20,7 @@ public class ScheduleResponse {
         this.startShift = startShift;
         this.endShift = endShift;
         this.date = date;
-        StaffResponse response = new StaffResponse(staff.getId(),staff.getEmployeeName(),staff.getStaff_code(),staff.getDepartment(),staff.getStore().getStoreId());
+        StaffResponse response = new StaffResponse(staff.getId(),staff.getEmployeeName(),staff.getStaff_code(),staff.getDepartment(),staff.getStore().getStoreName());
         this.staffResponse = response;
     }
 }
