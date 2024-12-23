@@ -85,17 +85,16 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ResponseEntity<APIRespone> updateUser(Long id, UserRequest userRequest) {
-        ResponseEntity<APIRespone> validationResponse = validateUserRequest(userRequest);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new APIRespone(false, "User not found", ""));
         }
         User existingUser = optionalUser.get();
-        existingUser.setFullName(userRequest.getFullName());
+
+        if (userRequest.getFullName() != null) {
+            existingUser.setFullName(userRequest.getFullName());
+        }
         if (userRequest.getAvatar() != null && !userRequest.getAvatar().isEmpty()) {
             try {
                 InputStream imageInputStream = userRequest.getAvatar().getInputStream();
@@ -105,10 +104,15 @@ public class UserServiceImpl implements IUserService {
                 return ResponseEntity.badRequest().body(new APIRespone(false, "Invalid image", ""));
             }
         }
-        existingUser.setEmail(userRequest.getEmail());
-        existingUser.setAddress(userRequest.getAddress());
+        if (userRequest.getEmail() != null) {
+            existingUser.setEmail(userRequest.getEmail());
+        }
+        if (userRequest.getAddress() != null) {
+            existingUser.setAddress(userRequest.getAddress());
+        }
+
         userRepository.save(existingUser);
-        return ResponseEntity.ok(new APIRespone(true, "User updated susccessfully", ""));
+        return ResponseEntity.ok(new APIRespone(true, "User updated successfully", ""));
     }
 
     @Override

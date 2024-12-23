@@ -1,7 +1,9 @@
 package com.example.BE_PBL6_FastOrderSystem.request;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class UserRequestV2 {
     private String fullName;
@@ -11,20 +13,5 @@ public class UserRequestV2 {
     private Double latitude;
     private Double longitude;
 
-
-    public UserRequestV2(String fullName, String avatar, String email, String address) {
-        this.fullName = fullName;
-        this.avatar = avatar;
-        this.email = email;
-        this.address = address;
-    }
-    public UserRequestV2(String fullName, String avatar, String email, String address, Double latitude, Double longitude) {
-        this.fullName = fullName;
-        this.avatar = avatar;
-        this.email = email;
-        this.address = address;
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
 }
 

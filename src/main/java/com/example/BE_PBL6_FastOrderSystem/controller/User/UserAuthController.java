@@ -23,17 +23,17 @@ public class UserAuthController {
         Long userId = FoodUserDetails.getCurrentUserId();
         return userService.getUserProfile(userId);
     }
-
-    @PutMapping(value = "/profile/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<APIRespone> updateUser(@ModelAttribute UserRequest userRequest) {
-        String fullName = userRequest.getFullName();
-        MultipartFile avatar = userRequest.getAvatar();
-        String email = userRequest.getEmail();
-        String address = userRequest.getAddress();
+    @PutMapping("/profile/update")
+    public ResponseEntity<APIRespone> updateUser(
+            @RequestParam("fullName") String fullName,
+            @RequestParam(value = "avatar", required = false) MultipartFile avatar,
+            @RequestParam("email") String email,
+            @RequestParam("address") String address) {
         Long userId = FoodUserDetails.getCurrentUserId();
-        UserRequest userRequest1 = new UserRequest(fullName, avatar, email, address);
-        return userService.updateUser(userId, userRequest1);
+        UserRequest userRequest = new UserRequest(fullName, avatar, email, address);
+        return userService.updateUser(userId, userRequest);
     }
+
     @PostMapping("/reset-password")
     public ResponseEntity<APIRespone> resetPassword(@RequestParam("oldPassword") String oldPassword,
                                                     @RequestParam("newPassword") String newPassword) {
