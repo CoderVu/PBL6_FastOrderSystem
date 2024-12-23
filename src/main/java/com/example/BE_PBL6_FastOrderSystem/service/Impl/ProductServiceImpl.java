@@ -569,7 +569,7 @@ public class ProductServiceImpl implements IProductService {
             return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
         }
         List<ProductResponse> productResponses = productRepository.findByStoreOwnerId(storeId).stream()
-                .map(productStoreDTO -> ResponseConverter.convertToProductResponse(productStoreDTO.getProduct()))  // Chỉ lấy đối tượng Product
+                .map(ResponseConverter::convertToProductResponse)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
     }
@@ -601,7 +601,7 @@ public class ProductServiceImpl implements IProductService {
         List<Store> stores = storeRepository.findAllByManagerId(ownerId);
         Long storeId = stores.get(0).getStoreId();
         List<ProductResponse> productResponses = productRepository.findByStoreOwnerId(storeId).stream()
-                .map(productStoreDTO -> ResponseConverter.convertToProductResponse(productStoreDTO.getProduct()))  // Chỉ lấy đối tượng Product
+                .map(ResponseConverter::convertToProductResponse)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
     }
