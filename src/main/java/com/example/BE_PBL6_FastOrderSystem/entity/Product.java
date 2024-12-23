@@ -15,7 +15,7 @@ public class Product {
     @Column(name = "product_id")
     private Long productId;
     private String productName;
-    @Column(name = "image", columnDefinition = "TEXT")
+    @Column(name = "image", columnDefinition = "LONGTEXT")
     private String image;
     private String description;
     private Double price;
