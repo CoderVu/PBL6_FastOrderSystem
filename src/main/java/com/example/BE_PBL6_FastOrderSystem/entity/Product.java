@@ -22,7 +22,6 @@ public class Product {
     private Double discountedPrice;
     @ManyToMany(mappedBy = "products")
     private List<Promotion> promotions = new ArrayList<>();
-
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;

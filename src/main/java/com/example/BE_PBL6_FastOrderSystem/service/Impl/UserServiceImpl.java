@@ -122,42 +122,29 @@ public class UserServiceImpl implements IUserService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new APIRespone(false, "User not found", ""));
         }
-
         User existingUser = optionalUser.get();
-
-        // Kiểm tra nếu người dùng yêu cầu thay đổi email
         if (userRequest.getEmail() != null && !userRequest.getEmail().equals(existingUser.getEmail())) {
-            // Nếu email mới đã tồn tại trong cơ sở dữ liệu thì trả về lỗi
             if (userRepository.existsByEmail(userRequest.getEmail())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(new APIRespone(false, "Email already exists", ""));
             }
-
-            // Kiểm tra định dạng email
             if (!userRequest.getEmail().matches("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z0-9-]+\\.)+(com|net|org|edu|gov|mil|int)$")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new APIRespone(false, "Invalid email format", ""));
             }
-            existingUser.setEmail(userRequest.getEmail()); // Cập nhật email
+            existingUser.setEmail(userRequest.getEmail());
         }
 
-        // Kiểm tra tính hợp lệ của địa chỉ nếu có
         if (userRequest.getAddress() != null) {
-            if (!userRequest.getAddress().matches("^[\\p{L}0-9\\s,.-]+$")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new APIRespone(false, "Address must contain only letters, numbers, spaces, commas, periods, and hyphens", ""));
-            }
-            existingUser.setAddress(userRequest.getAddress()); // Cập nhật địa chỉ
+            existingUser.setAddress(userRequest.getAddress());
         }
 
-        // Cập nhật các trường khác nếu có
         if (userRequest.getFullName() != null) {
             existingUser.setFullName(userRequest.getFullName());
         }
         if (userRequest.getAvatar() != null) {
             existingUser.setAvatar(userRequest.getAvatar());
         }
-
         userRepository.save(existingUser);
         return ResponseEntity.ok(new APIRespone(true, "User updated successfully", ""));
     }
