@@ -102,7 +102,7 @@ public class AuthController {
     @GetMapping("/oauth2/callback")
     public void handleCallback(HttpServletResponse response, @AuthenticationPrincipal OAuth2User principal, @RequestParam(value = "client", required = false) String client) throws Exception {
         if (principal == null) {
-            response.sendRedirect("http://localhost:3000/login?error");
+            response.sendRedirect("https://ambitious-bush-01a78f310.4.azurestaticapps.net/login?error");
             return;
         }
 
@@ -160,7 +160,7 @@ public class AuthController {
         if ("flutter".equalsIgnoreCase(client)) {
             redirectUrl = "myapp://oauth2/redirect?token=" + jwt + "&userId=" + user.getId();
         } else {
-          redirectUrl = "http://localhost:3000/oauth2/redirect?token=" + jwt + "&userId=" + user.getId();
+          redirectUrl = "https://ambitious-bush-01a78f310.4.azurestaticapps.net/oauth2/redirect?token=" + jwt + "&userId=" + user.getId();
           //  redirectUrl = "https://pbl6-fe-user-taupe.vercel.app/oauth2/redirect?token=" + jwt + "&userId=" + user.getId();
         }
 

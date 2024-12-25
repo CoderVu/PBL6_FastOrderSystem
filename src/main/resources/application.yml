@@ -26,7 +26,6 @@ spring:
     properties:
       hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
       hibernate.show_sql: true
-
   security:
     jwt:
       signerKey: "W31fqJQUxdNSy/Y+F+RFsa/Zi4hx3sX2tfRH/dAk/0342mbKCFpdljSyUkeE59vxGYdSPYIAW2UW+pExDCD+1Q=="
@@ -69,4 +68,5 @@ spring:
     serialization:
       fail-on-empty-beans: false
 BASE_URL: https://food-app-gvbhgyfabjcthbhd.southeastasia-01.azurewebsites.net
+#BASE_URL: http://localhost:8080
 
