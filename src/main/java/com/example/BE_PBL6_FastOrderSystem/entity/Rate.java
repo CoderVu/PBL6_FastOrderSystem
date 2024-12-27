@@ -29,11 +29,11 @@ public class Rate {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = java.time.LocalDateTime.now().toString();
+        createdAt = java.time.ZonedDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toString();
     }
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = java.time.LocalDateTime.now().toString();
+        updatedAt = java.time.ZonedDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toString();
     }
 
 }

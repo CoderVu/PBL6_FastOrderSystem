@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -127,7 +129,7 @@ public class OrderServiceImpl implements IOrderService {
 
         User user = userOptional.get();
         Order order = new Order();
-        order.setOrderDate(LocalDateTime.now());
+        order.setOrderDate(ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDateTime());
         StatusOrder statusOrder = statusOrderRepository.findByStatusName("Đơn hàng mới");
         order.setStatus(statusOrder);
         order.setOrderCode(orderCode);

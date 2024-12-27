@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class OrderResponse {
     private Long orderId;
     private Long shipperId;
+    private Long storeId;
     private String orderCode;
     private Long userId;
     private LocalDateTime orderDate;
@@ -36,6 +37,7 @@ public class OrderResponse {
         this.longitude = order.getLongitude();
         this.latitude = order.getLatitude();
         this.shipperId = (!order.getOrderDetails().isEmpty() && order.getOrderDetails().get(0).getShipperOrder() != null) ? order.getOrderDetails().get(0).getShipperOrder().getShipper().getId() : 0;
+        this.storeId = order.getOrderDetails().get(0).getStore().getStoreId();
         this.orderCode = order.getOrderCode();
         this.userId = order.getUser().getId();
         this.orderDate = order.getOrderDate();

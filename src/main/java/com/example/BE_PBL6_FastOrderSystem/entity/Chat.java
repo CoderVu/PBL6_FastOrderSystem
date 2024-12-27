@@ -4,6 +4,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Setter
 @Getter
@@ -33,6 +35,6 @@ public class Chat {
     private String image;
     @PrePersist
     protected void onCreate() {
-        localTime = LocalDateTime.now();
+        localTime = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).toLocalDateTime();
     }
 }
