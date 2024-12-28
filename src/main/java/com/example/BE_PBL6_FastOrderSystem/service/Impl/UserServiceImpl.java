@@ -241,10 +241,11 @@ public class UserServiceImpl implements IUserService {
         return ResponseEntity.ok(new APIRespone(true, "Success", userResponse));
     }
     @Override
-    public   ResponseEntity<APIRespone> searchByName(String name){
+    public ResponseEntity<APIRespone> searchByName(String name) {
         List<User> list = new ArrayList<>();
-        for(User user : userRepository.findAll()){
-            if(user.getFullName().toLowerCase().contains(name.toLowerCase())){
+        for (User user : userRepository.findAll()) {
+            String fullName = user.getFullName();
+            if (fullName != null && fullName.toLowerCase().contains(name.toLowerCase())) {
                 list.add(user);
             }
         }
@@ -252,7 +253,6 @@ public class UserServiceImpl implements IUserService {
                 .map(UserResponse::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(new APIRespone(true, "Success", userResponses));
-
     }
     @Override
     public ResponseEntity<APIRespone> countOrderByMonth(){

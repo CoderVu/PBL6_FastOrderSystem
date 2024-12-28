@@ -1098,6 +1098,9 @@ public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMet
     @Override
     public ResponseEntity<APIRespone> getAllTotalAmountOrderStore(Long ownerId) {
         List<Store> stores = storeRepository.findAllByManagerId(ownerId);
+        if (stores.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", null));
+        }
         Long totalAmount = orderRepository.getTotalAmountForCompletedOrdersStore(stores.get(0).getStoreId());
         return ResponseEntity.ok(new APIRespone(true, "Success", totalAmount));
     }

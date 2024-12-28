@@ -32,15 +32,6 @@ public class ResponseConverter {
                     );
                 })
                 .collect(Collectors.toList());
-        // Calculate discounted price if a promotion exists
-//        Double discountedPrice = product.getPrice();
-//        if (product.getPromotions() != null && !product.getPromotions().isEmpty()) {
-//            double maxDiscountPercentage = product.getPromotions().stream()
-//                    .mapToDouble(Promotion::getDiscountPercentage)
-//                    .max()
-//                    .orElse(0);
-//            discountedPrice = product.getPrice() * (1 - maxDiscountPercentage / 100);
-//        }
         Double discountedPrice = product.getDiscountedPrice();
         if (discountedPrice == null || discountedPrice == 0.0) {
             discountedPrice = product.getPrice();
@@ -65,6 +56,57 @@ public class ResponseConverter {
                 categoryResponse,
                 storeResponses,
                 product.getStockQuantity(),
+                product.getCreatedAt(),
+                product.getUpdatedAt(),
+                product.getBestSale()
+        );
+    }
+    public static ProductResponse convertToProductOfStoreResponse(ProductStore productStore) {
+        Product product = productStore.getProduct();
+        CategoryResponse categoryResponse = new CategoryResponse(
+                product.getCategory().getCategoryId(),
+                product.getCategory().getCategoryName(),
+                product.getCategory().getImage(),
+                product.getCategory().getDescription()
+        );
+        Store store = productStore.getStore();
+        StoreResponse storeResponse = new StoreResponse(
+                store.getStoreId(),
+                store.getStoreName(),
+                store.getImage(),
+                store.getLocation(),
+                store.getLongitude(),
+                store.getLatitude(),
+                store.getPhoneNumber(),
+                store.getOpeningTime(),
+                store.getClosingTime(),
+                store.getCreatedAt(),
+                store.getUpdatedAt(),
+                productStore.getStockQuantity()
+        );
+        Double discountedPrice = product.getDiscountedPrice();
+        if (discountedPrice == null || discountedPrice == 0.0) {
+            discountedPrice = product.getPrice();
+        }
+        // Calculate average rate if rates = null thi average rate = 0
+        double averageRate = 0.0;
+        if (product.getRates() != null && !product.getRates().isEmpty()) {
+            averageRate = product.getRates().stream()
+                    .mapToDouble(Rate::getRate)
+                    .average()
+                    .orElse(0);
+        }
+        return new ProductResponse(
+                product.getProductId(),
+                product.getProductName(),
+                product.getImage(),
+                product.getDescription(),
+                product.getPrice(),
+                discountedPrice,
+                averageRate,
+                categoryResponse,
+                List.of(storeResponse),
+                productStore.getStockQuantity(),
                 product.getCreatedAt(),
                 product.getUpdatedAt(),
                 product.getBestSale()

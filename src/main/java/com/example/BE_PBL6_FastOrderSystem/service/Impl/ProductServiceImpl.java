@@ -599,21 +599,16 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public ResponseEntity<APIRespone> getProductsByStore(Long ownerId) {
         List<Store> stores = storeRepository.findAllByManagerId(ownerId);
-        Long storeId = stores.get(0).getStoreId();
-        List<ProductResponse> productResponses = productRepository.findByStoreOwnerId(storeId).stream()
-                .map(ResponseConverter::convertToProductResponse)
+        if (stores.isEmpty()) {
+            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
+        }
+        Store store = stores.get(0);
+        List<ProductResponse> productResponses = productRepository.findByStoreOwnerId(store.getStoreId()).stream()
+                .map(product -> {
+                    ProductStore productStore = productStoreRepository.findByProductIdAndStoreId(product.getProductId(), store.getStoreId()).orElse(null);
+                    return ResponseConverter.convertToProductOfStoreResponse(productStore);
+                })
                 .collect(Collectors.toList());
         return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
     }
-//    @Override
-//    public ResponseEntity<APIRespone> getProductsByStoreId(Long storeId) {
-//        Optional<Store> store = storeRepository.findById(storeId);
-//        if (store.isEmpty()) {
-//            return new ResponseEntity<>(new APIRespone(false, "Store not found", ""), HttpStatus.NOT_FOUND);
-//        }
-//        List<ProductResponse> productResponses = productRepository.findByStoreOwnerId(storeId).stream()
-//                .map(productStoreDTO -> ResponseConverter.convertToProductResponse(productStoreDTO.getProduct()))
-//                .collect(Collectors.toList());
-//        return new ResponseEntity<>(new APIRespone(true, "Success", productResponses), HttpStatus.OK);
-//    }
 }
