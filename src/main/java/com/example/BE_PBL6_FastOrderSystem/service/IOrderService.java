@@ -40,6 +40,7 @@ public interface IOrderService {
 
 
     ResponseEntity<APIRespone> getAllOrderDetailsByUser(Long userId);
+   // ResponseEntity<APIRespone> getAllOrderDetailsByUser(Long userId, int page, int size);
 
     ResponseEntity<APIRespone> getOrderDetailByUserId(Long userId, String orderCode);
 

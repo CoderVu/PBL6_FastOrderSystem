@@ -4,12 +4,14 @@ import lombok.*;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
-@Getter
-@Setter
 public class APIRespone {
     private Boolean success;
     private String message;
     private Object data;
+    public APIRespone(Boolean success, String message, Object data) {
+        this.success = success;
+        this.message = message;
+        this.data = data;
+    }
 }

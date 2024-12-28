@@ -37,7 +37,7 @@ public class OrderResponse {
         this.longitude = order.getLongitude();
         this.latitude = order.getLatitude();
         this.shipperId = (!order.getOrderDetails().isEmpty() && order.getOrderDetails().get(0).getShipperOrder() != null) ? order.getOrderDetails().get(0).getShipperOrder().getShipper().getId() : 0;
-        this.storeId = order.getOrderDetails().get(0).getStore().getStoreId();
+        this.storeId = (!order.getOrderDetails().isEmpty() && order.getOrderDetails().get(0).getStore() != null) ? order.getOrderDetails().get(0).getStore().getStoreId() : 0;
         this.orderCode = order.getOrderCode();
         this.userId = order.getUser().getId();
         this.orderDate = order.getOrderDate();

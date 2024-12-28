@@ -67,6 +67,10 @@ spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
 BASE_URL: https://food-app-gvbhgyfabjcthbhd.southeastasia-01.azurewebsites.net
 #BASE_URL: http://localhost:8080
 

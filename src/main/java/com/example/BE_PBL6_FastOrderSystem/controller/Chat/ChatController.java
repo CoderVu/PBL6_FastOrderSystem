@@ -160,4 +160,24 @@ public class ChatController {
         System.out.println("findStoreByOwner");
         return chatService.findStoreByOwner(id);
     }
+    @PostMapping("/saveMessage")
+    public ResponseEntity<APIResponseChat<String>> saveMessage(
+            @RequestParam("sender") Long sender,
+            @RequestParam("receiver") Long receiver,
+            @RequestParam(value = "mess", required = false) String mess, // Nhận file ảnh từ form
+            @RequestParam(value = "isRead", required = false) Boolean isRead) {
+
+        // Tạo ChatRequest từ dữ liệu nhận được
+        ChatRequest chatRequest = new ChatRequest();
+        chatRequest.setSender(sender);
+        chatRequest.setReceiver(receiver);
+        chatRequest.setMessage(null);
+        chatRequest.setIsRead(isRead != null ? isRead : false); // Mặc định là chưa đọc
+        chatRequest.setMessage(mess);
+
+        // Lưu thông tin chat bao gồm ảnh (nếu có)
+        chatService.saveChat(chatRequest);
+        APIResponseChat<String> response = new APIResponseChat<>("", 0, "Success");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

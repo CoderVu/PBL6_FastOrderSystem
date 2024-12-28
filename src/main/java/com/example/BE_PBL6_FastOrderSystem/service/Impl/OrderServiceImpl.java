@@ -137,7 +137,14 @@ public class OrderServiceImpl implements IOrderService {
         order.setUpdatedAt(LocalDateTime.now());
         order.setUser(user);
         order.setFeedback(false);
-
+        if (discountCode != null) {
+            Optional<Voucher> voucherOptional = discountCodeRepository.findByCode(discountCode);
+            if (voucherOptional.isEmpty()) {
+                return ResponseEntity.badRequest().body(new APIRespone(false, "Discount code not found", ""));
+            }
+            Voucher voucher = voucherOptional.get();
+            order.setVoucher(voucher);
+        }
         List<OrderDetail> orderDetails = cartItems.stream().map(cartItem -> {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
@@ -292,6 +299,14 @@ public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMet
     order.setUser(user);
     order.setFeedback(false);
     order.setTotalAmount(Double.valueOf(totalAmount));
+    if (discountCode != null) {
+        Optional<Voucher> voucherOptional = discountCodeRepository.findByCode(discountCode);
+        if (voucherOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Discount code not found", ""));
+        }
+        Voucher voucher = voucherOptional.get();
+        order.setVoucher(voucher);
+    }
 
     // Set up order details
     OrderDetail orderDetail = new OrderDetail();
@@ -838,6 +853,32 @@ public ResponseEntity<APIRespone> processOrderNow(Long userId, String paymentMet
 
         return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses));
     }
+//@Override
+//public ResponseEntity<APIRespone> getAllOrderDetailsByUser(Long userId, int page, int size) {
+//    Pageable pageable = PageRequest.of(page, size);
+//    Page<Order> ordersPage = orderRepository.findAllByUserId(userId, pageable);
+//
+//    if (ordersPage.isEmpty()) {
+//        return ResponseEntity.badRequest().body(new APIRespone(false, "No order found", ""));
+//    }
+//
+//    List<OrderResponse> orderResponses = ordersPage.getContent().stream()
+//            .map(order -> {
+//                try {
+//                    Optional<Payment> paymentOptional = paymentRepository.findByOrderCode(order.getOrderCode());
+//                    String paymentMethod = paymentOptional.map(payment -> payment.getPaymentMethod().getName()).orElse("Unknown");
+//                    String statusPayment = paymentOptional.map(Payment::getStatus).orElse("Unknown");
+//                    return new OrderResponse(order, paymentMethod, statusPayment);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    return null;
+//                }
+//            })
+//            .filter(Objects::nonNull)
+//            .collect(Collectors.toList());
+//
+//    return ResponseEntity.ok(new APIRespone(true, "Success", orderResponses, ordersPage.getTotalPages(), ordersPage.getTotalElements()));
+//}
 
     @Override
     public ResponseEntity<APIRespone> getOrderDetailByUserId(Long userId, String orderCode) {
