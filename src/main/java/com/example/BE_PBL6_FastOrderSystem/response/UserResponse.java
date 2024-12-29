@@ -19,6 +19,7 @@ public class UserResponse {
     private LocalDateTime updatedAt;
     private Boolean accountLocked;
     private Boolean isActive;
+    private Boolean isBusy;
     private Boolean isApproved;
     private RoleResponse role;
 
@@ -36,6 +37,7 @@ public class UserResponse {
         this.updatedAt = user.getUpdatedAt();
         this.accountLocked = user.getAccountLocked();
         this.isActive = (user != null) ? user.getIsActive() : null;
+        this.isBusy = (user != null) ? user.getIsBusy() : null;
         this.isApproved = (user != null) ? user.getIsApproved() : null;
         this.role = new RoleResponse(user.getRole().getId(), user.getRole().getName());
     }
