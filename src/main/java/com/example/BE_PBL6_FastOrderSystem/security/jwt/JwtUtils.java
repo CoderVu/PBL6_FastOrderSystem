@@ -5,7 +5,6 @@ import com.example.BE_PBL6_FastOrderSystem.repository.TokenRepository;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
-import com.example.BE_PBL6_FastOrderSystem.service.Impl.AuthServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -17,9 +16,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -45,9 +42,9 @@ public class JwtUtils {
     private final IAuthService authService;
     private final TokenRepository tokenRepository;
 
-    public JwtUtils(@Lazy AuthServiceImpl authService, IUserService userService, TokenRepository tokenRepository) {
-        this.authService = authService;
+    public JwtUtils(@Lazy IUserService userService, @Lazy IAuthService authService, TokenRepository tokenRepository) {
         this.userService = userService;
+        this.authService = authService;
         this.tokenRepository = tokenRepository;
     }
 
@@ -157,4 +154,5 @@ public class JwtUtils {
         tokenRepository.save(token);
         return jwt;
     }
+
 }

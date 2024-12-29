@@ -6,7 +6,10 @@ import com.example.BE_PBL6_FastOrderSystem.repository.UserRepository;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequest;
 import com.example.BE_PBL6_FastOrderSystem.request.UserRequestV2;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
+import com.example.BE_PBL6_FastOrderSystem.response.NewTokenResponse;
 import com.example.BE_PBL6_FastOrderSystem.response.UserResponse;
+import com.example.BE_PBL6_FastOrderSystem.security.jwt.JwtUtils;
+import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetails;
 import com.example.BE_PBL6_FastOrderSystem.security.user.FoodUserDetailsService;
 import com.example.BE_PBL6_FastOrderSystem.service.IUserService;
 import com.example.BE_PBL6_FastOrderSystem.utils.ImageGeneral;
@@ -14,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,6 +38,7 @@ public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final FoodUserDetailsService userDetailsService;
+    private final JwtUtils jwtUtils;
 
     @Override
     public ResponseEntity<APIRespone> getUsers(String roleName) {
@@ -231,7 +237,11 @@ public class UserServiceImpl implements IUserService {
         User user = optionalUser.get();
         user.setPhoneNumber(phone);
         userRepository.save(user);
-        return ResponseEntity.ok(new APIRespone(true, "Success", ""));
+        FoodUserDetails userDetails = FoodUserDetails.buildUserDetails(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        String jwt = jwtUtils.generateToken(authentication);
+        NewTokenResponse newTokenResponse = new NewTokenResponse(jwt);
+        return ResponseEntity.ok(new APIRespone(true, "Phone number added successfully", newTokenResponse));
     }
 
     @Override
