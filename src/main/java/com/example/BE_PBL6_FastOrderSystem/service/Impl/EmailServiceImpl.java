@@ -33,6 +33,7 @@ public class EmailServiceImpl implements IEmailService {
         MimeMessage message = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom("vunguyen.17082003@gmail.com");
             helper.setTo(to);
             helper.setSubject(subject);
             content = content.replace("\n", "<br>");
@@ -49,7 +50,7 @@ public class EmailServiceImpl implements IEmailService {
         properties.put("mail.store.protocol", "imap");
         properties.put("mail.imaps.host", "imap.gmail.com");
         properties.put("mail.imaps.port", "993");
-        properties.put("mail.imaps.ssl.enable", "true"); // Bật SSL
+        properties.put("mail.imaps.ssl.enable", "true");
         Session emailSession = Session.getInstance(properties);
         Store store = null;
         Folder emailFolder = null;
