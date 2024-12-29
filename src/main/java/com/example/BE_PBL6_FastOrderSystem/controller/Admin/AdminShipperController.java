@@ -1,5 +1,6 @@
 package com.example.BE_PBL6_FastOrderSystem.controller.Admin;
 
+import com.example.BE_PBL6_FastOrderSystem.repository.CodeShipperRepository;
 import com.example.BE_PBL6_FastOrderSystem.response.APIRespone;
 import com.example.BE_PBL6_FastOrderSystem.service.IAuthService;
 import com.example.BE_PBL6_FastOrderSystem.service.IEmailService;
@@ -28,6 +29,7 @@ public class AdminShipperController {
             @RequestParam("name") String name) {
         String subject = "Xac nhan duoc duyet dang ky lam shipper";
         String code = otpService.generateCodeShipper();
+
         String message = "<html><body>" +
                 "<h1>Thong tin da duoc duyet</h1>" +
                 "<p>Xin chao " + name + "</p>" +

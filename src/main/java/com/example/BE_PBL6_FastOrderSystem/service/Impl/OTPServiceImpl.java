@@ -61,6 +61,10 @@ public class OTPServiceImpl implements IOTPService {
     @Override
     public String generateCodeShipper() {
         String code = OTPGenerator.generateOTP(6);
+        CodeShipper codeShipper = new CodeShipper();
+        codeShipper.setCode(code);
+        codeShipper.setStatus(true);
+        codeShipperRepository.save(codeShipper);
         return code;
     }
     @Override

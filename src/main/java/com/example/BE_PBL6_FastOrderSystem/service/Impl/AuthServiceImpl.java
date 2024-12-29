@@ -154,6 +154,7 @@ public class AuthServiceImpl implements IAuthService {
         user.setPhoneNumber(numberPhone);
         user.setAddress(address);
         user.setPassword(passwordEncoder.encode(password));
+        user.setIsActive(true);
         Optional<Role> optionalRole = roleRepository.findByName("ROLE_SHIPPER");
         if (optionalRole.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new APIRespone(false, "ROLE_SHIPPER not found", ""));

@@ -152,37 +152,58 @@ public class PromotionServiceImpl implements IPromotionService {
 
     @Override
     public ResponseEntity<APIRespone> applyPromotionToStore(Long promotionId, Long storeId) {
+        // Check if the promotion exists
         Optional<Promotion> promotionOptional = promotionRepository.findById(promotionId);
         if (promotionOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Promotion not found", ""));
         }
         Promotion promotion = promotionOptional.get();
+
+        // Check if the store exists
         Optional<Store> storeOptional = storeRepository.findById(storeId);
         if (storeOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Store not found", ""));
         }
         Store store = storeOptional.get();
+
+        // Check if the promotion is already applied to the store
+        if (promotion.getStores().contains(store)) {
+            return ResponseEntity.badRequest().body(new APIRespone(false, "Promotion is already applied to this store", ""));
+        }
+
+        // Add the store to the promotion
         promotion.getStores().add(store);
         promotionRepository.save(promotion);
 
         return ResponseEntity.ok(new APIRespone(true, "Promotion applied to store successfully", ""));
     }
-
     @Override
     public ResponseEntity<APIRespone> applyPromotionToAllStores(Long promotionId) {
+        // Check if the promotion exists
         Optional<Promotion> promotionOptional = promotionRepository.findById(promotionId);
         if (promotionOptional.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Promotion not found", ""));
         }
+
         Promotion promotion = promotionOptional.get();
         List<Store> stores = storeRepository.findAll();
-        if (promotion.getStores().containsAll(stores)) {
+
+        // Filter stores that do not already have the promotion
+        List<Store> storesWithoutPromotion = stores.stream()
+                .filter(store -> !promotion.getStores().contains(store))
+                .collect(Collectors.toList());
+
+        if (storesWithoutPromotion.isEmpty()) {
             return ResponseEntity.badRequest().body(new APIRespone(false, "Promotion already applied to all stores", ""));
         }
-        stores.forEach(store -> applyPromotionToStore(promotionId, store.getStoreId()));
+
+        // Apply promotion to stores that don't already have it
+        storesWithoutPromotion.forEach(store -> applyPromotionToStore(promotionId, store.getStoreId()));
+
         promotionRepository.save(promotion);
-        return ResponseEntity.ok(new APIRespone(true, "Promotion applied to all stores successfully", ""));
+        return ResponseEntity.ok(new APIRespone(true, "Promotion applied to all eligible stores successfully", ""));
     }
+
 
     @Override
     public ResponseEntity<APIRespone> applyPromotionsToStore(List<Long> promotionIds, Long storeId) {
@@ -213,8 +234,6 @@ public class PromotionServiceImpl implements IPromotionService {
         storeRepository.save(store);
         return ResponseEntity.ok(new APIRespone(true, "Promotions applied to store successfully", ""));
     }
-
-
     @Override
     public ResponseEntity<APIRespone> applyPromotionToProduct(Long promotionId, Long productId) {
         Optional<Promotion> promotionOptional = promotionRepository.findById(promotionId);
@@ -235,7 +254,6 @@ public class PromotionServiceImpl implements IPromotionService {
         if (isPromotionInProductStores) {
             product.getPromotions().add(promotion);
             promotion.getProducts().add(product);
-            // Calculate discounted price
             double maxDiscountPercentage = product.getPromotions().stream()
                     .mapToDouble(Promotion::getDiscountPercentage)
                     .max()
